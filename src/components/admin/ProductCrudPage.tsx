@@ -26,8 +26,16 @@ type ProductFormState = {
   imagePlaceholder: string;
   availableFor: string;
   origin: string;
+  region: string;
+  producer: string;
+  altitude: string;
+  variety: string;
   process: string;
   roastLevel: RoastLevel;
+  brewRecommendation: string;
+  isSeasonal: "yes" | "no";
+  availableFrom: string;
+  availableUntil: string;
 };
 
 const productTypes: { label: string; value: ProductType }[] = [
@@ -43,6 +51,17 @@ const roastLevels: RoastLevel[] = [
   "Medium-Dark",
 ];
 
+const availableForOptions = [
+  "Americano",
+  "Latte",
+  "Cappuccino",
+  "Filter Coffee",
+  "Cold Brew",
+  "Signature Coffee",
+  "Matcha Latte",
+  "Cocoa Latte",
+];
+
 const makeDefaultFormState = (
   productType: ProductType,
 ): ProductFormState => ({
@@ -55,8 +74,16 @@ const makeDefaultFormState = (
   imagePlaceholder: "",
   availableFor: "",
   origin: "",
+  region: "",
+  producer: "",
+  altitude: "",
+  variety: "",
   process: "",
   roastLevel: "Medium",
+  brewRecommendation: "",
+  isSeasonal: "no",
+  availableFrom: "",
+  availableUntil: "",
 });
 
 const productTypeLabel = (productType: ProductType) =>
@@ -66,6 +93,12 @@ const normalizeNotes = (notes: string) =>
   notes
     .split(",")
     .map((note) => note.trim())
+    .filter(Boolean);
+
+const normalizeAvailableFor = (availableFor: string) =>
+  availableFor
+    .split(",")
+    .map((item) => item.trim())
     .filter(Boolean);
 
 const createSlug = (name: string) =>
@@ -99,6 +132,7 @@ export function ProductCrudPage({
 
   const inactiveCount = products.length - activeCount;
   const isEditing = editingId !== null;
+  const selectedAvailableFor = normalizeAvailableFor(formState.availableFor);
 
   const updateField = <Key extends keyof ProductFormState>(
     field: Key,
@@ -113,6 +147,14 @@ export function ProductCrudPage({
   const resetForm = () => {
     setEditingId(null);
     setFormState(makeDefaultFormState(defaultProductType));
+  };
+
+  const toggleAvailableFor = (option: string) => {
+    const nextOptions = selectedAvailableFor.includes(option)
+      ? selectedAvailableFor.filter((item) => item !== option)
+      : [...selectedAvailableFor, option];
+
+    updateField("availableFor", nextOptions.join(", "));
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -134,8 +176,16 @@ export function ProductCrudPage({
       imagePlaceholder: formState.imagePlaceholder.trim(),
       availableFor: formState.availableFor.trim(),
       origin: formState.origin.trim() || undefined,
+      region: formState.region.trim() || undefined,
+      producer: formState.producer.trim() || undefined,
+      altitude: formState.altitude.trim() || undefined,
+      variety: formState.variety.trim() || undefined,
       process: formState.process.trim() || undefined,
       roastLevel: formState.roastLevel,
+      brewRecommendation: formState.brewRecommendation.trim() || undefined,
+      isSeasonal: formState.isSeasonal === "yes",
+      availableFrom: formState.availableFrom || undefined,
+      availableUntil: formState.availableUntil || undefined,
     };
 
     if (editingId) {
@@ -163,8 +213,16 @@ export function ProductCrudPage({
       imagePlaceholder: product.imagePlaceholder,
       availableFor: product.availableFor,
       origin: product.origin ?? "",
+      region: product.region ?? "",
+      producer: product.producer ?? "",
+      altitude: product.altitude ?? "",
+      variety: product.variety ?? "",
       process: product.process ?? "",
       roastLevel: product.roastLevel ?? "Medium",
+      brewRecommendation: product.brewRecommendation ?? "",
+      isSeasonal: product.isSeasonal ? "yes" : "no",
+      availableFrom: product.availableFrom ?? "",
+      availableUntil: product.availableUntil ?? "",
     });
   };
 
@@ -362,6 +420,55 @@ export function ProductCrudPage({
                   </label>
 
                   <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    Region
+                    <input
+                      value={formState.region}
+                      onChange={(event) =>
+                        updateField("region", event.target.value)
+                      }
+                      className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                    />
+                  </label>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    Producer / Farm
+                    <input
+                      value={formState.producer}
+                      onChange={(event) =>
+                        updateField("producer", event.target.value)
+                      }
+                      className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                    />
+                  </label>
+
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    Altitude
+                    <input
+                      value={formState.altitude}
+                      onChange={(event) =>
+                        updateField("altitude", event.target.value)
+                      }
+                      className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                      placeholder="1,750 masl"
+                    />
+                  </label>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    Variety
+                    <input
+                      value={formState.variety}
+                      onChange={(event) =>
+                        updateField("variety", event.target.value)
+                      }
+                      className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                    />
+                  </label>
+
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
                     Process
                     <input
                       value={formState.process}
@@ -374,7 +481,35 @@ export function ProductCrudPage({
                 </div>
 
                 <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                  Brew Recommendation
+                  <textarea
+                    value={formState.brewRecommendation}
+                    onChange={(event) =>
+                      updateField("brewRecommendation", event.target.value)
+                    }
+                    className="min-h-24 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 py-3 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                    placeholder="Best as filter with a gentle pour, or as a bright Americano."
+                  />
+                </label>
+
+                <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
                   Available For
+                  <div className="flex flex-wrap gap-2">
+                    {availableForOptions.map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => toggleAvailableFor(option)}
+                        className={
+                          selectedAvailableFor.includes(option)
+                            ? "rounded-full bg-[#2b1a12] px-4 py-2 text-sm font-semibold text-[#fff8ed]"
+                            : "rounded-full border border-[#3d2618]/14 px-4 py-2 text-sm font-semibold text-[#5f4635]"
+                        }
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
                   <input
                     required
                     value={formState.availableFor}
@@ -382,8 +517,52 @@ export function ProductCrudPage({
                       updateField("availableFor", event.target.value)
                     }
                     className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                    placeholder="Selected usages"
                   />
                 </label>
+
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    Seasonal
+                    <select
+                      value={formState.isSeasonal}
+                      onChange={(event) =>
+                        updateField(
+                          "isSeasonal",
+                          event.target.value as "yes" | "no",
+                        )
+                      }
+                      className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                    >
+                      <option value="no">No</option>
+                      <option value="yes">Yes</option>
+                    </select>
+                  </label>
+
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    Available From
+                    <input
+                      type="date"
+                      value={formState.availableFrom}
+                      onChange={(event) =>
+                        updateField("availableFrom", event.target.value)
+                      }
+                      className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                    />
+                  </label>
+
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    Available Until
+                    <input
+                      type="date"
+                      value={formState.availableUntil}
+                      onChange={(event) =>
+                        updateField("availableUntil", event.target.value)
+                      }
+                      className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                    />
+                  </label>
+                </div>
 
                 <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
                   Image Placeholder
@@ -442,6 +621,11 @@ export function ProductCrudPage({
                         {product.roastLevel}
                       </span>
                     ) : null}
+                    {product.isSeasonal ? (
+                      <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#7d4d2f]">
+                        Seasonal
+                      </span>
+                    ) : null}
                   </div>
 
                   <div className="mt-5 grid gap-3 text-sm leading-7 text-[#5f4635]">
@@ -453,9 +637,49 @@ export function ProductCrudPage({
                     </p>
                     <p>
                       <span className="font-semibold text-[#241710]">
+                        Producer / Farm:
+                      </span>{" "}
+                      {product.producer ?? "Not set"}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-[#241710]">
+                        Region:
+                      </span>{" "}
+                      {product.region ?? "Not set"}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-[#241710]">
+                        Altitude:
+                      </span>{" "}
+                      {product.altitude ?? "Not set"}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-[#241710]">
+                        Variety:
+                      </span>{" "}
+                      {product.variety ?? "Not set"}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-[#241710]">
+                        Brew:
+                      </span>{" "}
+                      {product.brewRecommendation ?? "Not set"}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-[#241710]">
                         Available for:
                       </span>{" "}
                       {product.availableFor}
+                    </p>
+                    <p>
+                      <span className="font-semibold text-[#241710]">
+                        Availability:
+                      </span>{" "}
+                      {product.availableFrom || product.availableUntil
+                        ? `${product.availableFrom ?? "Now"} - ${
+                            product.availableUntil ?? "Open"
+                          }`
+                        : "Ongoing"}
                     </p>
                     <p>
                       <span className="font-semibold text-[#241710]">

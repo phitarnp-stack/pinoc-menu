@@ -49,6 +49,87 @@ on conflict (id) do update set
   available_from = excluded.available_from,
   available_until = excluded.available_until;
 
+update products set
+  region = case id
+    when 'product-house-classic' then 'Cerrado Mineiro, Huila'
+    when 'product-house-cacao' then 'Minas Gerais, Chiang Rai'
+    when 'product-house-citrus' then 'Huila, Yirgacheffe'
+    when 'product-house-velvet' then 'Antigua, Cerrado Mineiro'
+    when 'product-ethiopia-guji-natural' then 'Guji'
+    when 'product-colombia-pink-bourbon' then 'Huila'
+    when 'product-thailand-mae-suai' then 'Chiang Rai'
+    when 'product-uji-ceremonial-matcha' then 'Kyoto'
+    when 'product-yame-latte-matcha' then 'Fukuoka'
+    when 'product-ghana-cocoa' then 'Ashanti'
+    when 'product-madagascar-vanilla-cocoa' then 'Sambirano Valley'
+    else region
+  end,
+  producer = case id
+    when 'product-house-classic' then 'Pinoc house blend program'
+    when 'product-house-cacao' then 'Pinoc house blend program'
+    when 'product-house-citrus' then 'Pinoc house blend program'
+    when 'product-house-velvet' then 'Pinoc house blend program'
+    when 'product-ethiopia-guji-natural' then 'Guji smallholder community lot'
+    when 'product-colombia-pink-bourbon' then 'Huila Pink Bourbon producers'
+    when 'product-thailand-mae-suai' then 'Mae Suai community lot'
+    when 'product-uji-ceremonial-matcha' then 'Uji tea growers'
+    when 'product-yame-latte-matcha' then 'Yame tea growers'
+    when 'product-ghana-cocoa' then 'Single-origin Ghana cocoa cooperative'
+    when 'product-madagascar-vanilla-cocoa' then 'Madagascar cocoa and vanilla blend'
+    else producer
+  end,
+  altitude = case id
+    when 'product-house-classic' then '1,100-1,800 masl'
+    when 'product-house-cacao' then '1,000-1,450 masl'
+    when 'product-house-citrus' then '1,650-2,000 masl'
+    when 'product-house-velvet' then '1,200-1,700 masl'
+    when 'product-ethiopia-guji-natural' then '1,950-2,150 masl'
+    when 'product-colombia-pink-bourbon' then '1,750-1,950 masl'
+    when 'product-thailand-mae-suai' then '1,250-1,450 masl'
+    else altitude
+  end,
+  variety = case id
+    when 'product-house-classic' then 'Catuai, Castillo'
+    when 'product-house-cacao' then 'Catuai, Typica'
+    when 'product-house-citrus' then 'Pink Bourbon, Heirloom'
+    when 'product-house-velvet' then 'Bourbon, Catuai'
+    when 'product-ethiopia-guji-natural' then 'Ethiopian heirloom'
+    when 'product-colombia-pink-bourbon' then 'Pink Bourbon'
+    when 'product-thailand-mae-suai' then 'Typica, Catuai'
+    when 'product-uji-ceremonial-matcha' then 'Tencha blend'
+    when 'product-yame-latte-matcha' then 'Latte-grade tencha blend'
+    when 'product-ghana-cocoa' then 'Forastero cocoa'
+    when 'product-madagascar-vanilla-cocoa' then 'Trinitario cocoa'
+    else variety
+  end,
+  brew_recommendation = case id
+    when 'product-house-classic' then 'Best for balanced espresso, Americano, and milk drinks with a chocolate-nut finish.'
+    when 'product-house-cacao' then 'Best when pulled as espresso for a deeper cocoa body and low-acidity Americano.'
+    when 'product-house-citrus' then 'Best as a black coffee option for guests who want honeyed citrus and clarity.'
+    when 'product-house-velvet' then 'Best for latte and soft Americano profiles where creamy texture is the goal.'
+    when 'product-ethiopia-guji-natural' then 'Best as hand-brewed filter with a gentle pour and slightly lower agitation.'
+    when 'product-colombia-pink-bourbon' then 'Best as filter coffee for floral aromatics, sparkling acidity, and honey sweetness.'
+    when 'product-thailand-mae-suai' then 'Best as filter coffee for a rounded local-origin cup with palm sugar sweetness.'
+    when 'product-uji-ceremonial-matcha' then 'Best whisked with water for a pure ceremonial cup or lightly sweetened over ice.'
+    when 'product-yame-latte-matcha' then 'Best with milk where creamy body and soft green tea sweetness are desired.'
+    when 'product-ghana-cocoa' then 'Best as single-origin cocoa with minimal sweetness to show cacao depth.'
+    when 'product-madagascar-vanilla-cocoa' then 'Best as a cocoa latte or iced cocoa for creamy dessert-like sweetness.'
+    else brew_recommendation
+  end
+where id in (
+  'product-house-classic',
+  'product-house-cacao',
+  'product-house-citrus',
+  'product-house-velvet',
+  'product-ethiopia-guji-natural',
+  'product-colombia-pink-bourbon',
+  'product-thailand-mae-suai',
+  'product-uji-ceremonial-matcha',
+  'product-yame-latte-matcha',
+  'product-ghana-cocoa',
+  'product-madagascar-vanilla-cocoa'
+);
+
 insert into coffee_beans (product_id, origin, region, producer, process, roast_level, is_house_blend, is_filter_option) values
   ('product-house-classic', 'Brazil, Colombia', null, null, 'Washed and natural blend', 'Medium', true, false),
   ('product-house-cacao', 'Brazil, Thailand', null, null, 'Natural and honey blend', 'Medium-Dark', true, false),
@@ -66,6 +147,13 @@ on conflict (product_id) do update set
   is_house_blend = excluded.is_house_blend,
   is_filter_option = excluded.is_filter_option;
 
+update coffee_beans set
+  altitude = products.altitude,
+  variety = products.variety,
+  brew_recommendation = products.brew_recommendation
+from products
+where coffee_beans.product_id = products.id;
+
 insert into matcha_products (product_id, grade, origin_region, preparation_notes) values
   ('product-uji-ceremonial-matcha', 'ceremonial', 'Uji, Kyoto', 'Whisk with water for a pure expression.'),
   ('product-yame-latte-matcha', 'latte', 'Yame, Fukuoka', 'Built for milk texture and low bitterness.')
@@ -74,6 +162,11 @@ on conflict (product_id) do update set
   origin_region = excluded.origin_region,
   preparation_notes = excluded.preparation_notes;
 
+update matcha_products set
+  brew_recommendation = products.brew_recommendation
+from products
+where matcha_products.product_id = products.id;
+
 insert into craft_cocoa_products (product_id, cocoa_origin, cocoa_percentage, preparation_notes) values
   ('product-ghana-cocoa', 'Ghana', 70, 'Prepared to highlight origin depth and polished bitterness.'),
   ('product-madagascar-vanilla-cocoa', 'Madagascar', 62, 'Designed for cocoa latte and iced cocoa.')
@@ -81,6 +174,11 @@ on conflict (product_id) do update set
   cocoa_origin = excluded.cocoa_origin,
   cocoa_percentage = excluded.cocoa_percentage,
   preparation_notes = excluded.preparation_notes;
+
+update craft_cocoa_products set
+  brew_recommendation = products.brew_recommendation
+from products
+where craft_cocoa_products.product_id = products.id;
 
 insert into menu_categories (id, slug, name, description, sort_order, is_active) values
   ('classic-coffee', 'classic-coffee', 'Classic Coffee', 'Espresso-based signatures built around balance, texture, and a refined specialty finish.', 1, true),
@@ -161,6 +259,22 @@ on conflict (id) do update set
   special_category = excluded.special_category,
   is_featured = excluded.is_featured,
   sort_order = excluded.sort_order;
+
+update specials set
+  visibility = 'visible',
+  menu_label = case id
+    when 'smi-orange-tonic' then 'seasonal'
+    when 'smi-matcha-cocoa-cloud' then 'new'
+    when 'smi-cacao-cold-brew' then 'limited'
+    else menu_label
+  end,
+  available_from = coalesce(available_from, '2026-06-01'),
+  available_until = coalesce(available_until, '2026-06-30')
+where id in (
+  'smi-orange-tonic',
+  'smi-matcha-cocoa-cloud',
+  'smi-cacao-cold-brew'
+);
 
 insert into customer_profiles (id, display_name, avatar_placeholder, preferred_login_method, member_since) values
   ('customer-pinoc-demo', 'Pinoc Member', 'Warm profile circle with coffee cream tones', 'mock', '2026-05-18')

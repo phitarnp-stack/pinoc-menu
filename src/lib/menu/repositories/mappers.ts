@@ -87,8 +87,11 @@ export const mapProductRow = (row: DbRecord): Product => ({
   origin: asOptionalString(row.origin),
   region: asOptionalString(row.region),
   producer: asOptionalString(row.producer),
+  altitude: asOptionalString(row.altitude),
+  variety: asOptionalString(row.variety),
   process: asOptionalString(row.process),
   roastLevel: asOptionalString(row.roast_level) as RoastLevel | undefined,
+  brewRecommendation: asOptionalString(row.brew_recommendation),
   isSeasonal: asBoolean(row.is_seasonal),
   availableFrom: asOptionalString(row.available_from),
   availableUntil: asOptionalString(row.available_until),
@@ -119,6 +122,13 @@ export const mapMenuItemRow = (row: DbRecord): MenuItem => ({
   recommendedFor: asString(row.recommended_for),
   imagePlaceholder: asString(row.image_placeholder),
   isActive: asBoolean(row.is_active),
+  specialCategory: asOptionalString(row.special_category) as
+    | SpecialCategory
+    | undefined,
+  visibility: asOptionalString(row.visibility) as
+    | MenuItem["visibility"]
+    | undefined,
+  menuLabel: asOptionalString(row.menu_label) as MenuItem["menuLabel"],
   isSeasonal: asBoolean(row.is_seasonal),
   availableFrom: asOptionalString(row.available_from),
   availableUntil: asOptionalString(row.available_until),
@@ -154,7 +164,12 @@ export const mapSpecialMenuItemRow = (row: DbRecord): SpecialMenuItem => ({
   specialCategoryId:
     specialCategoryIdBySlug[asString(row.special_category) as SpecialCategory] ??
     asString(row.special_category_id),
+  specialCategory: asOptionalString(row.special_category) as
+    | SpecialCategory
+    | undefined,
   isFeatured: asBoolean(row.is_featured),
+  visibility: asString(row.visibility, "visible") as SpecialMenuItem["visibility"],
+  menuLabel: asOptionalString(row.menu_label) as SpecialMenuItem["menuLabel"],
   sortOrder: asNumber(row.sort_order),
   availableFrom: asOptionalString(row.available_from),
   availableUntil: asOptionalString(row.available_until),

@@ -23,6 +23,16 @@ type ItemPageProps = {
 
 const formatPrice = (price: number) => `฿${price}`;
 
+const formatAvailability = (product: Product) => {
+  if (!product.isSeasonal && !product.availableFrom && !product.availableUntil) {
+    return "Ongoing";
+  }
+
+  return `${product.availableFrom ?? "Now"} - ${
+    product.availableUntil ?? "Open"
+  }`;
+};
+
 const demoCustomerId = "customer-pinoc-demo";
 
 export const dynamic = "force-dynamic";
@@ -170,6 +180,50 @@ export default async function ItemPage({ params }: ItemPageProps) {
                       <p className="mt-3 text-sm leading-6 text-[#5f4635]">
                         {product.flavorNotes.join(", ")}
                       </p>
+                      <div className="mt-4 grid gap-3 border-t border-[#3d2618]/10 pt-4 text-sm leading-6 text-[#5f4635] sm:grid-cols-2">
+                        <p>
+                          <span className="font-semibold text-[#241710]">
+                            Producer / Farm:
+                          </span>{" "}
+                          {product.producer ?? "Not listed"}
+                        </p>
+                        <p>
+                          <span className="font-semibold text-[#241710]">
+                            Region:
+                          </span>{" "}
+                          {product.region ?? "Not listed"}
+                        </p>
+                        <p>
+                          <span className="font-semibold text-[#241710]">
+                            Altitude:
+                          </span>{" "}
+                          {product.altitude ?? "Not listed"}
+                        </p>
+                        <p>
+                          <span className="font-semibold text-[#241710]">
+                            Variety:
+                          </span>{" "}
+                          {product.variety ?? "Not listed"}
+                        </p>
+                        <p className="sm:col-span-2">
+                          <span className="font-semibold text-[#241710]">
+                            Brew Recommendation:
+                          </span>{" "}
+                          {product.brewRecommendation ?? "Not listed"}
+                        </p>
+                        <p>
+                          <span className="font-semibold text-[#241710]">
+                            Seasonal Availability:
+                          </span>{" "}
+                          {formatAvailability(product)}
+                        </p>
+                        <p>
+                          <span className="font-semibold text-[#241710]">
+                            Suitable Menu Usage:
+                          </span>{" "}
+                          {product.availableFor}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>

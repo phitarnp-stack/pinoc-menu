@@ -13,7 +13,8 @@ export async function getSpecialCategories(): Promise<SpecialCategoryRecord[]> {
 
   const { data, error } = await supabase
     .from("specials")
-    .select("special_category");
+    .select("special_category")
+    .eq("visibility", "visible");
 
   if (error || !data) {
     return mockSpecialCategories;
@@ -40,6 +41,7 @@ export async function getSpecialMenuItems(): Promise<SpecialMenuItem[]> {
   const { data, error } = await supabase
     .from("specials")
     .select("*")
+    .eq("visibility", "visible")
     .order("sort_order");
 
   if (error || !data) {

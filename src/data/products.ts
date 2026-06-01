@@ -15,8 +15,14 @@ export const products: Product[] = [
     imagePlaceholder: "Warm coffee beans with chocolate-toned shadows",
     availableFor: "Americano, Latte, Cappuccino",
     origin: "Brazil, Colombia",
+    region: "Cerrado Mineiro, Huila",
+    producer: "Pinoc house blend program",
+    altitude: "1,100-1,800 masl",
+    variety: "Catuai, Castillo",
     process: "Washed and natural blend",
     roastLevel: "Medium",
+    brewRecommendation:
+      "Best for balanced espresso, Americano, and milk drinks with a chocolate-nut finish.",
     availableFrom: "2026-06-01",
   },
   {
@@ -33,8 +39,14 @@ export const products: Product[] = [
     imagePlaceholder: "Espresso crema over dark cacao tones",
     availableFor: "Americano, Latte, Cappuccino",
     origin: "Brazil, Thailand",
+    region: "Minas Gerais, Chiang Rai",
+    producer: "Pinoc house blend program",
+    altitude: "1,000-1,450 masl",
+    variety: "Catuai, Typica",
     process: "Natural and honey blend",
     roastLevel: "Medium-Dark",
+    brewRecommendation:
+      "Best when pulled as espresso for a deeper cocoa body and low-acidity Americano.",
     availableFrom: "2026-06-01",
   },
   {
@@ -51,8 +63,14 @@ export const products: Product[] = [
     imagePlaceholder: "Coffee cup with pale citrus highlights",
     availableFor: "Americano",
     origin: "Colombia, Ethiopia",
+    region: "Huila, Yirgacheffe",
+    producer: "Pinoc house blend program",
+    altitude: "1,650-2,000 masl",
+    variety: "Pink Bourbon, Heirloom",
     process: "Washed blend",
     roastLevel: "Medium-Light",
+    brewRecommendation:
+      "Best as a black coffee option for guests who want honeyed citrus and clarity.",
     availableFrom: "2026-06-01",
   },
   {
@@ -69,8 +87,14 @@ export const products: Product[] = [
     imagePlaceholder: "Silky latte art in a warm ceramic cup",
     availableFor: "Americano, Latte",
     origin: "Guatemala, Brazil",
+    region: "Antigua, Cerrado Mineiro",
+    producer: "Pinoc house blend program",
+    altitude: "1,200-1,700 masl",
+    variety: "Bourbon, Catuai",
     process: "Washed and pulped natural blend",
     roastLevel: "Medium",
+    brewRecommendation:
+      "Best for latte and soft Americano profiles where creamy texture is the goal.",
     availableFrom: "2026-06-01",
   },
   {
@@ -88,8 +112,13 @@ export const products: Product[] = [
     availableFor: "Filter Coffee",
     origin: "Ethiopia",
     region: "Guji",
+    producer: "Guji smallholder community lot",
+    altitude: "1,950-2,150 masl",
+    variety: "Ethiopian heirloom",
     process: "Natural",
     roastLevel: "Light",
+    brewRecommendation:
+      "Best as hand-brewed filter with a gentle pour and slightly lower agitation.",
     isSeasonal: true,
     availableFrom: "2026-06-01",
     availableUntil: "2026-06-30",
@@ -109,8 +138,13 @@ export const products: Product[] = [
     availableFor: "Filter Coffee",
     origin: "Colombia",
     region: "Huila",
+    producer: "Huila Pink Bourbon producers",
+    altitude: "1,750-1,950 masl",
+    variety: "Pink Bourbon",
     process: "Washed",
     roastLevel: "Light",
+    brewRecommendation:
+      "Best as filter coffee for floral aromatics, sparkling acidity, and honey sweetness.",
     isSeasonal: true,
     availableFrom: "2026-06-01",
     availableUntil: "2026-06-30",
@@ -131,8 +165,12 @@ export const products: Product[] = [
     origin: "Thailand",
     region: "Chiang Rai",
     producer: "Mae Suai community lot",
+    altitude: "1,250-1,450 masl",
+    variety: "Typica, Catuai",
     process: "Honey",
     roastLevel: "Medium-Light",
+    brewRecommendation:
+      "Best as filter coffee for a rounded local-origin cup with palm sugar sweetness.",
     isSeasonal: true,
     availableFrom: "2026-06-01",
     availableUntil: "2026-06-30",
@@ -151,7 +189,12 @@ export const products: Product[] = [
     imagePlaceholder: "Fine green matcha powder with bamboo whisk",
     availableFor: "Ceremonial Matcha, Matcha Latte",
     origin: "Uji, Kyoto",
+    region: "Kyoto",
+    producer: "Uji tea growers",
+    variety: "Tencha blend",
     process: "Stone-milled tencha",
+    brewRecommendation:
+      "Best whisked with water for a pure ceremonial cup or lightly sweetened over ice.",
   },
   {
     id: "product-yame-latte-matcha",
@@ -167,7 +210,12 @@ export const products: Product[] = [
     imagePlaceholder: "Layered matcha latte in clear glass",
     availableFor: "Matcha Latte, Iced Matcha Latte",
     origin: "Yame, Fukuoka",
+    region: "Fukuoka",
+    producer: "Yame tea growers",
+    variety: "Latte-grade tencha blend",
     process: "Stone-milled tencha",
+    brewRecommendation:
+      "Best with milk where creamy body and soft green tea sweetness are desired.",
   },
   {
     id: "product-ghana-cocoa",
@@ -183,7 +231,12 @@ export const products: Product[] = [
     imagePlaceholder: "Dark cocoa powder and warm ceramic cup",
     availableFor: "Single Origin Cocoa, Cocoa Latte",
     origin: "Ghana",
+    region: "Ashanti",
+    producer: "Single-origin Ghana cocoa cooperative",
+    variety: "Forastero cocoa",
     process: "Stone-ground cocoa",
+    brewRecommendation:
+      "Best as single-origin cocoa with minimal sweetness to show cacao depth.",
   },
   {
     id: "product-madagascar-vanilla-cocoa",
@@ -199,6 +252,11 @@ export const products: Product[] = [
     imagePlaceholder: "Cocoa latte surface with cream-toned highlights",
     availableFor: "Cocoa Latte, Iced Cocoa",
     origin: "Madagascar",
+    region: "Sambirano Valley",
+    producer: "Madagascar cocoa and vanilla blend",
+    variety: "Trinitario cocoa",
     process: "Blended craft cocoa",
+    brewRecommendation:
+      "Best as a cocoa latte or iced cocoa for creamy dessert-like sweetness.",
   },
 ];

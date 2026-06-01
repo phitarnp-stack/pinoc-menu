@@ -6,6 +6,10 @@ export type SpecialCategory = "coffee" | "non_coffee" | "cold_brew";
 
 export type RoastLevel = "Light" | "Medium-Light" | "Medium" | "Medium-Dark";
 
+export type VisibilityStatus = "visible" | "hidden";
+
+export type MenuLabel = "new" | "seasonal" | "limited";
+
 export interface TasteProfile {
   id: string;
   slug: string;
@@ -30,8 +34,11 @@ export interface Product {
   origin?: string;
   region?: string;
   producer?: string;
+  altitude?: string;
+  variety?: string;
   process?: string;
   roastLevel?: RoastLevel;
+  brewRecommendation?: string;
   isSeasonal?: boolean;
   availableFrom?: string;
   availableUntil?: string;
@@ -58,6 +65,9 @@ export interface MenuItem {
   recommendedFor: string;
   imagePlaceholder: string;
   isActive: boolean;
+  specialCategory?: SpecialCategory;
+  visibility?: VisibilityStatus;
+  menuLabel?: MenuLabel;
   isSeasonal?: boolean;
   availableFrom?: string;
   availableUntil?: string;
@@ -89,7 +99,10 @@ export interface SpecialMenuItem {
   id: string;
   menuItemId: string;
   specialCategoryId: string;
+  specialCategory?: SpecialCategory;
   isFeatured: boolean;
+  visibility?: VisibilityStatus;
+  menuLabel?: MenuLabel;
   sortOrder: number;
   availableFrom?: string;
   availableUntil?: string;

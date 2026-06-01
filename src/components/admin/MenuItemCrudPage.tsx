@@ -2,7 +2,14 @@
 
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
-import type { MenuCategory, MenuItem, TasteProfile } from "@/src/types/menu";
+import type {
+  MenuCategory,
+  MenuItem,
+  MenuLabel,
+  SpecialCategory,
+  TasteProfile,
+  VisibilityStatus,
+} from "@/src/types/menu";
 
 type MenuItemCrudPageProps = {
   title: string;
@@ -23,7 +30,27 @@ type MenuItemFormState = {
   recommendedFor: string;
   imagePlaceholder: string;
   isActive: "active" | "inactive";
+  specialCategory: SpecialCategory;
+  visibility: VisibilityStatus;
+  menuLabel: "" | MenuLabel;
+  availableFrom: string;
+  availableUntil: string;
 };
+
+const specialCategoryOptions: {
+  label: string;
+  value: SpecialCategory;
+}[] = [
+  { label: "Coffee", value: "coffee" },
+  { label: "Non Coffee", value: "non_coffee" },
+  { label: "Cold Brew", value: "cold_brew" },
+];
+
+const menuLabelOptions: { label: string; value: MenuLabel }[] = [
+  { label: "New", value: "new" },
+  { label: "Seasonal", value: "seasonal" },
+  { label: "Limited", value: "limited" },
+];
 
 const makeDefaultFormState = (
   menuCategories: MenuCategory[],
@@ -38,6 +65,11 @@ const makeDefaultFormState = (
   recommendedFor: "",
   imagePlaceholder: "",
   isActive: "active",
+  specialCategory: "coffee",
+  visibility: "visible",
+  menuLabel: "",
+  availableFrom: "",
+  availableUntil: "",
 });
 
 const normalizeNotes = (notes: string) =>
@@ -77,6 +109,7 @@ export function MenuItemCrudPage({
     [items],
   );
   const isEditing = editingId !== null;
+  const isSpecialForm = fixedCategoryId === "special";
 
   const resetForm = () => {
     setEditingId(null);
@@ -101,6 +134,14 @@ export function MenuItemCrudPage({
       recommendedFor: formState.recommendedFor.trim(),
       imagePlaceholder: formState.imagePlaceholder.trim(),
       isActive: formState.isActive === "active",
+      specialCategory: isSpecialForm ? formState.specialCategory : undefined,
+      visibility: isSpecialForm ? formState.visibility : undefined,
+      menuLabel: isSpecialForm
+        ? formState.menuLabel || undefined
+        : undefined,
+      isSeasonal: isSpecialForm && formState.menuLabel === "seasonal",
+      availableFrom: formState.availableFrom || undefined,
+      availableUntil: formState.availableUntil || undefined,
       sortOrder: items.length + 1,
     };
 
@@ -127,13 +168,28 @@ export function MenuItemCrudPage({
       recommendedFor: item.recommendedFor,
       imagePlaceholder: item.imagePlaceholder,
       isActive: item.isActive ? "active" : "inactive",
+      specialCategory: item.specialCategory ?? "coffee",
+      visibility: item.visibility ?? (item.isActive ? "visible" : "hidden"),
+      menuLabel: item.menuLabel ?? "",
+      availableFrom: item.availableFrom ?? "",
+      availableUntil: item.availableUntil ?? "",
     });
   };
 
   const toggleStatus = (itemId: string) => {
     setItems((current) =>
       current.map((item) =>
-        item.id === itemId ? { ...item, isActive: !item.isActive } : item,
+        item.id === itemId
+          ? {
+              ...item,
+              isActive: !item.isActive,
+              visibility: isSpecialForm
+                ? item.isActive
+                  ? "hidden"
+                  : "visible"
+                : item.visibility,
+            }
+          : item,
       ),
     );
   };
@@ -337,6 +393,114 @@ export function MenuItemCrudPage({
                     className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
                   />
                 </label>
+
+                {isSpecialForm ? (
+                  <div className="grid gap-4 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7d4d2f]">
+                      Special Menu
+                    </p>
+
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                        Special Category
+                        <select
+                          value={formState.specialCategory}
+                          onChange={(event) =>
+                            setFormState((current) => ({
+                              ...current,
+                              specialCategory: event.target
+                                .value as SpecialCategory,
+                            }))
+                          }
+                          className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                        >
+                          {specialCategoryOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+
+                      <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                        Visibility
+                        <select
+                          value={formState.visibility}
+                          onChange={(event) =>
+                            setFormState((current) => ({
+                              ...current,
+                              visibility: event.target
+                                .value as VisibilityStatus,
+                              isActive:
+                                event.target.value === "visible"
+                                  ? "active"
+                                  : "inactive",
+                            }))
+                          }
+                          className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                        >
+                          <option value="visible">Visible</option>
+                          <option value="hidden">Hidden</option>
+                        </select>
+                      </label>
+
+                      <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                        Menu Label
+                        <select
+                          value={formState.menuLabel}
+                          onChange={(event) =>
+                            setFormState((current) => ({
+                              ...current,
+                              menuLabel: event.target.value as
+                                | ""
+                                | MenuLabel,
+                            }))
+                          }
+                          className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                        >
+                          <option value="">None</option>
+                          {menuLabelOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                        Start Date
+                        <input
+                          type="date"
+                          value={formState.availableFrom}
+                          onChange={(event) =>
+                            setFormState((current) => ({
+                              ...current,
+                              availableFrom: event.target.value,
+                            }))
+                          }
+                          className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                        />
+                      </label>
+
+                      <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                        End Date
+                        <input
+                          type="date"
+                          value={formState.availableUntil}
+                          onChange={(event) =>
+                            setFormState((current) => ({
+                              ...current,
+                              availableUntil: event.target.value,
+                            }))
+                          }
+                          className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ) : null}
               </div>
 
               <button
@@ -382,6 +546,23 @@ export function MenuItemCrudPage({
                       <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
                         {formatPrice(item.price)}
                       </span>
+                      {item.specialCategory ? (
+                        <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
+                          {specialCategoryOptions.find(
+                            (option) => option.value === item.specialCategory,
+                          )?.label ?? item.specialCategory}
+                        </span>
+                      ) : null}
+                      {item.menuLabel ? (
+                        <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#7d4d2f]">
+                          {item.menuLabel}
+                        </span>
+                      ) : null}
+                      {item.visibility ? (
+                        <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
+                          {item.visibility}
+                        </span>
+                      ) : null}
                     </div>
                     <p className="mt-5 text-sm leading-7 text-[#5f4635]">
                       <span className="font-semibold text-[#241710]">
@@ -389,6 +570,15 @@ export function MenuItemCrudPage({
                       </span>{" "}
                       {item.flavorNotes.join(", ")}
                     </p>
+                    {item.availableFrom || item.availableUntil ? (
+                      <p className="mt-3 text-sm leading-7 text-[#5f4635]">
+                        <span className="font-semibold text-[#241710]">
+                          Dates:
+                        </span>{" "}
+                        {item.availableFrom ?? "Now"} -{" "}
+                        {item.availableUntil ?? "Open"}
+                      </p>
+                    ) : null}
                     <div className="mt-6 flex flex-col gap-2 sm:flex-row">
                       <button
                         type="button"
