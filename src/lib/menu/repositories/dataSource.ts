@@ -1,5 +1,8 @@
-import { createServerSupabaseClient } from "@/src/lib/supabase/server";
-import { isSupabaseConfigured, supabaseProjectHost } from "@/src/lib/supabase/server";
+import {
+  createServerSupabaseClient,
+  isSupabaseConfigured,
+  supabaseProjectHost,
+} from "@/src/lib/supabase/server";
 
 export type DataSourceStatus = "supabase" | "mock";
 
@@ -8,13 +11,17 @@ export type DataSourceDiagnostics = {
   envConfigured: boolean;
   projectHost?: string;
   checkedTable: string;
+  queryAttempted: string;
   rowCount?: number;
   errorCode?: string;
   errorMessage?: string;
+  errorDetails?: string;
+  errorHint?: string;
 };
 
 export async function getDataSourceDiagnostics(): Promise<DataSourceDiagnostics> {
   const checkedTable = "menu_categories";
+  const queryAttempted = "select id from menu_categories limit 1";
   const supabase = createServerSupabaseClient();
 
   if (!supabase) {
@@ -23,6 +30,7 @@ export async function getDataSourceDiagnostics(): Promise<DataSourceDiagnostics>
       envConfigured: isSupabaseConfigured,
       projectHost: supabaseProjectHost,
       checkedTable,
+      queryAttempted,
       errorMessage: "Supabase URL or anon key is missing.",
     };
   }
@@ -35,8 +43,11 @@ export async function getDataSourceDiagnostics(): Promise<DataSourceDiagnostics>
   if (error) {
     console.warn("[Pinoc data source] Supabase probe failed", {
       checkedTable,
+      queryAttempted,
       code: error.code,
       message: error.message,
+      details: error.details,
+      hint: error.hint,
       projectHost: supabaseProjectHost,
     });
 
@@ -45,8 +56,11 @@ export async function getDataSourceDiagnostics(): Promise<DataSourceDiagnostics>
       envConfigured: isSupabaseConfigured,
       projectHost: supabaseProjectHost,
       checkedTable,
+      queryAttempted,
       errorCode: error.code,
       errorMessage: error.message,
+      errorDetails: error.details,
+      errorHint: error.hint,
     };
   }
 
@@ -55,6 +69,7 @@ export async function getDataSourceDiagnostics(): Promise<DataSourceDiagnostics>
     envConfigured: isSupabaseConfigured,
     projectHost: supabaseProjectHost,
     checkedTable,
+    queryAttempted,
     rowCount: data?.length ?? 0,
   };
 }
