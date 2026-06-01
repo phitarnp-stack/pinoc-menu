@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
-import { saveProduct, updateProductStatus } from "@/src/lib/menu/adminWrites";
+import {
+  publishProductToMenu,
+  saveProduct,
+  updateProductStatus,
+  type ProductMenuCategoryId,
+} from "@/src/lib/menu/adminWrites";
 import type {
   Product,
   ProductStatus,
@@ -61,6 +66,15 @@ const availableForOptions = [
   "Signature Coffee",
   "Matcha Latte",
   "Cocoa Latte",
+];
+
+const coffeeMenuCategoryOptions: {
+  label: string;
+  value: ProductMenuCategoryId;
+}[] = [
+  { label: "Filter Coffee", value: "filter-coffee" },
+  { label: "Classic Coffee", value: "classic-coffee" },
+  { label: "Special", value: "special" },
 ];
 
 const makeDefaultFormState = (
@@ -130,6 +144,30 @@ export function ProductCrudPage({
     message: string;
   } | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [coffeeMenuCategoryByProductId, setCoffeeMenuCategoryByProductId] =
+    useState<Record<string, ProductMenuCategoryId | "">>({});
+  const [publishedMenuItems, setPublishedMenuItems] = useState<
+    Record<
+      string,
+      {
+        href: string;
+        status: "created" | "existing";
+        categoryId: ProductMenuCategoryId;
+        debug: {
+          menuItemId: string;
+          menuItemSlug: string;
+          menuItemCategoryId: string;
+          menuItemName: string;
+          menuItemIsActive: boolean;
+          menuItemStatus: "not_applicable";
+          linkId?: string;
+          linkMenuItemId?: string;
+          linkProductId?: string;
+          publicUrl: string;
+        };
+      }
+    >
+  >({});
 
   const activeCount = useMemo(
     () => products.filter((product) => product.status === "active").length,
@@ -293,6 +331,56 @@ export function ProductCrudPage({
           error instanceof Error
             ? error.message
             : "Supabase write failed. Please try again.",
+      });
+    } finally {
+      setPendingId(null);
+    }
+  };
+
+  const handlePublishProduct = async (product: Product) => {
+    const pendingPublishId = `publish-${product.id}`;
+    const selectedCategoryId =
+      coffeeMenuCategoryByProductId[product.id] || undefined;
+
+    setFeedback(null);
+    setPendingId(pendingPublishId);
+
+    try {
+      const result = await publishProductToMenu(product, selectedCategoryId);
+
+      setPublishedMenuItems((current) => ({
+        ...current,
+        [product.id]: {
+          href: result.menuItemHref,
+          status: result.status,
+          categoryId: result.categoryId,
+          debug: result.debug,
+        },
+      }));
+      setProducts((current) => [...current]);
+      setFeedback(
+        result.source === "mock"
+          ? {
+              tone: "warning",
+              message:
+                result.warning ??
+                "Supabase is unavailable, so this menu item was only created locally.",
+            }
+          : {
+              tone: result.status === "existing" ? "warning" : "success",
+              message:
+                result.status === "existing"
+                  ? "Already in menu. No duplicate was created."
+                  : "Menu item created and linked to this product.",
+            },
+      );
+    } catch (error) {
+      setFeedback({
+        tone: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Could not publish this product to the menu.",
       });
     } finally {
       setPendingId(null);
@@ -665,7 +753,11 @@ export function ProductCrudPage({
             </form>
 
             <div className="grid gap-4">
-              {products.map((product) => (
+              {products.map((product) => {
+                const publishState = publishedMenuItems[product.id];
+                const isPublishing = pendingId === `publish-${product.id}`;
+
+                return (
                 <article
                   key={product.id}
                   className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-6 shadow-[0_18px_48px_rgba(84,55,34,0.12)] backdrop-blur"
@@ -768,6 +860,120 @@ export function ProductCrudPage({
                     </p>
                   </div>
 
+                  <div className="mt-6 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 p-4">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                      <div className="grid gap-2">
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#7d4d2f]">
+                          Customer Menu
+                        </p>
+                        {product.productType === "coffee_bean" ? (
+                          <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                            Category
+                            <select
+                              value={coffeeMenuCategoryByProductId[product.id] ?? ""}
+                              onChange={(event) =>
+                                setCoffeeMenuCategoryByProductId((current) => ({
+                                  ...current,
+                                  [product.id]: event.target
+                                    .value as ProductMenuCategoryId,
+                                }))
+                              }
+                              className="min-h-11 rounded-lg border border-[#3d2618]/14 bg-[#fff8ed]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                            >
+                              <option value="">Choose category</option>
+                              {coffeeMenuCategoryOptions.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                  {option.label}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                        ) : (
+                          <p className="text-sm leading-6 text-[#5f4635]">
+                            Publishes to{" "}
+                            {product.productType === "matcha"
+                              ? "Matcha"
+                              : "Craft Cocoa"}
+                            .
+                          </p>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handlePublishProduct(product)}
+                        disabled={isPublishing}
+                        className="min-h-11 rounded-full bg-[#2b1a12] px-5 text-sm font-semibold text-[#fff8ed] transition hover:bg-[#412719]"
+                      >
+                        {isPublishing
+                          ? "Publishing..."
+                          : publishState?.status === "existing"
+                            ? "Already in menu"
+                            : "Create menu item from product"}
+                      </button>
+                    </div>
+
+                    {publishState ? (
+                      <div className="mt-4 rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/60 p-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7d4d2f]">
+                          Publish Debug
+                        </p>
+                        <div className="mt-3 grid gap-2 text-xs leading-5 text-[#5f4635]">
+                          <p>
+                            Menu item id:{" "}
+                            <span className="font-semibold text-[#241710]">
+                              {publishState.debug.menuItemId}
+                            </span>
+                          </p>
+                          <p>
+                            Menu item category:{" "}
+                            <span className="font-semibold text-[#241710]">
+                              {publishState.debug.menuItemCategoryId}
+                            </span>
+                          </p>
+                          <p>
+                            Menu item active:{" "}
+                            <span className="font-semibold text-[#241710]">
+                              {String(publishState.debug.menuItemIsActive)}
+                            </span>
+                          </p>
+                          <p>
+                            Menu item status:{" "}
+                            <span className="font-semibold text-[#241710]">
+                              {publishState.debug.menuItemStatus}
+                            </span>
+                          </p>
+                          <p>
+                            Link id:{" "}
+                            <span className="font-semibold text-[#241710]">
+                              {publishState.debug.linkId ?? "not returned"}
+                            </span>
+                          </p>
+                          <p>
+                            Link menu item id:{" "}
+                            <span className="font-semibold text-[#241710]">
+                              {publishState.debug.linkMenuItemId ??
+                                "not returned"}
+                            </span>
+                          </p>
+                          <p>
+                            Link product id:{" "}
+                            <span className="font-semibold text-[#241710]">
+                              {publishState.debug.linkProductId ??
+                                "not returned"}
+                            </span>
+                          </p>
+                          <Link
+                            href={publishState.href}
+                            className="mt-2 inline-flex text-sm font-semibold text-[#7d4d2f] transition hover:text-[#2b1a12]"
+                          >
+                            Public URL: {publishState.debug.publicUrl}
+                          </Link>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+
                   <div className="mt-6 flex flex-col gap-2 sm:flex-row">
                     <button
                       type="button"
@@ -790,7 +996,8 @@ export function ProductCrudPage({
                     </button>
                   </div>
                 </article>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
