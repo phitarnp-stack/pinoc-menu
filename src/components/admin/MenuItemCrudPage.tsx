@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
+import { saveMenuItem, updateMenuItemStatus } from "@/src/lib/menu/adminWrites";
 import type {
   MenuCategory,
   MenuItem,
@@ -103,6 +104,11 @@ export function MenuItemCrudPage({
     makeDefaultFormState(menuCategories, fixedCategoryId),
   );
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{
+    tone: "success" | "warning" | "error";
+    message: string;
+  } | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
 
   const activeCount = useMemo(
     () => items.filter((item) => item.isActive).length,
@@ -116,8 +122,12 @@ export function MenuItemCrudPage({
     setFormState(makeDefaultFormState(menuCategories, fixedCategoryId));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setFeedback(null);
+    const existingItem = editingId
+      ? items.find((item) => item.id === editingId)
+      : undefined;
 
     const nextItem: MenuItem = {
       id: editingId ?? createId(formState.name),
@@ -142,18 +152,39 @@ export function MenuItemCrudPage({
       isSeasonal: isSpecialForm && formState.menuLabel === "seasonal",
       availableFrom: formState.availableFrom || undefined,
       availableUntil: formState.availableUntil || undefined,
-      sortOrder: items.length + 1,
+      sortOrder: existingItem?.sortOrder ?? items.length + 1,
     };
 
-    if (editingId) {
-      setItems((current) =>
-        current.map((item) => (item.id === editingId ? nextItem : item)),
-      );
-    } else {
-      setItems((current) => [nextItem, ...current]);
-    }
+    setPendingId("form");
 
-    resetForm();
+    try {
+      const result = await saveMenuItem(nextItem, editingId ? "edit" : "create");
+
+      if (editingId) {
+        setItems((current) =>
+          current.map((item) => (item.id === editingId ? nextItem : item)),
+        );
+      } else {
+        setItems((current) => [nextItem, ...current]);
+      }
+
+      setFeedback(
+        result.source === "mock"
+          ? { tone: "warning", message: result.warning ?? "Saved locally." }
+          : { tone: "success", message: "Saved to Supabase." },
+      );
+      resetForm();
+    } catch (error) {
+      setFeedback({
+        tone: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Supabase write failed. Please try again.",
+      });
+    } finally {
+      setPendingId(null);
+    }
   };
 
   const editItem = (item: MenuItem) => {
@@ -176,22 +207,53 @@ export function MenuItemCrudPage({
     });
   };
 
-  const toggleStatus = (itemId: string) => {
-    setItems((current) =>
-      current.map((item) =>
-        item.id === itemId
-          ? {
-              ...item,
-              isActive: !item.isActive,
-              visibility: isSpecialForm
-                ? item.isActive
-                  ? "hidden"
-                  : "visible"
-                : item.visibility,
-            }
-          : item,
-      ),
-    );
+  const toggleStatus = async (itemId: string) => {
+    const item = items.find((currentItem) => currentItem.id === itemId);
+
+    if (!item) {
+      return;
+    }
+
+    const nextIsActive = !item.isActive;
+    const nextVisibility = isSpecialForm
+      ? nextIsActive
+        ? "visible"
+        : "hidden"
+      : item.visibility;
+
+    setFeedback(null);
+    setPendingId(itemId);
+
+    try {
+      const result = await updateMenuItemStatus(item, nextIsActive);
+
+      setItems((current) =>
+        current.map((currentItem) =>
+          currentItem.id === itemId
+            ? {
+                ...currentItem,
+                isActive: nextIsActive,
+                visibility: nextVisibility,
+              }
+            : currentItem,
+        ),
+      );
+      setFeedback(
+        result.source === "mock"
+          ? { tone: "warning", message: result.warning ?? "Saved locally." }
+          : { tone: "success", message: "Status saved to Supabase." },
+      );
+    } catch (error) {
+      setFeedback({
+        tone: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Supabase write failed. Please try again.",
+      });
+    } finally {
+      setPendingId(null);
+    }
   };
 
   const toggleTasteProfile = (tasteProfileId: string) => {
@@ -255,6 +317,20 @@ export function MenuItemCrudPage({
                   </button>
                 ) : null}
               </div>
+
+              {feedback ? (
+                <div
+                  className={
+                    feedback.tone === "error"
+                      ? "mt-5 rounded-lg border border-red-900/20 bg-red-50/70 px-4 py-3 text-sm leading-6 text-red-900"
+                      : feedback.tone === "warning"
+                        ? "mt-5 rounded-lg border border-[#9a6b39]/25 bg-[#fff8ed]/76 px-4 py-3 text-sm leading-6 text-[#7d4d2f]"
+                        : "mt-5 rounded-lg border border-[#2b1a12]/12 bg-[#fff8ed]/76 px-4 py-3 text-sm leading-6 text-[#2b1a12]"
+                  }
+                >
+                  {feedback.message}
+                </div>
+              ) : null}
 
               <div className="mt-7 grid gap-4">
                 <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
@@ -505,9 +581,14 @@ export function MenuItemCrudPage({
 
               <button
                 type="submit"
+                disabled={pendingId === "form"}
                 className="mt-7 min-h-12 w-full rounded-full bg-[#2b1a12] px-6 text-sm font-semibold text-[#fff8ed] shadow-[0_14px_30px_rgba(43,26,18,0.18)] transition hover:bg-[#412719]"
               >
-                {isEditing ? "Save Changes" : "Add Item"}
+                {pendingId === "form"
+                  ? "Saving..."
+                  : isEditing
+                    ? "Save Changes"
+                    : "Add Item"}
               </button>
             </form>
 
@@ -590,9 +671,14 @@ export function MenuItemCrudPage({
                       <button
                         type="button"
                         onClick={() => toggleStatus(item.id)}
+                        disabled={pendingId === item.id}
                         className="min-h-11 rounded-full bg-[#2b1a12] px-5 text-sm font-semibold text-[#fff8ed] transition hover:bg-[#412719]"
                       >
-                        {item.isActive ? "Deactivate" : "Activate"}
+                        {pendingId === item.id
+                          ? "Saving..."
+                          : item.isActive
+                            ? "Deactivate"
+                            : "Activate"}
                       </button>
                     </div>
                   </article>

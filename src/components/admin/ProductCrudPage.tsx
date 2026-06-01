@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
+import { saveProduct, updateProductStatus } from "@/src/lib/menu/adminWrites";
 import type {
   Product,
   ProductStatus,
@@ -124,6 +125,11 @@ export function ProductCrudPage({
     makeDefaultFormState(defaultProductType),
   );
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{
+    tone: "success" | "warning" | "error";
+    message: string;
+  } | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
 
   const activeCount = useMemo(
     () => products.filter((product) => product.status === "active").length,
@@ -157,8 +163,9 @@ export function ProductCrudPage({
     updateField("availableFor", nextOptions.join(", "));
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setFeedback(null);
 
     const nextProduct: Product = {
       id: editingId ?? createId(formState.name),
@@ -188,17 +195,41 @@ export function ProductCrudPage({
       availableUntil: formState.availableUntil || undefined,
     };
 
-    if (editingId) {
-      setProducts((current) =>
-        current.map((product) =>
-          product.id === editingId ? nextProduct : product,
-        ),
-      );
-    } else {
-      setProducts((current) => [nextProduct, ...current]);
-    }
+    setPendingId("form");
 
-    resetForm();
+    try {
+      const result = await saveProduct(
+        nextProduct,
+        editingId ? "edit" : "create",
+      );
+
+      if (editingId) {
+        setProducts((current) =>
+          current.map((product) =>
+            product.id === editingId ? nextProduct : product,
+          ),
+        );
+      } else {
+        setProducts((current) => [nextProduct, ...current]);
+      }
+
+      setFeedback(
+        result.source === "mock"
+          ? { tone: "warning", message: result.warning ?? "Saved locally." }
+          : { tone: "success", message: "Saved to Supabase." },
+      );
+      resetForm();
+    } catch (error) {
+      setFeedback({
+        tone: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Supabase write failed. Please try again.",
+      });
+    } finally {
+      setPendingId(null);
+    }
   };
 
   const editProduct = (product: Product) => {
@@ -226,17 +257,46 @@ export function ProductCrudPage({
     });
   };
 
-  const toggleProductStatus = (productId: string) => {
-    setProducts((current) =>
-      current.map((product) =>
-        product.id === productId
-          ? {
-              ...product,
-              status: product.status === "active" ? "inactive" : "active",
-            }
-          : product,
-      ),
-    );
+  const toggleProductStatus = async (productId: string) => {
+    const product = products.find((item) => item.id === productId);
+
+    if (!product) {
+      return;
+    }
+
+    const nextStatus = product.status === "active" ? "inactive" : "active";
+    setFeedback(null);
+    setPendingId(productId);
+
+    try {
+      const result = await updateProductStatus(productId, nextStatus);
+
+      setProducts((current) =>
+        current.map((item) =>
+          item.id === productId
+            ? {
+                ...item,
+                status: nextStatus,
+              }
+            : item,
+        ),
+      );
+      setFeedback(
+        result.source === "mock"
+          ? { tone: "warning", message: result.warning ?? "Saved locally." }
+          : { tone: "success", message: "Product status saved to Supabase." },
+      );
+    } catch (error) {
+      setFeedback({
+        tone: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Supabase write failed. Please try again.",
+      });
+    } finally {
+      setPendingId(null);
+    }
   };
 
   return (
@@ -301,6 +361,20 @@ export function ProductCrudPage({
                   </button>
                 ) : null}
               </div>
+
+              {feedback ? (
+                <div
+                  className={
+                    feedback.tone === "error"
+                      ? "mt-5 rounded-lg border border-red-900/20 bg-red-50/70 px-4 py-3 text-sm leading-6 text-red-900"
+                      : feedback.tone === "warning"
+                        ? "mt-5 rounded-lg border border-[#9a6b39]/25 bg-[#fff8ed]/76 px-4 py-3 text-sm leading-6 text-[#7d4d2f]"
+                        : "mt-5 rounded-lg border border-[#2b1a12]/12 bg-[#fff8ed]/76 px-4 py-3 text-sm leading-6 text-[#2b1a12]"
+                  }
+                >
+                  {feedback.message}
+                </div>
+              ) : null}
 
               <div className="mt-7 grid gap-4">
                 <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
@@ -579,9 +653,14 @@ export function ProductCrudPage({
 
               <button
                 type="submit"
+                disabled={pendingId === "form"}
                 className="mt-7 min-h-12 w-full rounded-full bg-[#2b1a12] px-6 text-sm font-semibold text-[#fff8ed] shadow-[0_14px_30px_rgba(43,26,18,0.18)] transition hover:bg-[#412719]"
               >
-                {isEditing ? "Save Changes" : "Add Product"}
+                {pendingId === "form"
+                  ? "Saving..."
+                  : isEditing
+                    ? "Save Changes"
+                    : "Add Product"}
               </button>
             </form>
 
@@ -700,9 +779,14 @@ export function ProductCrudPage({
                     <button
                       type="button"
                       onClick={() => toggleProductStatus(product.id)}
+                      disabled={pendingId === product.id}
                       className="min-h-11 rounded-full bg-[#2b1a12] px-5 text-sm font-semibold text-[#fff8ed] transition hover:bg-[#412719]"
                     >
-                      {product.status === "active" ? "Deactivate" : "Activate"}
+                      {pendingId === product.id
+                        ? "Saving..."
+                        : product.status === "active"
+                          ? "Deactivate"
+                          : "Activate"}
                     </button>
                   </div>
                 </article>
