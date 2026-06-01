@@ -4,6 +4,8 @@ import {
   supabaseKeyFormat,
   supabaseKeyPrefix,
   supabaseProjectHost,
+  supabaseProjectUrl,
+  supabaseRestUrl,
   supabaseRuntime,
 } from "@/src/lib/supabase/server";
 
@@ -13,6 +15,8 @@ export type DataSourceDiagnostics = {
   status: DataSourceStatus;
   envConfigured: boolean;
   projectHost?: string;
+  projectUrl?: string;
+  restUrl?: string;
   keyPrefix?: string;
   keyFormat: string;
   runtime: string;
@@ -36,6 +40,8 @@ export async function getDataSourceDiagnostics(): Promise<DataSourceDiagnostics>
       status: "mock",
       envConfigured: isSupabaseConfigured,
       projectHost: supabaseProjectHost,
+      projectUrl: supabaseProjectUrl,
+      restUrl: supabaseRestUrl,
       keyPrefix: supabaseKeyPrefix,
       keyFormat: supabaseKeyFormat,
       runtime: supabaseRuntime,
@@ -60,12 +66,16 @@ export async function getDataSourceDiagnostics(): Promise<DataSourceDiagnostics>
       details: error.details,
       hint: error.hint,
       projectHost: supabaseProjectHost,
+      projectUrl: supabaseProjectUrl,
+      restUrl: supabaseRestUrl,
     });
 
     return {
       status: "mock",
       envConfigured: isSupabaseConfigured,
       projectHost: supabaseProjectHost,
+      projectUrl: supabaseProjectUrl,
+      restUrl: supabaseRestUrl,
       keyPrefix: supabaseKeyPrefix,
       keyFormat: supabaseKeyFormat,
       runtime: supabaseRuntime,
@@ -83,6 +93,8 @@ export async function getDataSourceDiagnostics(): Promise<DataSourceDiagnostics>
     status: "supabase",
     envConfigured: isSupabaseConfigured,
     projectHost: supabaseProjectHost,
+    projectUrl: supabaseProjectUrl,
+    restUrl: supabaseRestUrl,
     keyPrefix: supabaseKeyPrefix,
     keyFormat: supabaseKeyFormat,
     runtime: supabaseRuntime,

@@ -15,6 +15,8 @@ export async function DataSourceIndicator() {
   const diagnosticRows = [
     ["Env", diagnostics.envConfigured ? "present" : "missing"],
     ["Host", diagnostics.projectHost ?? "not available"],
+    ["Project URL", diagnostics.projectUrl ?? "not available"],
+    ["REST URL", diagnostics.restUrl ?? "not available"],
     ["Runtime", diagnostics.runtime],
     ["Key Prefix", diagnostics.keyPrefix ?? "missing"],
     ["Key Format", diagnostics.keyFormat],
@@ -28,6 +30,7 @@ export async function DataSourceIndicator() {
     ["Details", diagnostics.errorDetails ?? "none"],
     ["Hint", diagnostics.errorHint ?? "none"],
   ];
+  const showDiagnostics = process.env.NODE_ENV === "development";
 
   return (
     <div className="grid gap-2">
@@ -42,19 +45,21 @@ export async function DataSourceIndicator() {
         {isConnected ? "Connected to Supabase" : "Using Mock Data"}
       </span>
 
-      <div className="max-w-[20rem] rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/78 p-3 text-[11px] leading-5 text-[#5f4635] shadow-[0_10px_24px_rgba(84,55,34,0.1)] sm:max-w-[28rem]">
-        <p className="font-semibold uppercase tracking-[0.16em] text-[#7d4d2f]">
-          Supabase Diagnostic
-        </p>
-        <dl className="mt-2 grid gap-1">
-          {diagnosticRows.map(([label, value]) => (
-            <div key={label} className="grid gap-1 sm:grid-cols-[5rem_1fr]">
-              <dt className="font-semibold text-[#241710]">{label}</dt>
-              <dd className="break-words font-mono text-[10px]">{value}</dd>
-            </div>
-          ))}
-        </dl>
-      </div>
+      {showDiagnostics ? (
+        <div className="max-w-[20rem] rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/78 p-3 text-[11px] leading-5 text-[#5f4635] shadow-[0_10px_24px_rgba(84,55,34,0.1)] sm:max-w-[28rem]">
+          <p className="font-semibold uppercase tracking-[0.16em] text-[#7d4d2f]">
+            Supabase Diagnostic
+          </p>
+          <dl className="mt-2 grid gap-1">
+            {diagnosticRows.map(([label, value]) => (
+              <div key={label} className="grid gap-1 sm:grid-cols-[5rem_1fr]">
+                <dt className="font-semibold text-[#241710]">{label}</dt>
+                <dd className="break-words font-mono text-[10px]">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -3,7 +3,29 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+const normalizeSupabaseUrl = (url: string | undefined) => {
+  if (!url) {
+    return undefined;
+  }
+
+  try {
+    const parsedUrl = new URL(url.trim());
+
+    return parsedUrl.origin;
+  } catch {
+    return undefined;
+  }
+};
+
+export const supabaseProjectUrl = normalizeSupabaseUrl(supabaseUrl);
+
+export const supabaseRestUrl = supabaseProjectUrl
+  ? `${supabaseProjectUrl}/rest/v1`
+  : undefined;
+
+export const isSupabaseConfigured = Boolean(
+  supabaseProjectUrl && supabaseAnonKey,
+);
 
 export const supabaseRuntime = "server";
 
@@ -20,12 +42,12 @@ export const supabaseKeyFormat = supabaseAnonKey?.startsWith("sb_publishable_")
       : "missing";
 
 const getSupabaseProjectHost = () => {
-  if (!supabaseUrl) {
+  if (!supabaseProjectUrl) {
     return undefined;
   }
 
   try {
-    return new URL(supabaseUrl).host;
+    return new URL(supabaseProjectUrl).host;
   } catch {
     return "invalid-supabase-url";
   }
@@ -34,11 +56,11 @@ const getSupabaseProjectHost = () => {
 export const supabaseProjectHost = getSupabaseProjectHost();
 
 export const createServerSupabaseClient = () => {
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!supabaseProjectUrl || !supabaseAnonKey) {
     return null;
   }
 
-  return createClient(supabaseUrl, supabaseAnonKey, {
+  return createClient(supabaseProjectUrl, supabaseAnonKey, {
     auth: {
       persistSession: false,
     },
