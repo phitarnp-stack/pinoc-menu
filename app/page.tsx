@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { PublicHeader } from "@/src/components/navigation/PublicHeader";
 
 export default function Home() {
   return (
     <main className="min-h-screen overflow-hidden bg-[#f6efe6] text-[#241710]">
+      <PublicHeader />
       <section className="relative flex min-h-screen items-center px-6 py-8 sm:px-10 lg:px-16">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(201,155,104,0.34),transparent_34%),linear-gradient(135deg,#f9f1e7_0%,#ead9c2_43%,#b99069_100%)]" />
         <div className="absolute inset-x-6 top-6 h-px bg-[#4a2d1c]/15 sm:inset-x-10 lg:inset-x-16" />
@@ -13,7 +15,7 @@ export default function Home() {
         <div className="pointer-events-none absolute right-8 bottom-24 hidden h-44 w-44 rounded-full border border-[#fff8ed]/35 lg:block" />
 
         <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-12 lg:grid lg:grid-cols-[1.04fr_0.96fr] lg:items-center">
-          <div className="max-w-xl pt-10 sm:pt-14 lg:pt-0">
+          <div className="max-w-xl pt-36 sm:pt-40 lg:pt-20">
             <p className="mb-6 text-xs font-semibold uppercase tracking-[0.34em] text-[#7d4d2f]">
               Pinoc Specialty
             </p>

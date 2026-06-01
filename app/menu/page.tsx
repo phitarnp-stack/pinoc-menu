@@ -1,16 +1,18 @@
 import Link from "next/link";
 import { menuCategories } from "@/src/data/menuCategories";
 import { menuItems } from "@/src/data/menuItems";
+import { PublicHeader } from "@/src/components/navigation/PublicHeader";
 
 export default function MenuPage() {
   return (
     <main className="min-h-screen bg-[#f6efe6] text-[#241710]">
+      <PublicHeader />
       <section className="relative min-h-screen overflow-hidden px-6 py-8 sm:px-10 lg:px-16">
         <div className="absolute inset-0 bg-[linear-gradient(135deg,#f9f1e7_0%,#ead9c2_48%,#caa37a_100%)]" />
         <div className="absolute inset-x-6 top-6 h-px bg-[#4a2d1c]/15 sm:inset-x-10 lg:inset-x-16" />
         <div className="absolute inset-x-6 bottom-6 h-px bg-[#fff8ed]/45 sm:inset-x-10 lg:inset-x-16" />
 
-        <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl flex-col justify-center gap-10 py-16 sm:py-20">
+        <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl flex-col justify-center gap-10 pb-16 pt-36 sm:pb-20 sm:pt-40 lg:pt-32">
           <div className="max-w-2xl">
             <Link
               href="/"

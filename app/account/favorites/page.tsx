@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PublicHeader } from "@/src/components/navigation/PublicHeader";
 import { customerFavorites } from "@/src/data/customer";
 import { menuCategories } from "@/src/data/menuCategories";
 import { menuItems } from "@/src/data/menuItems";
@@ -16,9 +17,10 @@ const formatPrice = (price: number) => `฿${price}`;
 export default function AccountFavoritesPage() {
   return (
     <main className="min-h-screen bg-[#f6efe6] text-[#241710]">
+      <PublicHeader />
       <section className="relative min-h-screen overflow-hidden px-6 py-8 sm:px-10 lg:px-16">
         <div className="absolute inset-0 bg-[linear-gradient(135deg,#f9f1e7_0%,#ead9c2_48%,#caa37a_100%)]" />
-        <div className="relative z-10 mx-auto w-full max-w-6xl py-16 sm:py-20">
+        <div className="relative z-10 mx-auto w-full max-w-6xl pb-16 pt-36 sm:pb-20 sm:pt-40 lg:pt-32">
           <Link
             href="/account"
             className="mb-8 inline-flex text-xs font-semibold uppercase tracking-[0.28em] text-[#7d4d2f] transition hover:text-[#2b1a12]"
