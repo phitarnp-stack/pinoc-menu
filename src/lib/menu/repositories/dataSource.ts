@@ -1,18 +1,66 @@
 import { createServerSupabaseClient } from "@/src/lib/supabase/server";
+import { isSupabaseConfigured, supabaseProjectHost } from "@/src/lib/supabase/server";
 
 export type DataSourceStatus = "supabase" | "mock";
 
-export async function getDataSourceStatus(): Promise<DataSourceStatus> {
+export type DataSourceDiagnostics = {
+  status: DataSourceStatus;
+  envConfigured: boolean;
+  projectHost?: string;
+  checkedTable: string;
+  rowCount?: number;
+  errorCode?: string;
+  errorMessage?: string;
+};
+
+export async function getDataSourceDiagnostics(): Promise<DataSourceDiagnostics> {
+  const checkedTable = "menu_categories";
   const supabase = createServerSupabaseClient();
 
   if (!supabase) {
-    return "mock";
+    return {
+      status: "mock",
+      envConfigured: isSupabaseConfigured,
+      projectHost: supabaseProjectHost,
+      checkedTable,
+      errorMessage: "Supabase URL or anon key is missing.",
+    };
   }
 
-  const { error } = await supabase
-    .from("menu_categories")
+  const { data, error } = await supabase
+    .from(checkedTable)
     .select("id")
     .limit(1);
 
-  return error ? "mock" : "supabase";
+  if (error) {
+    console.warn("[Pinoc data source] Supabase probe failed", {
+      checkedTable,
+      code: error.code,
+      message: error.message,
+      projectHost: supabaseProjectHost,
+    });
+
+    return {
+      status: "mock",
+      envConfigured: isSupabaseConfigured,
+      projectHost: supabaseProjectHost,
+      checkedTable,
+      errorCode: error.code,
+      errorMessage: error.message,
+    };
+  }
+
+  return {
+    status: "supabase",
+    envConfigured: isSupabaseConfigured,
+    projectHost: supabaseProjectHost,
+    checkedTable,
+    rowCount: data?.length ?? 0,
+  };
+}
+
+export async function getDataSourceStatus(): Promise<DataSourceStatus> {
+  const diagnostics = await getDataSourceDiagnostics();
+
+  return diagnostics.status;
 }
