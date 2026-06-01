@@ -5,6 +5,20 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
+export const supabaseRuntime = "server";
+
+export const supabaseKeyPrefix = supabaseAnonKey
+  ? supabaseAnonKey.slice(0, 12)
+  : undefined;
+
+export const supabaseKeyFormat = supabaseAnonKey?.startsWith("sb_publishable_")
+  ? "starts with sb_publishable_"
+  : supabaseAnonKey?.startsWith("eyJ")
+    ? "starts with eyJ"
+    : supabaseAnonKey
+      ? "other"
+      : "missing";
+
 const getSupabaseProjectHost = () => {
   if (!supabaseUrl) {
     return undefined;

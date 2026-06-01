@@ -15,6 +15,13 @@ export async function DataSourceIndicator() {
   const diagnosticRows = [
     ["Env", diagnostics.envConfigured ? "present" : "missing"],
     ["Host", diagnostics.projectHost ?? "not available"],
+    ["Runtime", diagnostics.runtime],
+    ["Key Prefix", diagnostics.keyPrefix ?? "missing"],
+    ["Key Format", diagnostics.keyFormat],
+    [
+      "Hardcoded",
+      diagnostics.hardcodedSupabaseKeysFound ? "found" : "not found",
+    ],
     ["Query", diagnostics.queryAttempted],
     ["Code", diagnostics.errorCode ?? "none"],
     ["Message", diagnostics.errorMessage ?? "none"],
