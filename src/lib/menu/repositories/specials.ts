@@ -1,7 +1,7 @@
 import { specialCategories as mockSpecialCategories } from "@/src/data/specialCategories";
 import { specialMenuItems as mockSpecialMenuItems } from "@/src/data/specialMenuItems";
 import { createServerSupabaseClient } from "@/src/lib/supabase/server";
-import { mapSpecialCategoryRow, mapSpecialMenuItemRow } from "./mappers";
+import { mapSpecialMenuItemRow } from "./mappers";
 import type { SpecialCategoryRecord, SpecialMenuItem } from "@/src/types/menu";
 
 export async function getSpecialCategories(): Promise<SpecialCategoryRecord[]> {
@@ -12,15 +12,22 @@ export async function getSpecialCategories(): Promise<SpecialCategoryRecord[]> {
   }
 
   const { data, error } = await supabase
-    .from("special_categories")
-    .select("*")
-    .order("sort_order");
+    .from("specials")
+    .select("special_category");
 
   if (error || !data) {
     return mockSpecialCategories;
   }
 
-  return data.map(mapSpecialCategoryRow);
+  const activeSlugs = new Set(
+    data
+      .map((item) => item.special_category)
+      .filter((slug): slug is string => typeof slug === "string"),
+  );
+
+  return mockSpecialCategories.filter((category) =>
+    activeSlugs.has(category.slug),
+  );
 }
 
 export async function getSpecialMenuItems(): Promise<SpecialMenuItem[]> {
@@ -31,7 +38,7 @@ export async function getSpecialMenuItems(): Promise<SpecialMenuItem[]> {
   }
 
   const { data, error } = await supabase
-    .from("special_menu_items")
+    .from("specials")
     .select("*")
     .order("sort_order");
 

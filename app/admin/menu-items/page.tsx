@@ -1,12 +1,26 @@
 import { MenuItemCrudPage } from "@/src/components/admin/MenuItemCrudPage";
-import { menuItems } from "@/src/data/menuItems";
+import {
+  getMenuCategories,
+  getMenuItems,
+  getTasteProfiles,
+} from "@/src/lib/menu/repositories";
 
-export default function AdminMenuItemsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminMenuItemsPage() {
+  const [menuItems, menuCategories, tasteProfiles] = await Promise.all([
+    getMenuItems(),
+    getMenuCategories(),
+    getTasteProfiles(),
+  ]);
+
   return (
     <MenuItemCrudPage
       title="Menu Items"
       description="Manage customer-facing drinks, categories, taste profiles, prices, and active state with local mock data."
       initialItems={menuItems}
+      menuCategories={menuCategories}
+      tasteProfiles={tasteProfiles}
     />
   );
 }

@@ -1,11 +1,11 @@
 import { ProductCrudPage } from "@/src/components/admin/ProductCrudPage";
-import { products } from "@/src/data/products";
+import { getProductsByType } from "@/src/lib/menu/repositories";
 
-const matchaProducts = products.filter(
-  (product) => product.productType === "matcha",
-);
+export const dynamic = "force-dynamic";
 
-export default function AdminMatchaProductsPage() {
+export default async function AdminMatchaProductsPage() {
+  const matchaProducts = await getProductsByType("matcha");
+
   return (
     <ProductCrudPage
       title="Matcha"

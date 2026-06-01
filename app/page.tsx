@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { PublicHeader } from "@/src/components/navigation/PublicHeader";
 
+export const dynamic = "force-dynamic";
+
 export default function Home() {
   return (
     <main className="min-h-screen overflow-hidden bg-[#f6efe6] text-[#241710]">

@@ -1,10 +1,21 @@
 import Link from "next/link";
 import { PublicHeader } from "@/src/components/navigation/PublicHeader";
-import { customerTasteProfileScores } from "@/src/data/customer";
-import { tasteProfiles } from "@/src/data/tasteProfiles";
+import {
+  getCustomerTasteProfileScores,
+  getTasteProfiles,
+} from "@/src/lib/menu/repositories";
 import type { CustomerTasteProfileScore, TasteProfile } from "@/src/types/menu";
 
-export default function AccountTasteProfilePage() {
+const demoCustomerId = "customer-pinoc-demo";
+
+export const dynamic = "force-dynamic";
+
+export default async function AccountTasteProfilePage() {
+  const [customerTasteProfileScores, tasteProfiles] = await Promise.all([
+    getCustomerTasteProfileScores(demoCustomerId),
+    getTasteProfiles(),
+  ]);
+
   const scoredProfiles = customerTasteProfileScores
     .map((score) => ({
       score,

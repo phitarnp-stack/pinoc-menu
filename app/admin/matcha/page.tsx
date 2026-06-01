@@ -1,7 +1,11 @@
 import { ProductCrudPage } from "@/src/components/admin/ProductCrudPage";
-import { matchaProducts } from "@/src/data/matcha";
+import { getProductsByType } from "@/src/lib/menu/repositories";
 
-export default function AdminMatchaPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminMatchaPage() {
+  const matchaProducts = await getProductsByType("matcha");
+
   return (
     <ProductCrudPage
       title="Matcha"

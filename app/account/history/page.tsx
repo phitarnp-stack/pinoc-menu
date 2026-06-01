@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { PublicHeader } from "@/src/components/navigation/PublicHeader";
-import { customerTastings, feelingTags } from "@/src/data/customer";
-import { menuItems } from "@/src/data/menuItems";
-import { products } from "@/src/data/products";
+import {
+  getCustomerTastings,
+  getFeelingTags,
+  getMenuItems,
+  getProducts,
+} from "@/src/lib/menu/repositories";
 
 const formatDate = (date: string) =>
   new Intl.DateTimeFormat("en", {
@@ -11,7 +14,19 @@ const formatDate = (date: string) =>
     year: "numeric",
   }).format(new Date(date));
 
-export default function AccountHistoryPage() {
+const demoCustomerId = "customer-pinoc-demo";
+
+export const dynamic = "force-dynamic";
+
+export default async function AccountHistoryPage() {
+  const [customerTastings, feelingTags, menuItems, products] =
+    await Promise.all([
+      getCustomerTastings(demoCustomerId),
+      getFeelingTags(),
+      getMenuItems(),
+      getProducts(),
+    ]);
+
   return (
     <main className="min-h-screen bg-[#f6efe6] text-[#241710]">
       <PublicHeader />

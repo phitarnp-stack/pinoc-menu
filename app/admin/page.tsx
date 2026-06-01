@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { coffeeBeanProducts } from "@/src/data/beans";
-import { craftCocoaProducts } from "@/src/data/craftCocoa";
-import { matchaProducts } from "@/src/data/matcha";
-import { menuItems } from "@/src/data/menuItems";
+import {
+  getMenuItems,
+  getProductsByType,
+} from "@/src/lib/menu/repositories";
 
 const adminSections = [
   {
@@ -49,7 +49,17 @@ const adminSections = [
   },
 ];
 
-export default function AdminPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminPage() {
+  const [coffeeBeanProducts, craftCocoaProducts, matchaProducts, menuItems] =
+    await Promise.all([
+      getProductsByType("coffee_bean"),
+      getProductsByType("craft_cocoa"),
+      getProductsByType("matcha"),
+      getMenuItems(),
+    ]);
+
   const activeProducts = [
     ...coffeeBeanProducts,
     ...craftCocoaProducts,

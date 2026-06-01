@@ -1,7 +1,11 @@
 import { ProductCrudPage } from "@/src/components/admin/ProductCrudPage";
-import { coffeeBeanProducts } from "@/src/data/beans";
+import { getProductsByType } from "@/src/lib/menu/repositories";
 
-export default function AdminBeansPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminBeansPage() {
+  const coffeeBeanProducts = await getProductsByType("coffee_bean");
+
   return (
     <ProductCrudPage
       title="Coffee Beans"

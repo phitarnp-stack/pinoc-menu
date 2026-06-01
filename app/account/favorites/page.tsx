@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { PublicHeader } from "@/src/components/navigation/PublicHeader";
-import { customerFavorites } from "@/src/data/customer";
-import { menuCategories } from "@/src/data/menuCategories";
-import { menuItems } from "@/src/data/menuItems";
-import { products } from "@/src/data/products";
+import {
+  getCustomerFavorites,
+  getMenuCategories,
+  getMenuItems,
+  getProducts,
+} from "@/src/lib/menu/repositories";
 
 const formatDate = (date: string) =>
   new Intl.DateTimeFormat("en", {
@@ -14,7 +16,19 @@ const formatDate = (date: string) =>
 
 const formatPrice = (price: number) => `฿${price}`;
 
-export default function AccountFavoritesPage() {
+const demoCustomerId = "customer-pinoc-demo";
+
+export const dynamic = "force-dynamic";
+
+export default async function AccountFavoritesPage() {
+  const [customerFavorites, menuCategories, menuItems, products] =
+    await Promise.all([
+      getCustomerFavorites(demoCustomerId),
+      getMenuCategories(),
+      getMenuItems(),
+      getProducts(),
+    ]);
+
   return (
     <main className="min-h-screen bg-[#f6efe6] text-[#241710]">
       <PublicHeader />

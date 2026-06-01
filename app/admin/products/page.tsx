@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { products } from "@/src/data/products";
+import { getProducts } from "@/src/lib/menu/repositories";
 
 const productSections = [
   {
@@ -25,7 +25,11 @@ const productSections = [
   },
 ];
 
-export default function AdminProductsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function AdminProductsPage() {
+  const products = await getProducts();
+
   return (
     <main className="min-h-screen bg-[#f6efe6] text-[#241710]">
       <section className="relative min-h-screen overflow-hidden px-6 py-8 sm:px-10 lg:px-16">

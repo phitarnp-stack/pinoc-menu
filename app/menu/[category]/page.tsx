@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { menuCategories } from "@/src/data/menuCategories";
-import { menuItems } from "@/src/data/menuItems";
 import { MenuItemsBrowser } from "@/src/components/menu/MenuItemsBrowser";
 import { PublicHeader } from "@/src/components/navigation/PublicHeader";
+import {
+  getMenuCategories,
+  getMenuItemsByCategory,
+} from "@/src/lib/menu/repositories";
 
 type CategoryPageProps = {
   params: Promise<{
@@ -11,7 +13,11 @@ type CategoryPageProps = {
   }>;
 };
 
-export function generateStaticParams() {
+export const dynamic = "force-dynamic";
+
+export async function generateStaticParams() {
+  const menuCategories = await getMenuCategories();
+
   return menuCategories.map((category) => ({
     category: category.slug,
   }));
@@ -19,15 +25,14 @@ export function generateStaticParams() {
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category: categorySlug } = await params;
+  const menuCategories = await getMenuCategories();
   const category = menuCategories.find((item) => item.slug === categorySlug);
 
   if (!category) {
     notFound();
   }
 
-  const items = menuItems.filter(
-    (item) => item.categoryId === category.id && item.isActive,
-  );
+  const items = await getMenuItemsByCategory(category.id);
 
   return (
     <main className="min-h-screen bg-[#f6efe6] text-[#241710]">

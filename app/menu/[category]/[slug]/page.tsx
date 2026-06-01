@@ -1,11 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { menuCategories } from "@/src/data/menuCategories";
-import { menuItemProducts } from "@/src/data/menuItemProducts";
-import { menuItems } from "@/src/data/menuItems";
-import { products } from "@/src/data/products";
 import { MenuItemMemberActions } from "@/src/components/customer/MenuItemMemberActions";
 import { PublicHeader } from "@/src/components/navigation/PublicHeader";
+import {
+  getCustomerFavorites,
+  getCustomerTastings,
+  getFeelingTags,
+  getMenuCategories,
+  getMenuItemBySlug,
+  getMenuItemProductsByMenuItemId,
+  getMenuItems,
+  getProducts,
+} from "@/src/lib/menu/repositories";
 import type { MenuItemProduct, Product } from "@/src/types/menu";
 
 type ItemPageProps = {
@@ -17,7 +23,16 @@ type ItemPageProps = {
 
 const formatPrice = (price: number) => `฿${price}`;
 
-export function generateStaticParams() {
+const demoCustomerId = "customer-pinoc-demo";
+
+export const dynamic = "force-dynamic";
+
+export async function generateStaticParams() {
+  const [menuItems, menuCategories] = await Promise.all([
+    getMenuItems(),
+    getMenuCategories(),
+  ]);
+
   return menuItems.map((item) => {
     const category = menuCategories.find(
       (menuCategory) => menuCategory.id === item.categoryId,
@@ -32,24 +47,29 @@ export function generateStaticParams() {
 
 export default async function ItemPage({ params }: ItemPageProps) {
   const { category: categorySlug, slug } = await params;
+  const menuCategories = await getMenuCategories();
   const category = menuCategories.find((item) => item.slug === categorySlug);
 
   if (!category) {
     notFound();
   }
 
-  const item = menuItems.find(
-    (menuItem) => menuItem.categoryId === category.id && menuItem.slug === slug,
-  );
+  const item = await getMenuItemBySlug(category.id, slug);
 
   if (!item) {
     notFound();
   }
 
+  const [menuItemProducts, products, customerTastings, customerFavorites, feelingTags] =
+    await Promise.all([
+      getMenuItemProductsByMenuItemId(item.id),
+      getProducts(),
+      getCustomerTastings(demoCustomerId),
+      getCustomerFavorites(demoCustomerId),
+      getFeelingTags(),
+    ]);
+
   const linkedProducts = menuItemProducts
-    .filter(
-      (mapping) => mapping.menuItemId === item.id && mapping.isActive,
-    )
     .sort((left, right) => left.sortOrder - right.sortOrder)
     .map((mapping) => ({
       mapping,
@@ -158,7 +178,13 @@ export default async function ItemPage({ params }: ItemPageProps) {
             </div>
           </div>
 
-          <MenuItemMemberActions item={item} />
+          <MenuItemMemberActions
+            item={item}
+            customerId={demoCustomerId}
+            feelingTags={feelingTags}
+            initialFavorites={customerFavorites}
+            initialTastings={customerTastings}
+          />
         </div>
       </section>
     </main>

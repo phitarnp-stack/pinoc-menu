@@ -15,8 +15,8 @@ export async function getCustomerTastings(
   }
 
   const { data, error } = await supabase
-    .from("customer_tastings")
-    .select("*, customer_tasting_feeling_tags(feeling_tag_id)")
+    .from("tasting_history")
+    .select("*, tasting_history_feeling_tags(feeling_tag_id)")
     .eq("customer_id", customerId)
     .order("tasted_at", { ascending: false });
 

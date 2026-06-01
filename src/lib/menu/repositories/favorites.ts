@@ -15,7 +15,7 @@ export async function getCustomerFavorites(
   }
 
   const { data, error } = await supabase
-    .from("customer_favorites")
+    .from("favorites")
     .select("*")
     .eq("customer_id", customerId)
     .order("created_at", { ascending: false });

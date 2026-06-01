@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { PublicHeader } from "@/src/components/navigation/PublicHeader";
 import {
-  customerFavorites,
-  customerTasteProfileScores,
-  customerTastings,
-  mockCustomerProfile,
-} from "@/src/data/customer";
+  getCustomerFavorites,
+  getCustomerProfile,
+  getCustomerTasteProfileScores,
+  getCustomerTastings,
+} from "@/src/lib/menu/repositories";
 
 const accountLinks = [
   {
@@ -25,7 +25,23 @@ const accountLinks = [
   },
 ];
 
-export default function AccountPage() {
+const demoCustomerId = "customer-pinoc-demo";
+
+export const dynamic = "force-dynamic";
+
+export default async function AccountPage() {
+  const [
+    customerProfile,
+    customerTastings,
+    customerFavorites,
+    customerTasteProfileScores,
+  ] = await Promise.all([
+    getCustomerProfile(demoCustomerId),
+    getCustomerTastings(demoCustomerId),
+    getCustomerFavorites(demoCustomerId),
+    getCustomerTasteProfileScores(demoCustomerId),
+  ]);
+
   return (
     <main className="min-h-screen bg-[#f6efe6] text-[#241710]">
       <PublicHeader />
@@ -40,7 +56,7 @@ export default function AccountPage() {
               Menu
             </Link>
             <h1 className="text-5xl font-semibold leading-[0.98] tracking-normal sm:text-6xl lg:text-7xl">
-              {mockCustomerProfile.displayName}
+              {customerProfile.displayName}
             </h1>
             <p className="mt-7 max-w-xl text-base leading-8 text-[#5f4635] sm:text-lg">
               Mock Member Mode for tasting memory. LINE Login is planned later;

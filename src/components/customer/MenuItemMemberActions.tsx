@@ -1,16 +1,19 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import {
-  customerFavorites as mockFavorites,
-  customerTastings as mockTastings,
-  feelingTags,
-  mockCustomerProfile,
-} from "@/src/data/customer";
-import type { CustomerFavorite, CustomerTasting, MenuItem } from "@/src/types/menu";
+import type {
+  CustomerFavorite,
+  CustomerTasting,
+  FeelingTag,
+  MenuItem,
+} from "@/src/types/menu";
 
 type MenuItemMemberActionsProps = {
   item: MenuItem;
+  customerId: string;
+  feelingTags: FeelingTag[];
+  initialFavorites: CustomerFavorite[];
+  initialTastings: CustomerTasting[];
 };
 
 const formatDate = (date: string) =>
@@ -20,9 +23,17 @@ const formatDate = (date: string) =>
     year: "numeric",
   }).format(new Date(date));
 
-export function MenuItemMemberActions({ item }: MenuItemMemberActionsProps) {
-  const [tastings, setTastings] = useState<CustomerTasting[]>(mockTastings);
-  const [favorites, setFavorites] = useState<CustomerFavorite[]>(mockFavorites);
+export function MenuItemMemberActions({
+  item,
+  customerId,
+  feelingTags,
+  initialFavorites,
+  initialTastings,
+}: MenuItemMemberActionsProps) {
+  const [tastings, setTastings] =
+    useState<CustomerTasting[]>(initialTastings);
+  const [favorites, setFavorites] =
+    useState<CustomerFavorite[]>(initialFavorites);
   const [rating, setRating] = useState(5);
   const [selectedFeelingTags, setSelectedFeelingTags] = useState<string[]>([]);
   const [note, setNote] = useState("");
@@ -56,7 +67,7 @@ export function MenuItemMemberActions({ item }: MenuItemMemberActionsProps) {
 
     const tasting: CustomerTasting = {
       id: `tasting-${item.id}-${Date.now().toString(36)}`,
-      customerId: mockCustomerProfile.id,
+      customerId,
       menuItemId: item.id,
       tastedAt: new Date().toISOString(),
       rating,
@@ -82,7 +93,7 @@ export function MenuItemMemberActions({ item }: MenuItemMemberActionsProps) {
     setFavorites((current) => [
       {
         id: `favorite-${item.id}-${Date.now().toString(36)}`,
-        customerId: mockCustomerProfile.id,
+        customerId,
         menuItemId: item.id,
         createdAt: new Date().toISOString(),
       },

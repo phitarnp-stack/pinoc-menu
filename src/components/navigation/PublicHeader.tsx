@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DataSourceIndicator } from "./DataSourceIndicator";
 
 const links = [
   { href: "/", label: "Home" },
@@ -11,12 +12,15 @@ export function PublicHeader() {
   return (
     <header className="absolute inset-x-0 top-0 z-20 px-6 pt-6 sm:px-10 lg:px-16">
       <nav className="mx-auto flex max-w-6xl flex-col gap-4 rounded-2xl border border-[#3d2618]/12 bg-[#fff8ed]/58 p-3 shadow-[0_14px_34px_rgba(84,55,34,0.12)] backdrop-blur sm:flex-row sm:items-center sm:justify-between">
-        <Link
-          href="/"
-          className="px-3 text-sm font-semibold uppercase tracking-[0.24em] text-[#7d4d2f] transition hover:text-[#2b1a12]"
-        >
-          Pinoc
-        </Link>
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <Link
+            href="/"
+            className="px-3 text-sm font-semibold uppercase tracking-[0.24em] text-[#7d4d2f] transition hover:text-[#2b1a12]"
+          >
+            Pinoc
+          </Link>
+          <DataSourceIndicator />
+        </div>
 
         <div className="grid grid-cols-4 gap-1 sm:flex sm:items-center">
           {links.map((link) => (

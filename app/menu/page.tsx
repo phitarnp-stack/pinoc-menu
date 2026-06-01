@@ -1,9 +1,18 @@
 import Link from "next/link";
-import { menuCategories } from "@/src/data/menuCategories";
-import { menuItems } from "@/src/data/menuItems";
 import { PublicHeader } from "@/src/components/navigation/PublicHeader";
+import {
+  getMenuCategories,
+  getMenuItems,
+} from "@/src/lib/menu/repositories";
 
-export default function MenuPage() {
+export const dynamic = "force-dynamic";
+
+export default async function MenuPage() {
+  const [menuCategories, menuItems] = await Promise.all([
+    getMenuCategories(),
+    getMenuItems(),
+  ]);
+
   return (
     <main className="min-h-screen bg-[#f6efe6] text-[#241710]">
       <PublicHeader />

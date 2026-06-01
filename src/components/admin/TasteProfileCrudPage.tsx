@@ -2,8 +2,11 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { tasteProfiles as initialProfiles } from "@/src/data/tasteProfiles";
 import type { TasteProfile } from "@/src/types/menu";
+
+type TasteProfileCrudPageProps = {
+  initialProfiles: TasteProfile[];
+};
 
 type ProfileFormState = {
   name: string;
@@ -24,7 +27,9 @@ const createSlug = (name: string) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 
-export function TasteProfileCrudPage() {
+export function TasteProfileCrudPage({
+  initialProfiles,
+}: TasteProfileCrudPageProps) {
   const [profiles, setProfiles] = useState<TasteProfile[]>(initialProfiles);
   const [formState, setFormState] = useState<ProfileFormState>(defaultFormState);
   const [editingId, setEditingId] = useState<string | null>(null);

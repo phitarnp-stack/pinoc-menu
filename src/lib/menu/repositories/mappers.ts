@@ -1,8 +1,12 @@
 import type {
   CustomerFavorite,
+  CustomerProfile,
+  CustomerTasteProfileScore,
   CustomerTasting,
+  FeelingTag,
   MenuCategory,
   MenuItem,
+  MenuItemProduct,
   Product,
   ProductStatus,
   ProductType,
@@ -56,6 +60,12 @@ const relationIds = (row: DbRecord, relationKey: string, idKey: string) => {
         : undefined,
     )
     .filter((item): item is string => typeof item === "string");
+};
+
+const specialCategoryIdBySlug: Record<SpecialCategory, string> = {
+  coffee: "special-coffee",
+  non_coffee: "special-non-coffee",
+  cold_brew: "special-cold-brew",
 };
 
 export const mapProductRow = (row: DbRecord): Product => ({
@@ -115,6 +125,18 @@ export const mapMenuItemRow = (row: DbRecord): MenuItem => ({
   sortOrder: asNumber(row.sort_order),
 });
 
+export const mapMenuItemProductRow = (row: DbRecord): MenuItemProduct => ({
+  id: asString(row.id),
+  menuItemId: asString(row.menu_item_id),
+  productId: asString(row.product_id),
+  role: asString(row.role, "option") as MenuItemProduct["role"],
+  isDefault: asBoolean(row.is_default),
+  isActive: asBoolean(row.is_active),
+  sortOrder: asNumber(row.sort_order),
+  availableFrom: asOptionalString(row.available_from),
+  availableUntil: asOptionalString(row.available_until),
+});
+
 export const mapSpecialCategoryRow = (
   row: DbRecord,
 ): SpecialCategoryRecord => ({
@@ -129,11 +151,34 @@ export const mapSpecialCategoryRow = (
 export const mapSpecialMenuItemRow = (row: DbRecord): SpecialMenuItem => ({
   id: asString(row.id),
   menuItemId: asString(row.menu_item_id),
-  specialCategoryId: asString(row.special_category_id),
+  specialCategoryId:
+    specialCategoryIdBySlug[asString(row.special_category) as SpecialCategory] ??
+    asString(row.special_category_id),
   isFeatured: asBoolean(row.is_featured),
   sortOrder: asNumber(row.sort_order),
   availableFrom: asOptionalString(row.available_from),
   availableUntil: asOptionalString(row.available_until),
+});
+
+export const mapCustomerProfileRow = (row: DbRecord): CustomerProfile => ({
+  id: asString(row.id),
+  displayName: asString(row.display_name),
+  avatarPlaceholder: asString(row.avatar_placeholder),
+  memberSince: asString(row.member_since),
+  preferredLoginMethod: asString(
+    row.preferred_login_method,
+    "line_liff_future",
+  ) as CustomerProfile["preferredLoginMethod"],
+});
+
+export const mapFeelingTagRow = (row: DbRecord): FeelingTag => ({
+  id: asString(row.id),
+  slug: asString(row.slug),
+  name: asString(row.name),
+  sentiment: asString(row.sentiment, "neutral") as FeelingTag["sentiment"],
+  description: asString(row.description),
+  sortOrder: asNumber(row.sort_order),
+  isActive: asBoolean(row.is_active),
 });
 
 export const mapTasteProfileRow = (row: DbRecord): TasteProfile => ({
@@ -154,7 +199,7 @@ export const mapCustomerTastingRow = (row: DbRecord): CustomerTasting => ({
   rating: asNumber(row.rating),
   feelingTagIds: relationIds(
     row,
-    "customer_tasting_feeling_tags",
+    "tasting_history_feeling_tags",
     "feeling_tag_id",
   ),
   note: asOptionalString(row.note),
@@ -166,4 +211,15 @@ export const mapCustomerFavoriteRow = (row: DbRecord): CustomerFavorite => ({
   menuItemId: asOptionalString(row.menu_item_id),
   productId: asOptionalString(row.product_id),
   createdAt: asString(row.created_at),
+});
+
+export const mapCustomerTasteProfileScoreRow = (
+  row: DbRecord,
+): CustomerTasteProfileScore => ({
+  id: asString(row.id),
+  customerId: asString(row.customer_id),
+  tasteProfileId: asString(row.taste_profile_id),
+  score: asNumber(row.score),
+  sampleCount: asNumber(row.sample_count),
+  lastUpdatedAt: asString(row.last_updated_at),
 });

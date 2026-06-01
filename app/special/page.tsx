@@ -1,11 +1,21 @@
 import Link from "next/link";
-import { menuItems } from "@/src/data/menuItems";
-import { specialCategories } from "@/src/data/specialCategories";
-import { specialMenuItems } from "@/src/data/specialMenuItems";
 import { MenuItemsBrowser } from "@/src/components/menu/MenuItemsBrowser";
 import { PublicHeader } from "@/src/components/navigation/PublicHeader";
+import {
+  getMenuItems,
+  getSpecialCategories,
+  getSpecialMenuItems,
+} from "@/src/lib/menu/repositories";
 
-export default function SpecialPage() {
+export const dynamic = "force-dynamic";
+
+export default async function SpecialPage() {
+  const [menuItems, specialCategories, specialMenuItems] = await Promise.all([
+    getMenuItems(),
+    getSpecialCategories(),
+    getSpecialMenuItems(),
+  ]);
+
   const sections = specialCategories.map((category) => {
     const items = specialMenuItems
       .filter(

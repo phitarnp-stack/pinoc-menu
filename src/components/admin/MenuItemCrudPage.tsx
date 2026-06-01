@@ -2,14 +2,14 @@
 
 import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
-import { menuCategories } from "@/src/data/menuCategories";
-import { tasteProfiles } from "@/src/data/tasteProfiles";
-import type { MenuItem } from "@/src/types/menu";
+import type { MenuCategory, MenuItem, TasteProfile } from "@/src/types/menu";
 
 type MenuItemCrudPageProps = {
   title: string;
   description: string;
   initialItems: MenuItem[];
+  menuCategories: MenuCategory[];
+  tasteProfiles: TasteProfile[];
   fixedCategoryId?: string;
 };
 
@@ -26,6 +26,7 @@ type MenuItemFormState = {
 };
 
 const makeDefaultFormState = (
+  menuCategories: MenuCategory[],
   fixedCategoryId?: string,
 ): MenuItemFormState => ({
   name: "",
@@ -61,11 +62,13 @@ export function MenuItemCrudPage({
   title,
   description,
   initialItems,
+  menuCategories,
+  tasteProfiles,
   fixedCategoryId,
 }: MenuItemCrudPageProps) {
   const [items, setItems] = useState<MenuItem[]>(initialItems);
   const [formState, setFormState] = useState<MenuItemFormState>(
-    makeDefaultFormState(fixedCategoryId),
+    makeDefaultFormState(menuCategories, fixedCategoryId),
   );
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -77,7 +80,7 @@ export function MenuItemCrudPage({
 
   const resetForm = () => {
     setEditingId(null);
-    setFormState(makeDefaultFormState(fixedCategoryId));
+    setFormState(makeDefaultFormState(menuCategories, fixedCategoryId));
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
