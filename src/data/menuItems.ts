@@ -15,6 +15,7 @@ export const menuItems: MenuItem[] = [
     recommendedFor: "Guests choosing between several House Blend expressions.",
     imagePlaceholder: "Clear black coffee in a warm ceramic cup",
     isActive: true,
+    classicGroup: "black_coffee",
     sortOrder: 1,
   },
   {
@@ -30,6 +31,7 @@ export const menuItems: MenuItem[] = [
     recommendedFor: "A smooth everyday cup with gentle sweetness and texture.",
     imagePlaceholder: "Latte art with a cream-toned ceramic cup",
     isActive: true,
+    classicGroup: "milk_coffee",
     sortOrder: 2,
   },
   {
@@ -45,6 +47,7 @@ export const menuItems: MenuItem[] = [
     recommendedFor: "A richer milk coffee with a clear espresso presence.",
     imagePlaceholder: "Small cappuccino cup with dense microfoam",
     isActive: true,
+    classicGroup: "milk_coffee",
     sortOrder: 3,
   },
   {

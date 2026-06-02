@@ -1,7 +1,9 @@
 import { MenuItemCrudPage } from "@/src/components/admin/MenuItemCrudPage";
 import {
   getMenuCategories,
+  getMenuItemProducts,
   getMenuItems,
+  getProducts,
   getSpecialMenuItems,
   getTasteProfiles,
 } from "@/src/lib/menu/repositories";
@@ -10,12 +12,21 @@ import type { SpecialCategory } from "@/src/types/menu";
 export const dynamic = "force-dynamic";
 
 export default async function AdminSpecialsPage() {
-  const [menuItems, menuCategories, tasteProfiles, specialMappings] =
+  const [
+    menuItems,
+    menuCategories,
+    tasteProfiles,
+    specialMappings,
+    products,
+    menuItemProducts,
+  ] =
     await Promise.all([
     getMenuItems(),
     getMenuCategories(),
     getTasteProfiles(),
     getSpecialMenuItems(),
+    getProducts(),
+    getMenuItemProducts(),
   ]);
   const specialItems = menuItems
     .filter((item) => item.categoryId === "special")
@@ -40,6 +51,8 @@ export default async function AdminSpecialsPage() {
       title="Specials"
       description="Manage Special Menu items for Coffee, Non Coffee, and Cold Brew."
       initialItems={specialItems}
+      initialMenuItemProducts={menuItemProducts}
+      products={products}
       menuCategories={menuCategories}
       tasteProfiles={tasteProfiles}
       fixedCategoryId="special"

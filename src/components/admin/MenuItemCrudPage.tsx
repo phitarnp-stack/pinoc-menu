@@ -3,15 +3,19 @@
 import { FormEvent, useMemo, useState } from "react";
 import {
   deleteMenuItem,
+  saveMenuItemBeanLinks,
   saveMenuItem,
   updateMenuItemStatus,
 } from "@/src/lib/menu/adminWrites";
 import type {
+  ClassicGroup,
   MenuCategory,
   HeroContentMode,
   MenuItem,
+  MenuItemProduct,
   MenuLabel,
   OverlayField,
+  Product,
   RecommendationAdventureLevel,
   RecommendationComfortLevel,
   RecommendationDrinkType,
@@ -31,7 +35,9 @@ type MenuItemCrudPageProps = {
   title: string;
   description: string;
   initialItems: MenuItem[];
+  initialMenuItemProducts: MenuItemProduct[];
   menuCategories: MenuCategory[];
+  products: Product[];
   tasteProfiles: TasteProfile[];
   fixedCategoryId?: string;
 };
@@ -58,6 +64,9 @@ type MenuItemFormState = {
   menuLabel: "" | MenuLabel;
   availableFrom: string;
   availableUntil: string;
+  classicGroup: ClassicGroup;
+  selectedBeanIds: string[];
+  defaultBeanId: string;
   drinkType: "" | RecommendationDrinkType;
   feelingTags: RecommendationFeelingTag[];
   adventureLevel: "" | RecommendationAdventureLevel;
@@ -143,6 +152,13 @@ const comfortLevelOptions: {
   { label: "Surprise Me", value: "surprise_me" },
 ];
 
+const classicGroupOptions: { label: string; value: ClassicGroup }[] = [
+  { label: "None", value: "none" },
+  { label: "Black Coffee", value: "black_coffee" },
+  { label: "Milk Coffee", value: "milk_coffee" },
+  { label: "Juice w/ Coffee", value: "juice_with_coffee" },
+];
+
 const heroContentModeOptions: {
   description: string;
   label: string;
@@ -197,6 +213,9 @@ const makeDefaultFormState = (
   menuLabel: "",
   availableFrom: "",
   availableUntil: "",
+  classicGroup: "none",
+  selectedBeanIds: [],
+  defaultBeanId: "",
   drinkType: "",
   feelingTags: [],
   adventureLevel: "",
@@ -234,11 +253,15 @@ export function MenuItemCrudPage({
   title,
   description,
   initialItems,
+  initialMenuItemProducts,
   menuCategories,
+  products,
   tasteProfiles,
   fixedCategoryId,
 }: MenuItemCrudPageProps) {
   const [items, setItems] = useState<MenuItem[]>(initialItems);
+  const [menuItemProducts, setMenuItemProducts] =
+    useState<MenuItemProduct[]>(initialMenuItemProducts);
   const [formState, setFormState] = useState<MenuItemFormState>(
     makeDefaultFormState(menuCategories, fixedCategoryId),
   );
@@ -271,6 +294,28 @@ export function MenuItemCrudPage({
     isSpecialForm || formState.categoryId === "special"
       ? "specials"
       : "menu-items";
+  const isClassicMenuItem =
+    !isSpecialForm && (fixedCategoryId ?? formState.categoryId) === "classic-coffee";
+  const activeCoffeeBeans = useMemo(
+    () =>
+      products
+        .filter(
+          (product) =>
+            product.productType === "coffee_bean" && product.status === "active",
+        )
+        .sort(
+          (left, right) =>
+            (left.isHouseBlend === right.isHouseBlend
+              ? 0
+              : left.isHouseBlend
+                ? -1
+                : 1) ||
+            (left.houseBlendOrder ?? 9999) -
+              (right.houseBlendOrder ?? 9999) ||
+            left.name.localeCompare(right.name),
+        ),
+    [products],
+  );
 
   const resetForm = () => {
     setEditingId(null);
@@ -312,6 +357,7 @@ export function MenuItemCrudPage({
       isSeasonal: isSpecialForm && formState.menuLabel === "seasonal",
       availableFrom: formState.availableFrom || undefined,
       availableUntil: formState.availableUntil || undefined,
+      classicGroup: isClassicMenuItem ? formState.classicGroup : "none",
       drinkType: formState.drinkType || undefined,
       feelingTags: formState.feelingTags,
       adventureLevel: formState.adventureLevel || undefined,
@@ -333,6 +379,35 @@ export function MenuItemCrudPage({
     try {
       const result = await saveMenuItem(nextItem, editingId ? "edit" : "create");
       const savedItem = result.menuItem ?? nextItem;
+      const selectedBeanLinks = formState.selectedBeanIds.map(
+        (productId, index) => ({
+          productId,
+          isDefault:
+            productId ===
+            (formState.defaultBeanId || formState.selectedBeanIds[0] || ""),
+          sortOrder: index + 1,
+        }),
+      );
+      let beanLinkResult = result;
+
+      if (isClassicMenuItem) {
+        beanLinkResult = await saveMenuItemBeanLinks(
+          savedItem.id,
+          selectedBeanLinks,
+        );
+        setMenuItemProducts((current) => [
+          ...current.filter((mapping) => mapping.menuItemId !== savedItem.id),
+          ...selectedBeanLinks.map((link) => ({
+            id: `mip-${savedItem.id}-${link.productId}`,
+            menuItemId: savedItem.id,
+            productId: link.productId,
+            role: link.isDefault ? ("default" as const) : ("option" as const),
+            isDefault: link.isDefault,
+            isActive: true,
+            sortOrder: link.sortOrder,
+          })),
+        ]);
+      }
 
       if (editingId) {
         setItems((current) =>
@@ -343,7 +418,7 @@ export function MenuItemCrudPage({
       }
 
       setFeedback(
-        result.source === "mock"
+        result.source === "mock" || beanLinkResult.source === "mock"
           ? { tone: "warning", message: result.warning ?? "Saved locally." }
           : { tone: "success", message: "Saved to Supabase." },
       );
@@ -362,6 +437,12 @@ export function MenuItemCrudPage({
   };
 
   const editItem = (item: MenuItem) => {
+    const linkedBeans = menuItemProducts
+      .filter((mapping) => mapping.menuItemId === item.id && mapping.isActive)
+      .sort((left, right) => left.sortOrder - right.sortOrder);
+    const defaultBean =
+      linkedBeans.find((mapping) => mapping.isDefault) ?? linkedBeans[0];
+
     setEditingId(item.id);
     setFormState({
       name: item.name,
@@ -385,6 +466,9 @@ export function MenuItemCrudPage({
       menuLabel: item.menuLabel ?? "",
       availableFrom: item.availableFrom ?? "",
       availableUntil: item.availableUntil ?? "",
+      classicGroup: item.classicGroup ?? "none",
+      selectedBeanIds: linkedBeans.map((mapping) => mapping.productId),
+      defaultBeanId: defaultBean?.productId ?? "",
       drinkType: item.drinkType ?? "",
       feelingTags: item.feelingTags ?? [],
       adventureLevel: item.adventureLevel ?? "",
@@ -553,6 +637,48 @@ export function MenuItemCrudPage({
     }));
   };
 
+  const toggleSelectedBean = (productId: string) => {
+    setFormState((current) => {
+      const isSelected = current.selectedBeanIds.includes(productId);
+      const selectedBeanIds = isSelected
+        ? current.selectedBeanIds.filter((id) => id !== productId)
+        : [...current.selectedBeanIds, productId];
+      const defaultBeanId = selectedBeanIds.includes(current.defaultBeanId)
+        ? current.defaultBeanId
+        : selectedBeanIds[0] ?? "";
+
+      return {
+        ...current,
+        selectedBeanIds,
+        defaultBeanId,
+      };
+    });
+  };
+
+  const moveSelectedBean = (productId: string, direction: -1 | 1) => {
+    setFormState((current) => {
+      const currentIndex = current.selectedBeanIds.indexOf(productId);
+      const nextIndex = currentIndex + direction;
+
+      if (
+        currentIndex < 0 ||
+        nextIndex < 0 ||
+        nextIndex >= current.selectedBeanIds.length
+      ) {
+        return current;
+      }
+
+      const selectedBeanIds = [...current.selectedBeanIds];
+      const [beanId] = selectedBeanIds.splice(currentIndex, 1);
+      selectedBeanIds.splice(nextIndex, 0, beanId);
+
+      return {
+        ...current,
+        selectedBeanIds,
+      };
+    });
+  };
+
   return (
     <main className="min-h-screen bg-[#f6efe6] text-[#241710]">
       <section className="relative min-h-screen overflow-hidden px-6 py-8 sm:px-10 lg:px-16">
@@ -710,6 +836,179 @@ export function MenuItemCrudPage({
                     className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
                   />
                 </label>
+
+                {isClassicMenuItem ? (
+                  <div className="grid gap-4 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 p-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7d4d2f]">
+                        Classic Menu Settings
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-[#5f4635]">
+                        Control where this drink appears and which beans guests
+                        can choose.
+                      </p>
+                    </div>
+
+                    <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                      Classic Group
+                      <select
+                        value={formState.classicGroup}
+                        onChange={(event) =>
+                          setFormState((current) => ({
+                            ...current,
+                            classicGroup: event.target.value as ClassicGroup,
+                          }))
+                        }
+                        className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                      >
+                        {classicGroupOptions.map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+
+                    <div className="grid gap-3">
+                      <p className="text-sm font-semibold text-[#5f4635]">
+                        Available Beans
+                      </p>
+                      {activeCoffeeBeans.length > 0 ? (
+                        <div className="grid gap-2">
+                          {activeCoffeeBeans.map((bean) => {
+                            const isSelected =
+                              formState.selectedBeanIds.includes(bean.id);
+                            const orderIndex =
+                              formState.selectedBeanIds.indexOf(bean.id);
+
+                            return (
+                              <div
+                                key={bean.id}
+                                className={
+                                  isSelected
+                                    ? "rounded-lg border border-[#7d4d2f]/20 bg-[#fff8ed]/70 p-3"
+                                    : "rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/36 p-3"
+                                }
+                              >
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                  <label className="flex items-start gap-3 text-sm font-semibold text-[#5f4635]">
+                                    <input
+                                      checked={isSelected}
+                                      type="checkbox"
+                                      onChange={() => toggleSelectedBean(bean.id)}
+                                      className="mt-1 h-4 w-4 accent-[#2b1a12]"
+                                    />
+                                    <span>
+                                      <span className="block text-[#241710]">
+                                        {bean.houseBlendLabel || bean.name}
+                                      </span>
+                                      <span className="mt-1 block text-xs font-medium leading-5 text-[#8a6a55]">
+                                        {bean.flavorNotes
+                                          .slice(0, 3)
+                                          .join(" • ")}
+                                      </span>
+                                    </span>
+                                  </label>
+
+                                  {isSelected ? (
+                                    <div className="flex flex-wrap gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          setFormState((current) => ({
+                                            ...current,
+                                            defaultBeanId: bean.id,
+                                          }))
+                                        }
+                                        className={
+                                          formState.defaultBeanId === bean.id
+                                            ? "min-h-9 rounded-full bg-[#2b1a12] px-4 text-xs font-semibold text-[#fff8ed]"
+                                            : "min-h-9 rounded-full border border-[#3d2618]/14 px-4 text-xs font-semibold text-[#5f4635]"
+                                        }
+                                      >
+                                        Default Bean
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          moveSelectedBean(bean.id, -1)
+                                        }
+                                        disabled={orderIndex <= 0}
+                                        className="min-h-9 rounded-full border border-[#3d2618]/14 px-3 text-xs font-semibold text-[#5f4635] disabled:opacity-40"
+                                      >
+                                        Up
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() =>
+                                          moveSelectedBean(bean.id, 1)
+                                        }
+                                        disabled={
+                                          orderIndex < 0 ||
+                                          orderIndex >=
+                                            formState.selectedBeanIds.length - 1
+                                        }
+                                        className="min-h-9 rounded-full border border-[#3d2618]/14 px-3 text-xs font-semibold text-[#5f4635] disabled:opacity-40"
+                                      >
+                                        Down
+                                      </button>
+                                    </div>
+                                  ) : null}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <p className="rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/50 p-3 text-sm leading-6 text-[#8a6a55]">
+                          Add active coffee bean products first, then return here
+                          to configure available beans.
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/70 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7d4d2f]">
+                        Customer Preview
+                      </p>
+                      <div className="mt-3 flex items-baseline justify-between gap-4">
+                        <p className="text-lg font-semibold">
+                          {formState.name || "Drink name"}
+                        </p>
+                        <p className="font-semibold">
+                          {formatPrice(Number(formState.price || 0))}
+                        </p>
+                      </div>
+                      <p className="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-[#8a6a55]">
+                        Available Beans
+                      </p>
+                      <ul className="mt-2 grid gap-1 text-sm leading-6 text-[#5f4635]">
+                        {formState.selectedBeanIds.length > 0 ? (
+                          formState.selectedBeanIds.map((beanId) => {
+                            const bean = activeCoffeeBeans.find(
+                              (item) => item.id === beanId,
+                            );
+
+                            if (!bean) {
+                              return null;
+                            }
+
+                            return (
+                              <li key={beanId}>
+                                • {bean.houseBlendLabel || bean.name}
+                                {formState.defaultBeanId === beanId
+                                  ? " (default)"
+                                  : ""}
+                              </li>
+                            );
+                          })
+                        ) : (
+                          <li>• Ask the barista for today&apos;s beans.</li>
+                        )}
+                      </ul>
+                    </div>
+                  </div>
+                ) : null}
 
                 <div className="grid gap-2">
                   <p className="text-sm font-semibold text-[#5f4635]">

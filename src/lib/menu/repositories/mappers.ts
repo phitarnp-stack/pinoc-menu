@@ -4,6 +4,7 @@ import type {
   CustomerTasteProfileScore,
   CustomerTasting,
   FeelingTag,
+  ClassicGroup,
   HeroContent,
   HeroContentMode,
   MenuCategory,
@@ -191,6 +192,7 @@ export const mapMenuItemRow = (row: DbRecord): MenuItem => ({
   isSeasonal: asBoolean(row.is_seasonal),
   availableFrom: asOptionalString(row.available_from),
   availableUntil: asOptionalString(row.available_until),
+  classicGroup: asString(row.classic_group, "none") as ClassicGroup,
   publicFieldVisibility: asPublicFieldVisibility(row.public_field_visibility),
   drinkType: asOptionalString(row.drink_type) as
     | RecommendationDrinkType

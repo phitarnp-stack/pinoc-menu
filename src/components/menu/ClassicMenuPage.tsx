@@ -1,6 +1,11 @@
 import { ClassicDrinkGroup } from "./ClassicDrinkGroup";
 import { HouseBlendStrip } from "./HouseBlendStrip";
-import type { MenuItem, MenuItemProduct, Product } from "@/src/types/menu";
+import type {
+  ClassicGroup as ClassicGroupId,
+  MenuItem,
+  MenuItemProduct,
+  Product,
+} from "@/src/types/menu";
 
 type ClassicMenuPageProps = {
   items: MenuItem[];
@@ -10,7 +15,7 @@ type ClassicMenuPageProps = {
 
 type ClassicGroup = {
   id: string;
-  itemNames: string[];
+  classicGroup: ClassicGroupId;
   title: string;
 };
 
@@ -18,28 +23,19 @@ const classicGroups: ClassicGroup[] = [
   {
     id: "black-coffee",
     title: "Black Coffee",
-    itemNames: ["Espresso", "Americano", "Long Black"],
+    classicGroup: "black_coffee",
   },
   {
     id: "milk-coffee",
     title: "Milk Coffee",
-    itemNames: [
-      "Latte",
-      "Chewy Latte",
-      "Cappuccino",
-      "Mocha",
-      "Espresso Yen",
-      "Dirty",
-    ],
+    classicGroup: "milk_coffee",
   },
   {
     id: "juice-with-coffee",
     title: "Juice w/ Coffee",
-    itemNames: ["Sunday Morning", "Tamarino", "Tarn Koo"],
+    classicGroup: "juice_with_coffee",
   },
 ];
-
-const normalizeName = (name: string) => name.trim().toLowerCase();
 
 const sortByMapping = (mappings: MenuItemProduct[]) =>
   [...mappings].sort((left, right) => {
@@ -86,30 +82,16 @@ export function ClassicMenuPage({
       return [item.id, beanOptions];
     }),
   );
-  const groupedItemIds = new Set<string>();
   const groups = classicGroups.map((group) => {
-    const groupNameSet = new Set(group.itemNames.map(normalizeName));
     const groupItems = items
-      .filter((item) => groupNameSet.has(normalizeName(item.name)))
-      .sort((left, right) => {
-        const leftIndex = group.itemNames
-          .map(normalizeName)
-          .indexOf(normalizeName(left.name));
-        const rightIndex = group.itemNames
-          .map(normalizeName)
-          .indexOf(normalizeName(right.name));
-
-        return leftIndex - rightIndex;
-      });
-
-    groupItems.forEach((item) => groupedItemIds.add(item.id));
+      .filter((item) => item.classicGroup === group.classicGroup)
+      .sort((left, right) => left.sortOrder - right.sortOrder);
 
     return {
       ...group,
       items: groupItems,
     };
   });
-  const otherItems = items.filter((item) => !groupedItemIds.has(item.id));
 
   return (
     <div className="grid gap-5">
@@ -125,13 +107,6 @@ export function ClassicMenuPage({
           />
         ))}
 
-        {otherItems.length > 0 ? (
-          <ClassicDrinkGroup
-            beanOptionsByItemId={beanOptionsByItemId}
-            items={otherItems}
-            title="Other Classics"
-          />
-        ) : null}
       </div>
     </div>
   );

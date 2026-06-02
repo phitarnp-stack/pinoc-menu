@@ -9,6 +9,7 @@ import type {
   RecommendationDrinkType,
   RecommendationFlavorPreference,
   RecommendationFeelingTag,
+  MenuItemProduct,
 } from "@/src/types/menu";
 
 type WriteMode = "create" | "edit";
@@ -91,6 +92,7 @@ const menuItemRow = (item: MenuItem) => ({
   is_seasonal: Boolean(item.isSeasonal),
   available_from: nullable(item.availableFrom),
   available_until: nullable(item.availableUntil),
+  classic_group: item.classicGroup ?? "none",
   public_field_visibility: item.publicFieldVisibility ?? {},
   drink_type: nullable(item.drinkType),
   feeling_tags: item.feelingTags ?? [],
@@ -106,6 +108,23 @@ const menuItemRow = (item: MenuItem) => ({
   why_we_created_it: nullable(item.whyWeCreatedIt),
   best_for: item.bestFor ?? [],
   sort_order: item.sortOrder,
+});
+
+const menuItemProductLinkRow = (
+  menuItemId: string,
+  productId: string,
+  isDefault: boolean,
+  sortOrder: number,
+) => ({
+  id: `mip-${menuItemId}-${productId}`,
+  menu_item_id: menuItemId,
+  product_id: productId,
+  role: isDefault ? "default" : "option",
+  is_default: isDefault,
+  is_active: true,
+  sort_order: sortOrder,
+  available_from: null,
+  available_until: null,
 });
 
 const menuItemProductRow = (
@@ -642,6 +661,54 @@ export async function saveMenuItem(
     source: "supabase",
     menuItem: await loadSavedMenuItem(supabase, item),
   };
+}
+
+export async function saveMenuItemBeanLinks(
+  menuItemId: string,
+  beanLinks: Pick<
+    MenuItemProduct,
+    "productId" | "isDefault" | "sortOrder"
+  >[],
+): Promise<AdminWriteResult> {
+  const supabase = createBrowserSupabaseClient();
+
+  if (!supabase) {
+    return mockWriteResult;
+  }
+
+  const deleteResult = await supabase
+    .from("menu_item_products")
+    .delete()
+    .eq("menu_item_id", menuItemId);
+
+  if (deleteResult.error) {
+    throw new Error(
+      formatSupabaseError("Clearing available beans", deleteResult.error),
+    );
+  }
+
+  if (beanLinks.length === 0) {
+    return { source: "supabase" };
+  }
+
+  const insertResult = await supabase.from("menu_item_products").insert(
+    beanLinks.map((link, index) =>
+      menuItemProductLinkRow(
+        menuItemId,
+        link.productId,
+        link.isDefault,
+        link.sortOrder || index + 1,
+      ),
+    ),
+  );
+
+  if (insertResult.error) {
+    throw new Error(
+      formatSupabaseError("Saving available beans", insertResult.error),
+    );
+  }
+
+  return { source: "supabase" };
 }
 
 export async function updateMenuItemStatus(

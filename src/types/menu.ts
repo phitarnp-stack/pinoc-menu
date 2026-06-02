@@ -12,6 +12,12 @@ export type MenuLabel = "new" | "seasonal" | "limited";
 
 export type StoryStatus = "default" | "custom";
 
+export type ClassicGroup =
+  | "black_coffee"
+  | "milk_coffee"
+  | "juice_with_coffee"
+  | "none";
+
 export type HeroContentMode =
   | "image_only"
   | "image_with_menu_info"
@@ -147,6 +153,7 @@ export interface MenuItem {
   isSeasonal?: boolean;
   availableFrom?: string;
   availableUntil?: string;
+  classicGroup?: ClassicGroup;
   publicFieldVisibility?: PublicFieldVisibility;
   drinkType?: RecommendationDrinkType;
   feelingTags?: RecommendationFeelingTag[];
