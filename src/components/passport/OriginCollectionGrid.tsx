@@ -6,7 +6,7 @@ export function OriginCollectionGrid({
   origins: PassportOriginCollection[];
 }) {
   return (
-    <section className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-6 shadow-[0_18px_48px_rgba(84,55,34,0.12)] backdrop-blur">
+    <section className="rounded-[1.25rem] border border-[#3d2618]/10 bg-[#fff8ed]/48 p-6 shadow-[0_14px_42px_rgba(84,55,34,0.08)] backdrop-blur">
       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
         Origin Collection
       </p>

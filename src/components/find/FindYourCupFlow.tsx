@@ -294,7 +294,7 @@ export function FindYourCupFlow({
   const secondary = recommendations.slice(1);
 
   return (
-    <div className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-5 shadow-[0_18px_48px_rgba(84,55,34,0.12)] backdrop-blur sm:p-7">
+    <div className="rounded-[1.25rem] border border-[#3d2618]/10 bg-[#fff8ed]/52 p-5 shadow-[0_14px_42px_rgba(84,55,34,0.1)] backdrop-blur sm:p-7">
       <div className="mb-7 flex items-center justify-between gap-4">
         <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7d4d2f]">
           {typeof step === "number" ? `Step ${step} of 5` : "Your Cup Today"}
@@ -394,7 +394,7 @@ export function FindYourCupFlow({
           </h2>
 
           {primary ? (
-            <article className="mt-7 overflow-hidden rounded-lg border border-[#3d2618]/12 bg-[#f6efe6]/70">
+            <article className="mt-7 overflow-hidden rounded-[1.25rem] border border-[#3d2618]/10 bg-[#f6efe6]/62 shadow-[0_18px_48px_rgba(84,55,34,0.08)]">
               {primary.imageUrl ? (
                 <img
                   alt={primary.name}
@@ -402,27 +402,32 @@ export function FindYourCupFlow({
                   className="aspect-[4/3] w-full object-cover"
                 />
               ) : null}
-              <div className="p-5 sm:p-6">
+              <div className="p-6 sm:p-8">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#7d4d2f]">
+                  Barista recommendation /{" "}
                   {categoryName(menuCategories, primary.categoryId)}
                 </p>
-                <h3 className="mt-3 text-3xl font-semibold">{primary.name}</h3>
-                <p className="mt-4 text-sm leading-7 text-[#5f4635]">
+                <h3 className="mt-4 text-4xl font-semibold leading-tight">
+                  {primary.name}
+                </h3>
+                <p className="mt-5 text-base leading-8 text-[#5f4635]">
                   {primary.description}
                 </p>
-                <p className="mt-4 text-sm leading-7 text-[#5f4635]">
-                  <span className="font-semibold text-[#241710]">
-                    Why this cup:
-                  </span>{" "}
-                  {createReason(
-                    primary,
-                    mood,
-                    adventure,
-                    begin,
-                    flavor,
-                    destination,
-                  )}
-                </p>
+                <div className="mt-6 rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/48 p-5">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#7d4d2f]">
+                    Why this cup fits today
+                  </p>
+                  <p className="mt-3 text-sm leading-7 text-[#5f4635]">
+                    {createReason(
+                      primary,
+                      mood,
+                      adventure,
+                      begin,
+                      flavor,
+                      destination,
+                    )}
+                  </p>
+                </div>
                 <div className="mt-5 flex flex-wrap gap-2">
                   {primary.flavorNotes.slice(0, 4).map((note) => (
                     <span
@@ -441,7 +446,7 @@ export function FindYourCupFlow({
                     href={`/menu/${categorySlug(menuCategories, primary.categoryId)}/${primary.slug}`}
                     className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#2b1a12] px-5 text-sm font-semibold text-[#fff8ed]"
                   >
-                    View Menu Item
+                    Read the Story
                   </Link>
                   <button
                     type="button"
@@ -470,7 +475,7 @@ export function FindYourCupFlow({
 
           {secondary.length > 0 ? (
             <div className="mt-8">
-              <h3 className="text-xl font-semibold">You May Also Enjoy</h3>
+              <h3 className="text-xl font-semibold">Other gentle directions</h3>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
                 {secondary.map((item) => (
                   <article
@@ -488,7 +493,7 @@ export function FindYourCupFlow({
                       href={`/menu/${categorySlug(menuCategories, item.categoryId)}/${item.slug}`}
                       className="mt-5 inline-flex text-sm font-semibold text-[#7d4d2f]"
                     >
-                      View Menu Item
+                      Read the Story
                     </Link>
                   </article>
                 ))}

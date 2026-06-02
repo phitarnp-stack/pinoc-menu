@@ -57,18 +57,18 @@ export function PassportAddButton({
   };
 
   return (
-    <div className="mt-8 rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-6 shadow-[0_18px_48px_rgba(84,55,34,0.12)] backdrop-blur sm:p-7">
+    <div className="mt-8 rounded-[1.25rem] border border-[#3d2618]/10 bg-[#fff8ed]/48 p-6 shadow-[0_14px_42px_rgba(84,55,34,0.08)] backdrop-blur sm:p-7">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
             Coffee Passport
           </p>
           <h2 className="mt-3 text-2xl font-semibold">
-            Add this cup to your journal
+            Remember this cup
           </h2>
           <p className="mt-3 text-sm leading-7 text-[#5f4635]">
-            Save this experience on your device. Pinoc will collect the origin,
-            flavor notes, and discovery milestones for your Passport.
+            Save this moment on your device. Pinoc will keep the origin,
+            flavor notes, and quiet milestones in your Passport.
           </p>
         </div>
         {entryCount > 0 ? (
@@ -94,7 +94,7 @@ export function PassportAddButton({
             type="submit"
             className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#2b1a12] px-6 text-sm font-semibold text-[#fff8ed] shadow-[0_14px_30px_rgba(43,26,18,0.18)] transition hover:bg-[#412719]"
           >
-            Add to Passport
+            Save to Passport
           </button>
           <Link
             href="/passport"

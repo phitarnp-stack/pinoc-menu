@@ -16,9 +16,9 @@ export function BadgeCollection({
   const awardsByBadge = new Map(awards.map((award) => [award.badgeId, award]));
 
   return (
-    <section className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-6 shadow-[0_18px_48px_rgba(84,55,34,0.12)] backdrop-blur">
+    <section className="rounded-[1.25rem] border border-[#3d2618]/10 bg-[#fff8ed]/48 p-6 shadow-[0_14px_42px_rgba(84,55,34,0.08)] backdrop-blur">
       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
-        Badge Collection
+        Journal Marks
       </p>
       <h2 className="mt-3 text-2xl font-semibold">Quiet milestones</h2>
 
@@ -31,7 +31,7 @@ export function BadgeCollection({
               key={badge.id}
               className={
                 award
-                  ? "rounded-lg border border-[#3d2618]/12 bg-[#2b1a12] p-4 text-[#fff8ed]"
+                  ? "rounded-lg border border-[#3d2618]/12 bg-[#2b1a12]/90 p-4 text-[#fff8ed]"
                   : "rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/68 p-4 text-[#5f4635]"
               }
             >

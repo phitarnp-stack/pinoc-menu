@@ -19,11 +19,11 @@ export default function PassportPage() {
               Coffee Passport
             </p>
             <h1 className="mt-5 text-5xl font-semibold leading-[0.98] tracking-normal sm:text-6xl lg:text-7xl">
-              Your discovery journal
+              Your quiet journal
             </h1>
             <p className="mt-6 max-w-xl text-base leading-8 text-[#5f4635] sm:text-lg">
-              A quiet record of cups, origins, flavors, and small milestones
-              you have met at Pinoc.
+              A personal record of cups, origins, flavors, and small moments
+              you chose to remember at Pinoc.
             </p>
           </div>
 

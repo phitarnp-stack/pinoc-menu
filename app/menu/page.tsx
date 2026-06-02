@@ -31,12 +31,12 @@ export default async function MenuPage() {
             </Link>
 
             <h1 className="text-4xl font-semibold leading-tight tracking-normal text-[#241710] sm:text-5xl lg:text-6xl">
-              Menu Architecture
+              Choose your path
             </h1>
 
             <p className="mt-5 max-w-xl text-base leading-8 text-[#5f4635] sm:text-lg">
-              Four paths into a specialty coffee experience, shaped by mood,
-              craft, and the cup you want to remember.
+              Begin with the feeling you want to keep. Coffee, matcha, cocoa,
+              and quiet signatures are arranged as paths into discovery.
             </p>
           </div>
 
@@ -49,7 +49,7 @@ export default async function MenuPage() {
               return (
                 <article
                   key={category.id}
-                  className="group flex min-h-64 flex-col justify-between rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/58 p-6 shadow-[0_18px_48px_rgba(84,55,34,0.12)] backdrop-blur transition hover:-translate-y-1 hover:border-[#3d2618]/24 hover:bg-[#fff8ed]/78 hover:shadow-[0_24px_58px_rgba(84,55,34,0.18)] sm:p-7"
+                  className="group flex min-h-64 flex-col justify-between rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/44 p-6 shadow-[0_14px_38px_rgba(84,55,34,0.08)] backdrop-blur transition hover:-translate-y-1 hover:border-[#3d2618]/20 hover:bg-[#fff8ed]/66 sm:p-7"
                 >
                   <div>
                     <div className="mb-6 h-px w-14 bg-[#7d4d2f]/45 transition group-hover:w-20" />
@@ -60,7 +60,7 @@ export default async function MenuPage() {
                       {category.description}
                     </p>
                     <p className="mt-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#7d4d2f]">
-                      {itemCount} selections
+                      {itemCount} quiet selections
                     </p>
                   </div>
 
@@ -70,7 +70,7 @@ export default async function MenuPage() {
                         ? "/special"
                         : `/menu/${category.slug}`
                     }
-                    className="mt-8 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#2b1a12] px-6 text-sm font-semibold text-[#fff8ed] shadow-[0_14px_30px_rgba(43,26,18,0.18)] transition hover:bg-[#412719] focus:outline-none focus:ring-2 focus:ring-[#2b1a12] focus:ring-offset-4 focus:ring-offset-[#f6efe6] sm:w-fit"
+                    className="mt-8 inline-flex min-h-12 w-full items-center justify-center rounded-full border border-[#3d2618]/14 bg-[#fff8ed]/52 px-6 text-sm font-semibold text-[#2b1a12] transition hover:bg-[#2b1a12] hover:text-[#fff8ed] focus:outline-none focus:ring-2 focus:ring-[#2b1a12] focus:ring-offset-4 focus:ring-offset-[#f6efe6] sm:w-fit"
                   >
                     Explore
                   </Link>

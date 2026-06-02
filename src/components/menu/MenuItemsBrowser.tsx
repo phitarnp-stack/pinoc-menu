@@ -25,8 +25,8 @@ const formatPrice = (price: number) => `฿${price}`;
 
 const viewOptions: { label: string; value: Exclude<MenuView, "flavor-map"> }[] =
   [
-    { label: "Grid View", value: "grid" },
-    { label: "List View", value: "list" },
+    { label: "Journal", value: "grid" },
+    { label: "Quiet List", value: "list" },
   ];
 
 function GridIcon() {
@@ -105,6 +105,31 @@ function ViewIcon({ view }: { view: Exclude<MenuView, "flavor-map"> }) {
   return view === "grid" ? <GridIcon /> : <ListIcon />;
 }
 
+function EmptyMenuSection() {
+  return (
+    <div className="rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/42 p-6 shadow-[0_12px_34px_rgba(84,55,34,0.06)] backdrop-blur sm:p-8">
+      <div className="mb-5 h-px w-14 bg-[#7d4d2f]/35" />
+      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
+        Resting today
+      </p>
+      <h3 className="mt-4 text-2xl font-semibold leading-tight">
+        This path is quiet for now.
+      </h3>
+      <p className="mt-3 max-w-xl text-sm leading-7 text-[#5f4635]">
+        Pinoc rotates drinks and products with the season. Explore another
+        direction, or let the Digital Barista guide you to a cup that fits
+        today.
+      </p>
+      <Link
+        href="/find-your-cup"
+        className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full border border-[#3d2618]/14 px-5 text-sm font-semibold text-[#5f4635] transition hover:bg-[#fff8ed]"
+      >
+        Find Your Cup
+      </Link>
+    </div>
+  );
+}
+
 export function MenuItemsBrowser({
   sections,
   itemBaseHref,
@@ -127,10 +152,10 @@ export function MenuItemsBrowser({
   };
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-7">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
-          Browse Mode
+          Choose how to wander
         </p>
         <div className="grid grid-cols-2 rounded-full border border-[#3d2618]/12 bg-[#fff8ed]/58 p-1 shadow-[0_14px_34px_rgba(84,55,34,0.1)] backdrop-blur sm:w-fit">
           {viewOptions.map((option) => {
@@ -157,9 +182,9 @@ export function MenuItemsBrowser({
       </div>
 
       {sections.map((section) => (
-        <section key={section.id} className="grid gap-4">
+        <section key={section.id} className="grid gap-5">
           {sections.length > 1 ? (
-            <div className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/48 p-5 backdrop-blur">
+            <div className="rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/38 p-5 backdrop-blur">
               <div className="mb-4 h-px w-14 bg-[#7d4d2f]/45" />
               <h2 className="text-2xl font-semibold">{section.name}</h2>
               {section.description ? (
@@ -170,13 +195,15 @@ export function MenuItemsBrowser({
             </div>
           ) : null}
 
-          {view === "grid" ? (
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+          {section.items.length === 0 ? <EmptyMenuSection /> : null}
+
+          {section.items.length > 0 && view === "grid" ? (
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {section.items.map((item) => (
                 <Link
                   key={item.id}
                   href={`${itemBaseHref}/${item.slug}`}
-                  className="group flex min-h-[25rem] flex-col overflow-hidden rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/58 shadow-[0_18px_48px_rgba(84,55,34,0.12)] backdrop-blur transition hover:-translate-y-1 hover:bg-[#fff8ed]/78 hover:shadow-[0_24px_58px_rgba(84,55,34,0.18)]"
+                  className="group flex min-h-[25rem] flex-col overflow-hidden rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/46 shadow-[0_14px_38px_rgba(84,55,34,0.08)] backdrop-blur transition hover:-translate-y-1 hover:bg-[#fff8ed]/70"
                 >
                   <div className="relative aspect-[4/3] overflow-hidden border-b border-[#3d2618]/10 bg-[radial-gradient(circle_at_30%_25%,rgba(255,248,237,0.94),transparent_35%),linear-gradient(135deg,#ead9c2,#8f5c39)]">
                     {item.imageUrl ? (
@@ -195,34 +222,39 @@ export function MenuItemsBrowser({
                   </div>
                   <div className="flex flex-1 flex-col justify-between p-6">
                     <div>
-                      <div className="mb-5 flex items-start justify-between gap-4">
+                      <div className="mb-5">
+                        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#7d4d2f]">
+                          Discovery entry
+                        </p>
                         <h3 className="text-2xl font-semibold leading-tight">
                           {item.name}
                         </h3>
-                        <p className="text-sm font-semibold text-[#7d4d2f]">
-                          {formatPrice(item.price)}
-                        </p>
                       </div>
                       <p className="text-sm leading-7 text-[#5f4635]">
                         {item.flavorNotes.slice(0, 3).join(", ")}
                       </p>
                     </div>
-                    <span className="mt-7 inline-flex min-h-11 items-center justify-center rounded-full bg-[#2b1a12] px-5 text-sm font-semibold text-[#fff8ed]">
-                      Explore
-                    </span>
+                    <div className="mt-7 flex items-center justify-between gap-4 border-t border-[#3d2618]/10 pt-5">
+                      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-[#8a6a55]">
+                        Story first
+                      </span>
+                      <span className="text-sm font-semibold text-[#7d4d2f]">
+                        {formatPrice(item.price)}
+                      </span>
+                    </div>
                   </div>
                 </Link>
               ))}
             </div>
           ) : null}
 
-          {view === "list" ? (
+          {section.items.length > 0 && view === "list" ? (
             <div className="grid gap-3">
               {section.items.map((item) => (
                 <Link
                   key={item.id}
                   href={`${itemBaseHref}/${item.slug}`}
-                  className="group rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-5 shadow-[0_14px_34px_rgba(84,55,34,0.1)] backdrop-blur transition hover:bg-[#fff8ed]/82 sm:p-6"
+                  className="group rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/46 p-5 shadow-[0_10px_30px_rgba(84,55,34,0.08)] backdrop-blur transition hover:bg-[#fff8ed]/70 sm:p-6"
                 >
                   <div className="grid gap-4 sm:grid-cols-[7rem_1fr] lg:grid-cols-[7rem_1fr_auto] lg:items-start">
                     <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-[#3d2618]/10 bg-[radial-gradient(circle_at_30%_25%,rgba(255,248,237,0.94),transparent_35%),linear-gradient(135deg,#ead9c2,#8f5c39)]">

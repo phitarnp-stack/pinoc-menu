@@ -41,11 +41,15 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         <div className="absolute inset-0 bg-[linear-gradient(135deg,#f9f1e7_0%,#ead9c2_48%,#caa37a_100%)]" />
         <div className="absolute inset-x-6 top-6 h-px bg-[#4a2d1c]/15 sm:inset-x-10 lg:inset-x-16" />
 
-        <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl flex-col justify-center gap-10 pb-16 pt-36 sm:pb-20 sm:pt-40 lg:pt-32">
+        <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl flex-col justify-center gap-12 pb-16 pt-36 sm:pb-20 sm:pt-40 lg:pt-32">
           <div className="max-w-2xl">
             <PublicBackLink href="/menu" label="Back to Menu" />
 
-            <h1 className="text-4xl font-semibold leading-tight tracking-normal sm:text-5xl lg:text-6xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#7d4d2f]">
+              Tasting path
+            </p>
+
+            <h1 className="mt-5 text-4xl font-semibold leading-tight tracking-normal sm:text-5xl lg:text-6xl">
               {category.name}
             </h1>
 

@@ -93,15 +93,19 @@ export default async function ItemPage({ params }: ItemPageProps) {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_8%,rgba(255,248,237,0.52),transparent_30%),linear-gradient(135deg,#f9f1e7_0%,#ead9c2_48%,#caa37a_100%)]" />
         <div className="absolute inset-x-6 top-6 h-px bg-[#4a2d1c]/15 sm:inset-x-10 lg:inset-x-16" />
 
-        <div className="relative z-10 mx-auto w-full max-w-6xl pb-16 pt-36 sm:pb-20 sm:pt-40 lg:pt-32">
-          <div className="grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:items-start">
-            <div>
+        <div className="relative z-10 mx-auto w-full max-w-5xl pb-16 pt-36 sm:pb-20 sm:pt-40 lg:pt-32">
+          <div className="grid gap-10">
+            <div className="max-w-3xl">
               <PublicBackLink
                 href={`/menu/${category.slug}`}
                 label={`Back to ${category.name}`}
               />
 
-              <h1 className="text-5xl font-semibold leading-[0.98] tracking-normal sm:text-6xl lg:text-7xl">
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#7d4d2f]">
+                Drink story
+              </p>
+
+              <h1 className="mt-5 text-5xl font-semibold leading-[1.02] tracking-normal sm:text-6xl lg:text-7xl">
                 {item.name}
               </h1>
 
@@ -117,26 +121,17 @@ export default async function ItemPage({ params }: ItemPageProps) {
                 />
               ) : null}
 
-              <div className="mt-8 rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/42 p-5 backdrop-blur">
-                <p className="text-sm leading-7 text-[#5f4635]">
-                  Guest Mode is always open. LINE login will let you save your
-                  tasting history later.
-                  <span className="mt-1 block text-xs text-[#8a6a55]">
-                    ตอนนี้ดูเมนูได้เลย ไม่ต้องเข้าสู่ระบบ
-                  </span>
-                </p>
-              </div>
             </div>
 
-            <div className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/58 p-6 shadow-[0_24px_58px_rgba(84,55,34,0.16)] backdrop-blur sm:p-8">
+            <article className="rounded-[1.25rem] border border-[#3d2618]/10 bg-[#fff8ed]/48 p-6 shadow-[0_18px_52px_rgba(84,55,34,0.1)] backdrop-blur sm:p-9">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
-                  Drink Story
+                  A note from the bar
                 </p>
-                <h2 className="mt-4 text-3xl font-semibold leading-tight">
+                <h2 className="mt-5 max-w-2xl text-3xl font-semibold leading-tight sm:text-4xl">
                   {story.storyTitle}
                 </h2>
-                <p className="mt-4 text-base leading-8 text-[#5f4635]">
+                <p className="mt-5 max-w-3xl text-lg leading-9 text-[#5f4635]">
                   {story.storyDescription}
                 </p>
               </div>
@@ -149,7 +144,7 @@ export default async function ItemPage({ params }: ItemPageProps) {
                   {item.flavorNotes.map((note) => (
                     <span
                       key={note}
-                      className="rounded-full border border-[#3d2618]/12 bg-[#f6efe6]/75 px-4 py-2 text-sm text-[#5f4635]"
+                      className="rounded-full border border-[#3d2618]/10 bg-[#f6efe6]/70 px-4 py-2 text-sm text-[#5f4635]"
                     >
                       {note}
                     </span>
@@ -176,7 +171,7 @@ export default async function ItemPage({ params }: ItemPageProps) {
                   {story.bestFor.map((bestForItem) => (
                     <span
                       key={bestForItem}
-                      className="rounded-full bg-[#2b1a12] px-4 py-2 text-sm font-semibold text-[#fff8ed]"
+                      className="rounded-full border border-[#3d2618]/12 bg-[#f6efe6]/70 px-4 py-2 text-sm font-semibold text-[#5f4635]"
                     >
                       {bestForItem}
                     </span>
@@ -184,7 +179,7 @@ export default async function ItemPage({ params }: ItemPageProps) {
                 </div>
               </div>
 
-              <div className="mt-8 border-t border-[#3d2618]/10 pt-8">
+              <div className="mt-10 border-t border-[#3d2618]/10 pt-8">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
                   Price
                 </p>
@@ -192,7 +187,7 @@ export default async function ItemPage({ params }: ItemPageProps) {
                   {formatPrice(item.price)}
                 </p>
               </div>
-            </div>
+            </article>
           </div>
 
           <PassportAddButton
