@@ -3,19 +3,9 @@ import { getDataSourceDiagnostics } from "@/src/lib/menu/repositories";
 export async function DataSourceIndicator() {
   const diagnostics = await getDataSourceDiagnostics();
   const isConnected = diagnostics.status === "supabase";
-  const debugLabel = isConnected
-    ? `Connected to ${diagnostics.projectHost ?? "Supabase"}`
-    : [
-        diagnostics.envConfigured ? "Env configured" : "Env missing",
-        diagnostics.errorCode,
-        diagnostics.errorMessage,
-      ]
-        .filter(Boolean)
-        .join(" | ");
 
   return (
     <span
-      title={debugLabel}
       className={
         isConnected
           ? "inline-flex min-h-8 w-fit items-center justify-center rounded-full border border-[#2b1a12]/12 bg-[#2b1a12] px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#fff8ed]"

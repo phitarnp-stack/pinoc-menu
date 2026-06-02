@@ -49,41 +49,45 @@ export default function Home() {
           </div>
 
           <div className="relative mx-auto aspect-[4/5] w-full max-w-sm sm:max-w-md lg:max-w-lg">
-            <div className="absolute inset-0 rounded-[1.75rem] border border-[#fff8ed]/50 bg-[#fff8ed]/24 shadow-[0_40px_100px_rgba(48,29,17,0.18)] backdrop-blur-md" />
-            <div className="absolute inset-5 rounded-[1.35rem] border border-[#3d2618]/10 bg-[linear-gradient(155deg,rgba(255,248,237,0.88),rgba(235,215,190,0.62)_46%,rgba(161,113,75,0.38))] shadow-[inset_0_1px_0_rgba(255,248,237,0.7)]" />
+            <div className="absolute inset-0 rounded-[1.75rem] border border-[#fff8ed]/55 bg-[#fff8ed]/22 shadow-[0_42px_110px_rgba(48,29,17,0.2)] backdrop-blur-md" />
+            <div className="absolute inset-5 rounded-[1.35rem] border border-[#3d2618]/10 bg-[linear-gradient(145deg,rgba(255,248,237,0.9),rgba(238,222,199,0.72)_45%,rgba(173,128,88,0.34))] shadow-[inset_0_1px_0_rgba(255,248,237,0.82)]" />
+            <div className="absolute inset-9 rounded-[1rem] border border-[#fff8ed]/42 bg-[#fff8ed]/18" />
 
-            <div className="absolute left-8 right-8 top-8 flex items-center justify-between text-[#7d4d2f]">
-              <p className="text-xs font-semibold uppercase tracking-[0.28em]">
-                Filter Ritual
+            <div className="absolute left-9 right-9 top-8 flex items-center justify-between text-[#7d4d2f]">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em]">
+                Slow Filter
               </p>
-              <div className="h-px w-16 bg-[#7d4d2f]/35" />
+              <p className="text-xs font-semibold uppercase tracking-[0.22em]">
+                01
+              </p>
             </div>
 
-            <div className="absolute left-1/2 top-[18%] h-36 w-44 -translate-x-1/2">
-              <div className="absolute left-1/2 top-0 h-24 w-32 -translate-x-1/2 rounded-t-[4rem] rounded-b-[1.2rem] border border-[#3d2618]/20 bg-[linear-gradient(145deg,#fff8ed,#d9b88f)] shadow-[0_20px_46px_rgba(84,55,34,0.16)]" />
-              <div className="absolute left-1/2 top-9 h-20 w-40 -translate-x-1/2 border-l-[28px] border-r-[28px] border-t-[92px] border-l-transparent border-r-transparent border-t-[#704326]/90 drop-shadow-[0_18px_24px_rgba(43,26,18,0.2)]" />
-              <div className="absolute left-1/2 top-13 h-16 w-28 -translate-x-1/2 border-l-[18px] border-r-[18px] border-t-[70px] border-l-transparent border-r-transparent border-t-[#efe1cf]" />
-              <div className="absolute left-1/2 top-8 h-1 w-24 -translate-x-1/2 rounded-full bg-[#fff8ed]/80" />
+            <div className="absolute left-10 top-20 h-40 w-28 rounded-xl border border-[#3d2618]/10 bg-[linear-gradient(180deg,rgba(255,248,237,0.76),rgba(222,198,170,0.42))] shadow-[0_18px_42px_rgba(84,55,34,0.12)]" />
+            <div className="absolute left-14 top-24 h-2 w-14 rounded-full bg-[#7d4d2f]/28" />
+            <div className="absolute left-14 top-32 h-20 w-20 rounded-full border border-[#3d2618]/10 bg-[radial-gradient(circle_at_38%_32%,rgba(255,248,237,0.62),rgba(205,166,124,0.38)_56%,rgba(125,77,47,0.18))]" />
+
+            <div className="absolute left-1/2 top-[18%] h-56 w-56 -translate-x-1/2">
+              <div className="absolute left-1/2 top-0 h-8 w-28 -translate-x-1/2 rounded-full border border-[#3d2618]/18 bg-[#fff8ed]/72 shadow-[0_10px_24px_rgba(84,55,34,0.14)]" />
+              <div className="absolute left-1/2 top-5 h-24 w-36 -translate-x-1/2 rounded-b-[3.4rem] rounded-t-xl border border-[#3d2618]/16 bg-[linear-gradient(180deg,#fff8ed,#dec29e)] shadow-[0_24px_54px_rgba(84,55,34,0.18)]" />
+              <div className="absolute left-1/2 top-9 h-16 w-28 -translate-x-1/2 rounded-b-[2.5rem] rounded-t-md bg-[linear-gradient(180deg,#6d4228,#2b1a12)] shadow-[inset_0_10px_18px_rgba(255,248,237,0.12)]" />
+              <div className="absolute left-1/2 top-[7.75rem] h-20 w-px -translate-x-1/2 bg-[linear-gradient(180deg,#7d4d2f,rgba(125,77,47,0))]" />
+              <div className="absolute left-1/2 top-[12.2rem] h-11 w-32 -translate-x-1/2 rounded-[2rem] border border-[#3d2618]/14 bg-[linear-gradient(180deg,rgba(255,248,237,0.78),rgba(222,201,176,0.48))] shadow-[0_24px_46px_rgba(84,55,34,0.18)]" />
+              <div className="absolute left-1/2 top-[13rem] h-7 w-24 -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_42%_35%,#c99262,#714025_62%,#2b1a12)] shadow-[inset_0_8px_14px_rgba(255,248,237,0.18)]" />
+              <div className="absolute right-8 top-[12.8rem] h-9 w-10 rounded-r-full border-[7px] border-l-0 border-[#d8b996]/82" />
             </div>
 
-            <div className="absolute left-1/2 top-[47%] h-28 w-[12.5rem] -translate-x-1/2">
-              <div className="absolute inset-x-4 top-0 h-20 rounded-b-[3rem] rounded-t-xl border border-[#3d2618]/16 bg-[linear-gradient(180deg,rgba(255,248,237,0.92),rgba(219,193,163,0.72))] shadow-[0_26px_58px_rgba(84,55,34,0.18)]" />
-              <div className="absolute left-1/2 top-4 h-9 w-32 -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_38%_32%,#c18454,#714025_58%,#2b1a12)] shadow-[inset_0_8px_16px_rgba(255,248,237,0.18)]" />
-              <div className="absolute right-0 top-5 h-12 w-14 rounded-r-full border-8 border-l-0 border-[#d7b894]" />
-              <div className="absolute bottom-0 left-4 right-4 h-2 rounded-full bg-[#3d2618]/12 blur-[1px]" />
+            <div className="absolute bottom-[8.5rem] right-10 grid grid-cols-2 gap-2">
+              <div className="h-5 w-3 rotate-[24deg] rounded-full bg-[#4a2d1c] shadow-[inset_2px_0_0_rgba(255,248,237,0.16)]" />
+              <div className="mt-5 h-4 w-2.5 rotate-[-24deg] rounded-full bg-[#7d4d2f] shadow-[inset_1px_0_0_rgba(255,248,237,0.18)]" />
+              <div className="ml-4 h-4 w-2.5 rotate-[38deg] rounded-full bg-[#5f3924] shadow-[inset_1px_0_0_rgba(255,248,237,0.16)]" />
             </div>
 
-            <div className="absolute left-9 top-[68%] grid gap-2">
-              <div className="h-5 w-3 rotate-[-28deg] rounded-full bg-[#4a2d1c] shadow-[inset_2px_0_0_rgba(255,248,237,0.18)]" />
-              <div className="ml-8 h-4 w-2.5 rotate-[22deg] rounded-full bg-[#7d4d2f] shadow-[inset_1px_0_0_rgba(255,248,237,0.2)]" />
-            </div>
-
-            <div className="absolute bottom-8 left-8 right-8 rounded-xl border border-[#fff8ed]/44 bg-[#2b1a12]/82 px-5 py-5 text-[#fff8ed] shadow-[0_18px_44px_rgba(25,13,7,0.28)] backdrop-blur">
+            <div className="absolute bottom-8 left-8 right-8 rounded-xl border border-[#fff8ed]/44 bg-[#2b1a12]/84 px-5 py-5 text-[#fff8ed] shadow-[0_18px_44px_rgba(25,13,7,0.28)] backdrop-blur">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-[#e7caa7]">
                 Tasting Direction
               </p>
               <p className="mt-3 text-2xl font-semibold leading-tight">
-                Clean florals, polished cacao, a slow golden finish.
+                Filter clarity, soft florals, cacao warmth.
               </p>
             </div>
           </div>

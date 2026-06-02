@@ -21,18 +21,6 @@ export type PublishProductResult = AdminWriteResult & {
   menuItemId: string;
   menuItemHref: string;
   categoryId: ProductMenuCategoryId;
-  debug: {
-    menuItemId: string;
-    menuItemSlug: string;
-    menuItemCategoryId: string;
-    menuItemName: string;
-    menuItemIsActive: boolean;
-    menuItemStatus: "not_applicable";
-    linkId?: string;
-    linkMenuItemId?: string;
-    linkProductId?: string;
-    publicUrl: string;
-  };
 };
 
 const mockWriteResult: AdminWriteResult = {
@@ -53,6 +41,7 @@ const productRow = (product: Product) => ({
   description: product.description,
   flavor_notes: product.flavorNotes,
   image_placeholder: product.imagePlaceholder,
+  image_url: nullable(product.imageUrl),
   available_for: product.availableFor,
   origin: nullable(product.origin),
   region: nullable(product.region),
@@ -65,6 +54,7 @@ const productRow = (product: Product) => ({
   is_seasonal: Boolean(product.isSeasonal),
   available_from: nullable(product.availableFrom),
   available_until: nullable(product.availableUntil),
+  public_field_visibility: product.publicFieldVisibility ?? {},
 });
 
 const menuItemRow = (item: MenuItem) => ({
@@ -77,10 +67,12 @@ const menuItemRow = (item: MenuItem) => ({
   flavor_notes: item.flavorNotes,
   recommended_for: item.recommendedFor,
   image_placeholder: item.imagePlaceholder,
+  image_url: nullable(item.imageUrl),
   is_active: item.isActive,
   is_seasonal: Boolean(item.isSeasonal),
   available_from: nullable(item.availableFrom),
   available_until: nullable(item.availableUntil),
+  public_field_visibility: item.publicFieldVisibility ?? {},
   sort_order: item.sortOrder,
 });
 
@@ -164,53 +156,17 @@ const buildMenuItemFromProduct = (
     product.availableFor ??
     "Guests exploring a specialty Pinoc product.",
   imagePlaceholder: product.imagePlaceholder,
+  imageUrl: product.imageUrl,
   isActive: product.status === "active",
   isSeasonal: Boolean(product.isSeasonal),
   availableFrom: product.availableFrom,
   availableUntil: product.availableUntil,
+  publicFieldVisibility: product.publicFieldVisibility,
   sortOrder: 1000,
 });
 
 const productMenuHref = (categoryId: ProductMenuCategoryId, slug: string) =>
   `/menu/${categorySlugById[categoryId]}/${slug}`;
-
-const buildPublishDebug = ({
-  menuItemId,
-  menuItemSlug,
-  menuItemCategoryId,
-  menuItemName,
-  menuItemIsActive,
-  linkId,
-  linkMenuItemId,
-  linkProductId,
-}: {
-  menuItemId: string;
-  menuItemSlug: string;
-  menuItemCategoryId: string;
-  menuItemName: string;
-  menuItemIsActive: boolean;
-  linkId?: string;
-  linkMenuItemId?: string;
-  linkProductId?: string;
-}) => {
-  const publicUrl = productMenuHref(
-    menuItemCategoryId as ProductMenuCategoryId,
-    menuItemSlug,
-  );
-
-  return {
-    menuItemId,
-    menuItemSlug,
-    menuItemCategoryId,
-    menuItemName,
-    menuItemIsActive,
-    menuItemStatus: "not_applicable" as const,
-    linkId,
-    linkMenuItemId,
-    linkProductId,
-    publicUrl,
-  };
-};
 
 export async function saveProduct(
   product: Product,
@@ -273,22 +229,12 @@ export async function publishProductToMenu(
       menuItemId: menuItem.id,
       menuItemHref: productMenuHref(categoryId, menuItem.slug),
       categoryId,
-      debug: buildPublishDebug({
-        menuItemId: menuItem.id,
-        menuItemSlug: menuItem.slug,
-        menuItemCategoryId: categoryId,
-        menuItemName: menuItem.name,
-        menuItemIsActive: menuItem.isActive,
-        linkId: menuItemProductRow(menuItem.id, product.id).id,
-        linkMenuItemId: menuItem.id,
-        linkProductId: product.id,
-      }),
     };
   }
 
   const existingLink = await supabase
     .from("menu_item_products")
-    .select("id, menu_item_id, product_id")
+    .select("menu_item_id")
     .eq("product_id", product.id)
     .eq("is_active", true)
     .limit(1);
@@ -300,12 +246,11 @@ export async function publishProductToMenu(
   }
 
   const linkedMenuItemId = existingLink.data?.[0]?.menu_item_id;
-  const linkedRow = existingLink.data?.[0];
 
   if (linkedMenuItemId) {
     const existingMenuItem = await supabase
       .from("menu_items")
-      .select("id, slug, category_id, name, is_active")
+      .select("id, slug, category_id")
       .eq("id", linkedMenuItemId)
       .maybeSingle();
 
@@ -328,23 +273,13 @@ export async function publishProductToMenu(
           existingMenuItem.data.slug,
         ),
         categoryId: existingCategoryId,
-        debug: buildPublishDebug({
-          menuItemId: existingMenuItem.data.id,
-          menuItemSlug: existingMenuItem.data.slug,
-          menuItemCategoryId: existingMenuItem.data.category_id,
-          menuItemName: existingMenuItem.data.name,
-          menuItemIsActive: existingMenuItem.data.is_active,
-          linkId: linkedRow?.id,
-          linkMenuItemId: linkedRow?.menu_item_id,
-          linkProductId: linkedRow?.product_id,
-        }),
       };
     }
   }
 
   const existingSlug = await supabase
     .from("menu_items")
-    .select("id, slug, category_id, name, is_active")
+    .select("id, slug, category_id")
     .eq("category_id", categoryId)
     .eq("slug", menuItem.slug)
     .maybeSingle();
@@ -358,9 +293,7 @@ export async function publishProductToMenu(
   if (existingSlug.data) {
     const linkResult = await supabase
       .from("menu_item_products")
-      .insert(menuItemProductRow(existingSlug.data.id, product.id))
-      .select("id, menu_item_id, product_id")
-      .maybeSingle();
+      .insert(menuItemProductRow(existingSlug.data.id, product.id));
 
     if (linkResult.error && linkResult.error.code !== "23505") {
       throw new Error(
@@ -368,50 +301,18 @@ export async function publishProductToMenu(
       );
     }
 
-    const existingLinkAfterConflict = linkResult.error
-      ? await supabase
-          .from("menu_item_products")
-          .select("id, menu_item_id, product_id")
-          .eq("menu_item_id", existingSlug.data.id)
-          .eq("product_id", product.id)
-          .maybeSingle()
-      : null;
-
-    if (existingLinkAfterConflict?.error) {
-      throw new Error(
-        formatSupabaseError(
-          "Loading existing product menu link",
-          existingLinkAfterConflict.error,
-        ),
-      );
-    }
-
-    const linkData = linkResult.data ?? existingLinkAfterConflict?.data;
-
     return {
       source: "supabase",
       status: "existing",
       menuItemId: existingSlug.data.id,
       menuItemHref: productMenuHref(categoryId, existingSlug.data.slug),
       categoryId,
-      debug: buildPublishDebug({
-        menuItemId: existingSlug.data.id,
-        menuItemSlug: existingSlug.data.slug,
-        menuItemCategoryId: existingSlug.data.category_id,
-        menuItemName: existingSlug.data.name,
-        menuItemIsActive: existingSlug.data.is_active,
-        linkId: linkData?.id,
-        linkMenuItemId: linkData?.menu_item_id,
-        linkProductId: linkData?.product_id,
-      }),
     };
   }
 
   const menuItemResult = await supabase
     .from("menu_items")
-    .insert(menuItemRow(menuItem))
-    .select("id, slug, category_id, name, is_active")
-    .single();
+    .insert(menuItemRow(menuItem));
 
   if (menuItemResult.error) {
     throw new Error(formatSupabaseError("Creating menu item", menuItemResult.error));
@@ -419,9 +320,7 @@ export async function publishProductToMenu(
 
   const linkResult = await supabase
     .from("menu_item_products")
-    .insert(menuItemProductRow(menuItem.id, product.id))
-    .select("id, menu_item_id, product_id")
-    .single();
+    .insert(menuItemProductRow(menuItem.id, product.id));
 
   if (linkResult.error) {
     throw new Error(
@@ -439,16 +338,6 @@ export async function publishProductToMenu(
     menuItemId: menuItem.id,
     menuItemHref: productMenuHref(categoryId, menuItem.slug),
     categoryId,
-    debug: buildPublishDebug({
-      menuItemId: menuItemResult.data.id,
-      menuItemSlug: menuItemResult.data.slug,
-      menuItemCategoryId: menuItemResult.data.category_id,
-      menuItemName: menuItemResult.data.name,
-      menuItemIsActive: menuItemResult.data.is_active,
-      linkId: linkResult.data.id,
-      linkMenuItemId: linkResult.data.menu_item_id,
-      linkProductId: linkResult.data.product_id,
-    }),
   };
 }
 

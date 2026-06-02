@@ -30,6 +30,7 @@ type MenuItemFormState = {
   tasteProfileIds: string[];
   recommendedFor: string;
   imagePlaceholder: string;
+  imageUrl: string;
   isActive: "active" | "inactive";
   specialCategory: SpecialCategory;
   visibility: VisibilityStatus;
@@ -65,6 +66,7 @@ const makeDefaultFormState = (
   tasteProfileIds: [],
   recommendedFor: "",
   imagePlaceholder: "",
+  imageUrl: "",
   isActive: "active",
   specialCategory: "coffee",
   visibility: "visible",
@@ -143,6 +145,7 @@ export function MenuItemCrudPage({
       tasteProfileIds: formState.tasteProfileIds,
       recommendedFor: formState.recommendedFor.trim(),
       imagePlaceholder: formState.imagePlaceholder.trim(),
+      imageUrl: formState.imageUrl.trim() || undefined,
       isActive: formState.isActive === "active",
       specialCategory: isSpecialForm ? formState.specialCategory : undefined,
       visibility: isSpecialForm ? formState.visibility : undefined,
@@ -198,6 +201,7 @@ export function MenuItemCrudPage({
       tasteProfileIds: item.tasteProfileIds,
       recommendedFor: item.recommendedFor,
       imagePlaceholder: item.imagePlaceholder,
+      imageUrl: item.imageUrl ?? "",
       isActive: item.isActive ? "active" : "inactive",
       specialCategory: item.specialCategory ?? "coffee",
       visibility: item.visibility ?? (item.isActive ? "visible" : "hidden"),
@@ -254,6 +258,26 @@ export function MenuItemCrudPage({
     } finally {
       setPendingId(null);
     }
+  };
+
+  const archiveItem = async (item: MenuItem) => {
+    const confirmed = window.confirm(
+      `Archive ${item.name}? It will be marked inactive and hidden from the customer menu.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    if (!item.isActive) {
+      setFeedback({
+        tone: "warning",
+        message: "This menu item is already archived.",
+      });
+      return;
+    }
+
+    await toggleStatus(item.id);
   };
 
   const toggleTasteProfile = (tasteProfileId: string) => {
@@ -470,6 +494,32 @@ export function MenuItemCrudPage({
                   />
                 </label>
 
+                <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                  Image URL
+                  <input
+                    type="url"
+                    value={formState.imageUrl}
+                    onChange={(event) =>
+                      setFormState((current) => ({
+                        ...current,
+                        imageUrl: event.target.value,
+                      }))
+                    }
+                    className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                    placeholder="https://example.com/menu-item.jpg"
+                  />
+                </label>
+
+                {formState.imageUrl ? (
+                  <div className="overflow-hidden rounded-lg border border-[#3d2618]/12 bg-[#f6efe6]/60">
+                    <img
+                      alt={`${formState.name || "Menu item"} preview`}
+                      src={formState.imageUrl}
+                      className="aspect-[4/3] w-full object-cover"
+                    />
+                  </div>
+                ) : null}
+
                 {isSpecialForm ? (
                   <div className="grid gap-4 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 p-4">
                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7d4d2f]">
@@ -603,6 +653,18 @@ export function MenuItemCrudPage({
                     key={item.id}
                     className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-6 shadow-[0_18px_48px_rgba(84,55,34,0.12)] backdrop-blur"
                   >
+                    {item.imageUrl ? (
+                      <img
+                        alt={item.name}
+                        src={item.imageUrl}
+                        className="mb-5 aspect-[4/3] w-full rounded-lg object-cover"
+                      />
+                    ) : (
+                      <div className="mb-5 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/60 px-4 py-8 text-sm font-semibold text-[#7d4d2f]">
+                        {item.imagePlaceholder}
+                      </div>
+                    )}
+
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                       <div>
                         <h2 className="text-2xl font-semibold">{item.name}</h2>
@@ -679,6 +741,14 @@ export function MenuItemCrudPage({
                           : item.isActive
                             ? "Deactivate"
                             : "Activate"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => archiveItem(item)}
+                        disabled={pendingId === item.id || !item.isActive}
+                        className="min-h-11 rounded-full border border-[#3d2618]/14 px-5 text-sm font-semibold text-[#5f4635] transition hover:border-[#3d2618]/30 hover:bg-[#f6efe6]/70 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {item.isActive ? "Archive" : "Archived"}
                       </button>
                     </div>
                   </article>

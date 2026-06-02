@@ -1,12 +1,7 @@
 import {
   createServerSupabaseClient,
   isSupabaseConfigured,
-  supabaseKeyFormat,
-  supabaseKeyPrefix,
   supabaseProjectHost,
-  supabaseProjectUrl,
-  supabaseRestUrl,
-  supabaseRuntime,
 } from "@/src/lib/supabase/server";
 
 export type DataSourceStatus = "supabase" | "mock";
@@ -15,12 +10,6 @@ export type DataSourceDiagnostics = {
   status: DataSourceStatus;
   envConfigured: boolean;
   projectHost?: string;
-  projectUrl?: string;
-  restUrl?: string;
-  keyPrefix?: string;
-  keyFormat: string;
-  runtime: string;
-  hardcodedSupabaseKeysFound: boolean;
   checkedTable: string;
   queryAttempted: string;
   rowCount?: number;
@@ -40,12 +29,6 @@ export async function getDataSourceDiagnostics(): Promise<DataSourceDiagnostics>
       status: "mock",
       envConfigured: isSupabaseConfigured,
       projectHost: supabaseProjectHost,
-      projectUrl: supabaseProjectUrl,
-      restUrl: supabaseRestUrl,
-      keyPrefix: supabaseKeyPrefix,
-      keyFormat: supabaseKeyFormat,
-      runtime: supabaseRuntime,
-      hardcodedSupabaseKeysFound: false,
       checkedTable,
       queryAttempted,
       errorMessage: "Supabase URL or anon key is missing.",
@@ -66,20 +49,12 @@ export async function getDataSourceDiagnostics(): Promise<DataSourceDiagnostics>
       details: error.details,
       hint: error.hint,
       projectHost: supabaseProjectHost,
-      projectUrl: supabaseProjectUrl,
-      restUrl: supabaseRestUrl,
     });
 
     return {
       status: "mock",
       envConfigured: isSupabaseConfigured,
       projectHost: supabaseProjectHost,
-      projectUrl: supabaseProjectUrl,
-      restUrl: supabaseRestUrl,
-      keyPrefix: supabaseKeyPrefix,
-      keyFormat: supabaseKeyFormat,
-      runtime: supabaseRuntime,
-      hardcodedSupabaseKeysFound: false,
       checkedTable,
       queryAttempted,
       errorCode: error.code,
@@ -93,12 +68,6 @@ export async function getDataSourceDiagnostics(): Promise<DataSourceDiagnostics>
     status: "supabase",
     envConfigured: isSupabaseConfigured,
     projectHost: supabaseProjectHost,
-    projectUrl: supabaseProjectUrl,
-    restUrl: supabaseRestUrl,
-    keyPrefix: supabaseKeyPrefix,
-    keyFormat: supabaseKeyFormat,
-    runtime: supabaseRuntime,
-    hardcodedSupabaseKeysFound: false,
     checkedTable,
     queryAttempted,
     rowCount: data?.length ?? 0,

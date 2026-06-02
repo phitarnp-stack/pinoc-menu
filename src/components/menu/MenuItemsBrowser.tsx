@@ -177,12 +177,20 @@ export function MenuItemsBrowser({
                   href={`${itemBaseHref}/${item.slug}`}
                   className="group flex min-h-[25rem] flex-col overflow-hidden rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/58 shadow-[0_18px_48px_rgba(84,55,34,0.12)] backdrop-blur transition hover:-translate-y-1 hover:bg-[#fff8ed]/78 hover:shadow-[0_24px_58px_rgba(84,55,34,0.18)]"
                 >
-                  <div className="relative aspect-[4/3] border-b border-[#3d2618]/10 bg-[radial-gradient(circle_at_30%_25%,rgba(255,248,237,0.94),transparent_35%),linear-gradient(135deg,#ead9c2,#8f5c39)]">
-                    <div className="absolute inset-x-5 bottom-5 rounded-lg border border-[#fff8ed]/36 bg-[#2b1a12]/58 px-4 py-3 text-[#fff8ed] backdrop-blur">
-                      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#e7caa7]">
-                        {item.imagePlaceholder}
-                      </p>
-                    </div>
+                  <div className="relative aspect-[4/3] overflow-hidden border-b border-[#3d2618]/10 bg-[radial-gradient(circle_at_30%_25%,rgba(255,248,237,0.94),transparent_35%),linear-gradient(135deg,#ead9c2,#8f5c39)]">
+                    {item.imageUrl ? (
+                      <img
+                        alt={item.name}
+                        src={item.imageUrl}
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="absolute inset-x-5 bottom-5 rounded-lg border border-[#fff8ed]/36 bg-[#2b1a12]/58 px-4 py-3 text-[#fff8ed] backdrop-blur">
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#e7caa7]">
+                          {item.imagePlaceholder}
+                        </p>
+                      </div>
+                    )}
                   </div>
                   <div className="flex flex-1 flex-col justify-between p-6">
                     <div>
@@ -213,9 +221,24 @@ export function MenuItemsBrowser({
                 <Link
                   key={item.id}
                   href={`${itemBaseHref}/${item.slug}`}
-                  className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-5 shadow-[0_14px_34px_rgba(84,55,34,0.1)] backdrop-blur transition hover:bg-[#fff8ed]/82 sm:p-6"
+                  className="group rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-5 shadow-[0_14px_34px_rgba(84,55,34,0.1)] backdrop-blur transition hover:bg-[#fff8ed]/82 sm:p-6"
                 >
-                  <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
+                  <div className="grid gap-4 sm:grid-cols-[7rem_1fr] lg:grid-cols-[7rem_1fr_auto] lg:items-start">
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-[#3d2618]/10 bg-[radial-gradient(circle_at_30%_25%,rgba(255,248,237,0.94),transparent_35%),linear-gradient(135deg,#ead9c2,#8f5c39)]">
+                      {item.imageUrl ? (
+                        <img
+                          alt={item.name}
+                          src={item.imageUrl}
+                          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="flex h-full items-end p-3">
+                          <p className="text-[0.64rem] font-semibold uppercase leading-4 tracking-[0.16em] text-[#fff8ed]">
+                            {item.imagePlaceholder}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                     <div>
                       <div className="flex flex-wrap items-center gap-3">
                         <h3 className="text-xl font-semibold">{item.name}</h3>

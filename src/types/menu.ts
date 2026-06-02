@@ -10,6 +10,18 @@ export type VisibilityStatus = "visible" | "hidden";
 
 export type MenuLabel = "new" | "seasonal" | "limited";
 
+export type PublicFieldVisibility = {
+  producer?: boolean;
+  region?: boolean;
+  altitude?: boolean;
+  variety?: boolean;
+  process?: boolean;
+  roastLevel?: boolean;
+  brewRecommendation?: boolean;
+  availableFor?: boolean;
+  seasonalAvailability?: boolean;
+};
+
 export interface TasteProfile {
   id: string;
   slug: string;
@@ -30,6 +42,7 @@ export interface Product {
   flavorNotes: string[];
   tasteProfileIds: string[];
   imagePlaceholder: string;
+  imageUrl?: string;
   availableFor: string;
   origin?: string;
   region?: string;
@@ -42,6 +55,7 @@ export interface Product {
   isSeasonal?: boolean;
   availableFrom?: string;
   availableUntil?: string;
+  publicFieldVisibility?: PublicFieldVisibility;
 }
 
 export interface MenuCategory {
@@ -64,6 +78,7 @@ export interface MenuItem {
   tasteProfileIds: string[];
   recommendedFor: string;
   imagePlaceholder: string;
+  imageUrl?: string;
   isActive: boolean;
   specialCategory?: SpecialCategory;
   visibility?: VisibilityStatus;
@@ -71,6 +86,7 @@ export interface MenuItem {
   isSeasonal?: boolean;
   availableFrom?: string;
   availableUntil?: string;
+  publicFieldVisibility?: PublicFieldVisibility;
   sortOrder: number;
 }
 

@@ -12,6 +12,7 @@ import type {
   Product,
   ProductStatus,
   ProductType,
+  PublicFieldVisibility,
   RoastLevel,
 } from "@/src/types/menu";
 
@@ -30,6 +31,7 @@ type ProductFormState = {
   description: string;
   flavorNotes: string;
   imagePlaceholder: string;
+  imageUrl: string;
   availableFor: string;
   origin: string;
   region: string;
@@ -42,6 +44,7 @@ type ProductFormState = {
   isSeasonal: "yes" | "no";
   availableFrom: string;
   availableUntil: string;
+  publicFieldVisibility: Required<PublicFieldVisibility>;
 };
 
 const productTypes: { label: string; value: ProductType }[] = [
@@ -77,6 +80,60 @@ const coffeeMenuCategoryOptions: {
   { label: "Special", value: "special" },
 ];
 
+const fieldVisibilityOptions: {
+  key: keyof Required<PublicFieldVisibility>;
+  label: string;
+}[] = [
+  { key: "producer", label: "Producer / farm" },
+  { key: "region", label: "Region" },
+  { key: "altitude", label: "Altitude" },
+  { key: "variety", label: "Variety" },
+  { key: "process", label: "Process" },
+  { key: "roastLevel", label: "Roast level" },
+  { key: "brewRecommendation", label: "Brew recommendation" },
+  { key: "availableFor", label: "Available for" },
+  { key: "seasonalAvailability", label: "Seasonal availability" },
+];
+
+const productVisibilityDefaults: Record<
+  ProductType,
+  Required<PublicFieldVisibility>
+> = {
+  coffee_bean: {
+    producer: true,
+    region: true,
+    altitude: true,
+    variety: true,
+    process: true,
+    roastLevel: true,
+    brewRecommendation: true,
+    availableFor: true,
+    seasonalAvailability: true,
+  },
+  matcha: {
+    producer: true,
+    region: true,
+    altitude: false,
+    variety: false,
+    process: true,
+    roastLevel: false,
+    brewRecommendation: true,
+    availableFor: true,
+    seasonalAvailability: true,
+  },
+  craft_cocoa: {
+    producer: true,
+    region: true,
+    altitude: false,
+    variety: true,
+    process: true,
+    roastLevel: false,
+    brewRecommendation: false,
+    availableFor: true,
+    seasonalAvailability: true,
+  },
+};
+
 const makeDefaultFormState = (
   productType: ProductType,
 ): ProductFormState => ({
@@ -87,6 +144,7 @@ const makeDefaultFormState = (
   description: "",
   flavorNotes: "",
   imagePlaceholder: "",
+  imageUrl: "",
   availableFor: "",
   origin: "",
   region: "",
@@ -99,6 +157,7 @@ const makeDefaultFormState = (
   isSeasonal: "no",
   availableFrom: "",
   availableUntil: "",
+  publicFieldVisibility: productVisibilityDefaults[productType],
 });
 
 const productTypeLabel = (productType: ProductType) =>
@@ -128,6 +187,14 @@ const createId = (name: string) =>
 
 const formatPrice = (price: number) => `฿${price}`;
 
+const normalizeVisibility = (
+  productType: ProductType,
+  visibility?: PublicFieldVisibility,
+) => ({
+  ...productVisibilityDefaults[productType],
+  ...visibility,
+});
+
 export function ProductCrudPage({
   title,
   description,
@@ -152,19 +219,6 @@ export function ProductCrudPage({
       {
         href: string;
         status: "created" | "existing";
-        categoryId: ProductMenuCategoryId;
-        debug: {
-          menuItemId: string;
-          menuItemSlug: string;
-          menuItemCategoryId: string;
-          menuItemName: string;
-          menuItemIsActive: boolean;
-          menuItemStatus: "not_applicable";
-          linkId?: string;
-          linkMenuItemId?: string;
-          linkProductId?: string;
-          publicUrl: string;
-        };
       }
     >
   >({});
@@ -219,6 +273,7 @@ export function ProductCrudPage({
       flavorNotes: normalizeNotes(formState.flavorNotes),
       tasteProfileIds: [],
       imagePlaceholder: formState.imagePlaceholder.trim(),
+      imageUrl: formState.imageUrl.trim() || undefined,
       availableFor: formState.availableFor.trim(),
       origin: formState.origin.trim() || undefined,
       region: formState.region.trim() || undefined,
@@ -231,6 +286,7 @@ export function ProductCrudPage({
       isSeasonal: formState.isSeasonal === "yes",
       availableFrom: formState.availableFrom || undefined,
       availableUntil: formState.availableUntil || undefined,
+      publicFieldVisibility: formState.publicFieldVisibility,
     };
 
     setPendingId("form");
@@ -280,6 +336,7 @@ export function ProductCrudPage({
       description: product.description,
       flavorNotes: product.flavorNotes.join(", "),
       imagePlaceholder: product.imagePlaceholder,
+      imageUrl: product.imageUrl ?? "",
       availableFor: product.availableFor,
       origin: product.origin ?? "",
       region: product.region ?? "",
@@ -292,6 +349,10 @@ export function ProductCrudPage({
       isSeasonal: product.isSeasonal ? "yes" : "no",
       availableFrom: product.availableFrom ?? "",
       availableUntil: product.availableUntil ?? "",
+      publicFieldVisibility: normalizeVisibility(
+        product.productType,
+        product.publicFieldVisibility,
+      ),
     });
   };
 
@@ -353,8 +414,6 @@ export function ProductCrudPage({
         [product.id]: {
           href: result.menuItemHref,
           status: result.status,
-          categoryId: result.categoryId,
-          debug: result.debug,
         },
       }));
       setProducts((current) => [...current]);
@@ -385,6 +444,38 @@ export function ProductCrudPage({
     } finally {
       setPendingId(null);
     }
+  };
+
+  const archiveProduct = async (product: Product) => {
+    const confirmed = window.confirm(
+      `Archive ${product.name}? It will be marked inactive and hidden from active product workflows.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    if (product.status === "inactive") {
+      setFeedback({
+        tone: "warning",
+        message: "This product is already archived.",
+      });
+      return;
+    }
+
+    await toggleProductStatus(product.id);
+  };
+
+  const togglePublicFieldVisibility = (
+    field: keyof Required<PublicFieldVisibility>,
+  ) => {
+    setFormState((current) => ({
+      ...current,
+      publicFieldVisibility: {
+        ...current.publicFieldVisibility,
+        [field]: !current.publicFieldVisibility[field],
+      },
+    }));
   };
 
   return (
@@ -481,10 +572,17 @@ export function ProductCrudPage({
                     <select
                       value={formState.productType}
                       onChange={(event) =>
-                        updateField(
-                          "productType",
-                          event.target.value as ProductType,
-                        )
+                        setFormState((current) => {
+                          const nextProductType = event.target
+                            .value as ProductType;
+
+                          return {
+                            ...current,
+                            productType: nextProductType,
+                            publicFieldVisibility:
+                              productVisibilityDefaults[nextProductType],
+                          };
+                        })
                       }
                       className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
                     >
@@ -737,6 +835,58 @@ export function ProductCrudPage({
                     className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
                   />
                 </label>
+
+                <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                  Image URL
+                  <input
+                    type="url"
+                    value={formState.imageUrl}
+                    onChange={(event) =>
+                      updateField("imageUrl", event.target.value)
+                    }
+                    className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                    placeholder="https://example.com/product.jpg"
+                  />
+                </label>
+
+                {formState.imageUrl ? (
+                  <div className="overflow-hidden rounded-lg border border-[#3d2618]/12 bg-[#f6efe6]/60">
+                    <img
+                      alt={`${formState.name || "Product"} preview`}
+                      src={formState.imageUrl}
+                      className="aspect-[4/3] w-full object-cover"
+                    />
+                  </div>
+                ) : null}
+
+                <div className="grid gap-3 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7d4d2f]">
+                    Public detail fields
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {fieldVisibilityOptions.map((option) => {
+                      const isVisible =
+                        formState.publicFieldVisibility[option.key];
+
+                      return (
+                        <button
+                          key={option.key}
+                          type="button"
+                          onClick={() =>
+                            togglePublicFieldVisibility(option.key)
+                          }
+                          className={
+                            isVisible
+                              ? "rounded-full bg-[#2b1a12] px-4 py-2 text-sm font-semibold text-[#fff8ed]"
+                              : "rounded-full border border-[#3d2618]/14 px-4 py-2 text-sm font-semibold text-[#5f4635]"
+                          }
+                        >
+                          {isVisible ? "Show" : "Hide"} {option.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
 
               <button
@@ -762,6 +912,18 @@ export function ProductCrudPage({
                   key={product.id}
                   className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-6 shadow-[0_18px_48px_rgba(84,55,34,0.12)] backdrop-blur"
                 >
+                  {product.imageUrl ? (
+                    <img
+                      alt={product.name}
+                      src={product.imageUrl}
+                      className="mb-5 aspect-[4/3] w-full rounded-lg object-cover"
+                    />
+                  ) : (
+                    <div className="mb-5 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/60 px-4 py-8 text-sm font-semibold text-[#7d4d2f]">
+                      {product.imagePlaceholder}
+                    </div>
+                  )}
+
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <h2 className="text-2xl font-semibold">{product.name}</h2>
@@ -914,63 +1076,12 @@ export function ProductCrudPage({
                     </div>
 
                     {publishState ? (
-                      <div className="mt-4 rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/60 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7d4d2f]">
-                          Publish Debug
-                        </p>
-                        <div className="mt-3 grid gap-2 text-xs leading-5 text-[#5f4635]">
-                          <p>
-                            Menu item id:{" "}
-                            <span className="font-semibold text-[#241710]">
-                              {publishState.debug.menuItemId}
-                            </span>
-                          </p>
-                          <p>
-                            Menu item category:{" "}
-                            <span className="font-semibold text-[#241710]">
-                              {publishState.debug.menuItemCategoryId}
-                            </span>
-                          </p>
-                          <p>
-                            Menu item active:{" "}
-                            <span className="font-semibold text-[#241710]">
-                              {String(publishState.debug.menuItemIsActive)}
-                            </span>
-                          </p>
-                          <p>
-                            Menu item status:{" "}
-                            <span className="font-semibold text-[#241710]">
-                              {publishState.debug.menuItemStatus}
-                            </span>
-                          </p>
-                          <p>
-                            Link id:{" "}
-                            <span className="font-semibold text-[#241710]">
-                              {publishState.debug.linkId ?? "not returned"}
-                            </span>
-                          </p>
-                          <p>
-                            Link menu item id:{" "}
-                            <span className="font-semibold text-[#241710]">
-                              {publishState.debug.linkMenuItemId ??
-                                "not returned"}
-                            </span>
-                          </p>
-                          <p>
-                            Link product id:{" "}
-                            <span className="font-semibold text-[#241710]">
-                              {publishState.debug.linkProductId ??
-                                "not returned"}
-                            </span>
-                          </p>
-                          <Link
-                            href={publishState.href}
-                            className="mt-2 inline-flex text-sm font-semibold text-[#7d4d2f] transition hover:text-[#2b1a12]"
-                          >
-                            Public URL: {publishState.debug.publicUrl}
-                          </Link>
-                        </div>
-                      </div>
+                      <Link
+                        href={publishState.href}
+                        className="mt-4 inline-flex text-sm font-semibold text-[#7d4d2f] transition hover:text-[#2b1a12]"
+                      >
+                        View public menu item
+                      </Link>
                     ) : null}
                   </div>
 
@@ -992,7 +1103,17 @@ export function ProductCrudPage({
                         ? "Saving..."
                         : product.status === "active"
                           ? "Deactivate"
-                          : "Activate"}
+                            : "Activate"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => archiveProduct(product)}
+                      disabled={
+                        pendingId === product.id || product.status === "inactive"
+                      }
+                      className="min-h-11 rounded-full border border-[#3d2618]/14 px-5 text-sm font-semibold text-[#5f4635] transition hover:border-[#3d2618]/30 hover:bg-[#f6efe6]/70 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {product.status === "inactive" ? "Archived" : "Archive"}
                     </button>
                   </div>
                 </article>

@@ -10,6 +10,7 @@ import type {
   Product,
   ProductStatus,
   ProductType,
+  PublicFieldVisibility,
   RoastLevel,
   SpecialCategory,
   SpecialCategoryRecord,
@@ -45,6 +46,13 @@ const asStringArray = (value: unknown) =>
   Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
     : [];
+
+const asPublicFieldVisibility = (
+  value: unknown,
+): PublicFieldVisibility | undefined =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as PublicFieldVisibility)
+    : undefined;
 
 const relationIds = (row: DbRecord, relationKey: string, idKey: string) => {
   const relation = row[relationKey];
@@ -83,6 +91,7 @@ export const mapProductRow = (row: DbRecord): Product => ({
     "taste_profile_id",
   ),
   imagePlaceholder: asString(row.image_placeholder),
+  imageUrl: asOptionalString(row.image_url),
   availableFor: asString(row.available_for),
   origin: asOptionalString(row.origin),
   region: asOptionalString(row.region),
@@ -95,6 +104,7 @@ export const mapProductRow = (row: DbRecord): Product => ({
   isSeasonal: asBoolean(row.is_seasonal),
   availableFrom: asOptionalString(row.available_from),
   availableUntil: asOptionalString(row.available_until),
+  publicFieldVisibility: asPublicFieldVisibility(row.public_field_visibility),
 });
 
 export const mapMenuCategoryRow = (row: DbRecord): MenuCategory => ({
@@ -121,6 +131,7 @@ export const mapMenuItemRow = (row: DbRecord): MenuItem => ({
   ),
   recommendedFor: asString(row.recommended_for),
   imagePlaceholder: asString(row.image_placeholder),
+  imageUrl: asOptionalString(row.image_url),
   isActive: asBoolean(row.is_active),
   specialCategory: asOptionalString(row.special_category) as
     | SpecialCategory
@@ -132,6 +143,7 @@ export const mapMenuItemRow = (row: DbRecord): MenuItem => ({
   isSeasonal: asBoolean(row.is_seasonal),
   availableFrom: asOptionalString(row.available_from),
   availableUntil: asOptionalString(row.available_until),
+  publicFieldVisibility: asPublicFieldVisibility(row.public_field_visibility),
   sortOrder: asNumber(row.sort_order),
 });
 

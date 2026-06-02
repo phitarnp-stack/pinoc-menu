@@ -19,27 +19,9 @@ const normalizeSupabaseUrl = (url: string | undefined) => {
 
 export const supabaseProjectUrl = normalizeSupabaseUrl(supabaseUrl);
 
-export const supabaseRestUrl = supabaseProjectUrl
-  ? `${supabaseProjectUrl}/rest/v1`
-  : undefined;
-
 export const isSupabaseConfigured = Boolean(
   supabaseProjectUrl && supabaseAnonKey,
 );
-
-export const supabaseRuntime = "server";
-
-export const supabaseKeyPrefix = supabaseAnonKey
-  ? supabaseAnonKey.slice(0, 12)
-  : undefined;
-
-export const supabaseKeyFormat = supabaseAnonKey?.startsWith("sb_publishable_")
-  ? "starts with sb_publishable_"
-  : supabaseAnonKey?.startsWith("eyJ")
-    ? "starts with eyJ"
-    : supabaseAnonKey
-      ? "other"
-      : "missing";
 
 const getSupabaseProjectHost = () => {
   if (!supabaseProjectUrl) {

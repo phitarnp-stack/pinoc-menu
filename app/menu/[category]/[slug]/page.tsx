@@ -33,6 +33,11 @@ const formatAvailability = (product: Product) => {
   }`;
 };
 
+const isProductFieldVisible = (
+  product: Product,
+  field: keyof NonNullable<Product["publicFieldVisibility"]>,
+) => product.publicFieldVisibility?.[field] ?? true;
+
 const demoCustomerId = "customer-pinoc-demo";
 
 export const dynamic = "force-dynamic";
@@ -118,6 +123,14 @@ export default async function ItemPage({ params }: ItemPageProps) {
                 {item.description}
               </p>
 
+              {item.imageUrl ? (
+                <img
+                  alt={item.name}
+                  src={item.imageUrl}
+                  className="mt-8 aspect-[4/3] w-full max-w-xl rounded-lg object-cover shadow-[0_24px_58px_rgba(84,55,34,0.16)]"
+                />
+              ) : null}
+
               <div className="mt-8 rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/42 p-5 backdrop-blur">
                 <p className="text-sm leading-7 text-[#5f4635]">
                   Guest Mode is always open. Sign in with LINE to save your
@@ -171,58 +184,102 @@ export default async function ItemPage({ params }: ItemPageProps) {
                             {product.region ? `, ${product.region}` : ""}
                           </p>
                         </div>
-                        {product.roastLevel ? (
+                        {product.roastLevel &&
+                        isProductFieldVisible(product, "roastLevel") ? (
                           <span className="rounded-full bg-[#2b1a12] px-3 py-1 text-xs font-semibold text-[#fff8ed]">
                             {product.roastLevel}
                           </span>
                         ) : null}
                       </div>
+                      {product.imageUrl ? (
+                        <img
+                          alt={product.name}
+                          src={product.imageUrl}
+                          className="mt-4 aspect-[4/3] w-full rounded-lg object-cover"
+                        />
+                      ) : null}
                       <p className="mt-3 text-sm leading-6 text-[#5f4635]">
                         {product.flavorNotes.join(", ")}
                       </p>
                       <div className="mt-4 grid gap-3 border-t border-[#3d2618]/10 pt-4 text-sm leading-6 text-[#5f4635] sm:grid-cols-2">
-                        <p>
-                          <span className="font-semibold text-[#241710]">
-                            Producer / Farm:
-                          </span>{" "}
-                          {product.producer ?? "Not listed"}
-                        </p>
-                        <p>
-                          <span className="font-semibold text-[#241710]">
-                            Region:
-                          </span>{" "}
-                          {product.region ?? "Not listed"}
-                        </p>
-                        <p>
-                          <span className="font-semibold text-[#241710]">
-                            Altitude:
-                          </span>{" "}
-                          {product.altitude ?? "Not listed"}
-                        </p>
-                        <p>
-                          <span className="font-semibold text-[#241710]">
-                            Variety:
-                          </span>{" "}
-                          {product.variety ?? "Not listed"}
-                        </p>
-                        <p className="sm:col-span-2">
-                          <span className="font-semibold text-[#241710]">
-                            Brew Recommendation:
-                          </span>{" "}
-                          {product.brewRecommendation ?? "Not listed"}
-                        </p>
-                        <p>
-                          <span className="font-semibold text-[#241710]">
-                            Seasonal Availability:
-                          </span>{" "}
-                          {formatAvailability(product)}
-                        </p>
-                        <p>
-                          <span className="font-semibold text-[#241710]">
-                            Suitable Menu Usage:
-                          </span>{" "}
-                          {product.availableFor}
-                        </p>
+                        {isProductFieldVisible(product, "producer") ? (
+                          <p>
+                            <span className="font-semibold text-[#241710]">
+                              Producer / Farm:
+                            </span>{" "}
+                            {product.producer ?? "Not listed"}
+                          </p>
+                        ) : null}
+                        {isProductFieldVisible(product, "region") ? (
+                          <p>
+                            <span className="font-semibold text-[#241710]">
+                              Region:
+                            </span>{" "}
+                            {product.region ?? "Not listed"}
+                          </p>
+                        ) : null}
+                        {isProductFieldVisible(product, "altitude") ? (
+                          <p>
+                            <span className="font-semibold text-[#241710]">
+                              Altitude:
+                            </span>{" "}
+                            {product.altitude ?? "Not listed"}
+                          </p>
+                        ) : null}
+                        {isProductFieldVisible(product, "variety") ? (
+                          <p>
+                            <span className="font-semibold text-[#241710]">
+                              Variety:
+                            </span>{" "}
+                            {product.variety ?? "Not listed"}
+                          </p>
+                        ) : null}
+                        {isProductFieldVisible(product, "process") ? (
+                          <p>
+                            <span className="font-semibold text-[#241710]">
+                              Process:
+                            </span>{" "}
+                            {product.process ?? "Not listed"}
+                          </p>
+                        ) : null}
+                        {isProductFieldVisible(product, "roastLevel") ? (
+                          <p>
+                            <span className="font-semibold text-[#241710]">
+                              Roast Level:
+                            </span>{" "}
+                            {product.roastLevel ?? "Not listed"}
+                          </p>
+                        ) : null}
+                        {isProductFieldVisible(
+                          product,
+                          "brewRecommendation",
+                        ) ? (
+                          <p className="sm:col-span-2">
+                            <span className="font-semibold text-[#241710]">
+                              Brew Recommendation:
+                            </span>{" "}
+                            {product.brewRecommendation ?? "Not listed"}
+                          </p>
+                        ) : null}
+                        {isProductFieldVisible(
+                          product,
+                          "seasonalAvailability",
+                        ) ? (
+                          <p>
+                            <span className="font-semibold text-[#241710]">
+                              Seasonal Availability:
+                            </span>{" "}
+                            {formatAvailability(product)}
+                          </p>
+                        ) : null}
+                        {isProductFieldVisible(product, "availableFor") ? (
+                          <p>
+                            <span className="font-semibold text-[#241710]">
+                              Suitable Menu Usage:
+                            </span>{" "}
+                            {product.availableFor}
+                          </p>
+                        ) : null}
                       </div>
                     </div>
                   ))}
