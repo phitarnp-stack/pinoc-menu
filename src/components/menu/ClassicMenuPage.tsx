@@ -41,12 +41,6 @@ const classicGroups: ClassicGroup[] = [
 
 const normalizeName = (name: string) => name.trim().toLowerCase();
 
-const isHouseBlend = (product: Product) =>
-  product.productType === "coffee_bean" &&
-  product.status === "active" &&
-  (product.name.toLowerCase().includes("house") ||
-    product.producer?.toLowerCase().includes("house blend"));
-
 const sortByMapping = (mappings: MenuItemProduct[]) =>
   [...mappings].sort((left, right) => {
     if (left.isDefault !== right.isDefault) {
@@ -66,8 +60,12 @@ export function ClassicMenuPage({
       product.productType === "coffee_bean" && product.status === "active",
   );
   const houseBlends = activeCoffeeBeans
-    .filter(isHouseBlend)
-    .sort((left, right) => left.name.localeCompare(right.name));
+    .filter((product) => product.isHouseBlend)
+    .sort(
+      (left, right) =>
+        (left.houseBlendOrder ?? 9999) - (right.houseBlendOrder ?? 9999) ||
+        left.name.localeCompare(right.name),
+    );
   const productById = new Map(products.map((product) => [product.id, product]));
   const beanOptionsByItemId = new Map<string, Product[]>(
     items.map((item) => {

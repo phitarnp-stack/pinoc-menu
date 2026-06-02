@@ -29,8 +29,13 @@ export function HouseBlendStrip({ houseBlends }: HouseBlendStripProps) {
               className="rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/58 p-4"
             >
               <p className="text-sm font-semibold text-[#241710]">
-                {blend.name}
+                {blend.houseBlendLabel || blend.name}
               </p>
+              {blend.houseBlendLabel ? (
+                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-[#8a6a55]">
+                  {blend.name}
+                </p>
+              ) : null}
               <p className="mt-2 text-sm leading-6 text-[#5f4635]">
                 {blend.flavorNotes.slice(0, 3).join(" • ")}
               </p>

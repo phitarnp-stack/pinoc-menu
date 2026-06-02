@@ -35,6 +35,9 @@ type ProductFormState = {
   imagePlaceholder: string;
   imageUrl: string;
   availableFor: string;
+  isHouseBlend: "yes" | "no";
+  houseBlendOrder: string;
+  houseBlendLabel: string;
   origin: string;
   region: string;
   producer: string;
@@ -139,6 +142,9 @@ const makeDefaultFormState = (
   imagePlaceholder: "",
   imageUrl: "",
   availableFor: "",
+  isHouseBlend: "no",
+  houseBlendOrder: "",
+  houseBlendLabel: "",
   origin: "",
   region: "",
   producer: "",
@@ -300,7 +306,16 @@ export function ProductCrudPage({
 
   const inactiveCount = products.length - activeCount;
   const isEditing = editingId !== null;
+  const isCoffeeBeanForm = formState.productType === "coffee_bean";
   const isCraftCocoaForm = formState.productType === "craft_cocoa";
+  const [showHouseBlendsOnly, setShowHouseBlendsOnly] = useState(false);
+  const visibleProducts = useMemo(
+    () =>
+      showHouseBlendsOnly
+        ? products.filter((product) => product.isHouseBlend)
+        : products,
+    [products, showHouseBlendsOnly],
+  );
   const selectedAvailableFor = useMemo(
     () => normalizeAvailableFor(formState.availableFor),
     [formState.availableFor],
@@ -389,6 +404,18 @@ export function ProductCrudPage({
       availableFor:
         formState.availableFor.trim() ||
         (isCraftCocoaForm ? "Cocoa Latte" : ""),
+      isHouseBlend:
+        formState.productType === "coffee_bean" &&
+        formState.isHouseBlend === "yes",
+      houseBlendOrder:
+        formState.productType === "coffee_bean" &&
+        formState.houseBlendOrder.trim()
+          ? Number(formState.houseBlendOrder)
+          : undefined,
+      houseBlendLabel:
+        formState.productType === "coffee_bean"
+          ? formState.houseBlendLabel.trim() || undefined
+          : undefined,
       origin: formState.origin.trim() || undefined,
       region: formState.region.trim() || undefined,
       producer: formState.producer.trim() || undefined,
@@ -455,6 +482,10 @@ export function ProductCrudPage({
       imagePlaceholder: product.imagePlaceholder,
       imageUrl: product.imageUrl ?? "",
       availableFor: product.availableFor,
+      isHouseBlend: product.isHouseBlend ? "yes" : "no",
+      houseBlendOrder:
+        product.houseBlendOrder !== undefined ? String(product.houseBlendOrder) : "",
+      houseBlendLabel: product.houseBlendLabel ?? "",
       origin: product.origin ?? "",
       region: product.region ?? "",
       producer: product.producer ?? "",
@@ -723,6 +754,64 @@ export function ProductCrudPage({
                     </select>
                   </label>
                 </div>
+
+                {isCoffeeBeanForm ? (
+                  <div className="grid gap-4 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 p-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7d4d2f]">
+                        House Blend Settings
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-[#5f4635]">
+                        Show this bean in the Classic Menu House Blend section.
+                      </p>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-[1fr_0.7fr]">
+                      <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                        Is House Blend?
+                        <select
+                          value={formState.isHouseBlend}
+                          onChange={(event) =>
+                            updateField(
+                              "isHouseBlend",
+                              event.target.value as "yes" | "no",
+                            )
+                          }
+                          className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                        >
+                          <option value="no">No</option>
+                          <option value="yes">Yes</option>
+                        </select>
+                      </label>
+
+                      <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                        Display Order
+                        <input
+                          min="0"
+                          type="number"
+                          value={formState.houseBlendOrder}
+                          onChange={(event) =>
+                            updateField("houseBlendOrder", event.target.value)
+                          }
+                          className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                          placeholder="1"
+                        />
+                      </label>
+                    </div>
+
+                    <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                      House Blend Label / Short Name
+                      <input
+                        value={formState.houseBlendLabel}
+                        onChange={(event) =>
+                          updateField("houseBlendLabel", event.target.value)
+                        }
+                        className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                        placeholder="House Blend No.1"
+                      />
+                    </label>
+                  </div>
+                ) : null}
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
@@ -1136,7 +1225,31 @@ export function ProductCrudPage({
             </form>
 
             <div className="grid gap-4">
-              {products.map((product) => {
+              {defaultProductType === "coffee_bean" ? (
+                <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-4 shadow-[0_14px_34px_rgba(84,55,34,0.1)] backdrop-blur">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7d4d2f]">
+                      Coffee Bean View
+                    </p>
+                    <p className="mt-1 text-sm leading-6 text-[#5f4635]">
+                      House Blends are shown in the Classic Menu top section.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowHouseBlendsOnly((current) => !current)}
+                    className={
+                      showHouseBlendsOnly
+                        ? "min-h-11 rounded-full bg-[#2b1a12] px-5 text-sm font-semibold text-[#fff8ed]"
+                        : "min-h-11 rounded-full border border-[#3d2618]/14 px-5 text-sm font-semibold text-[#5f4635] transition hover:bg-[#f6efe6]/70"
+                    }
+                  >
+                    {showHouseBlendsOnly ? "Showing House Blends" : "Show House Blends"}
+                  </button>
+                </div>
+              ) : null}
+
+              {visibleProducts.map((product) => {
                 const publishState = publishedMenuItems[product.id];
                 const isPublishing = pendingId === `publish-${product.id}`;
 
@@ -1179,6 +1292,11 @@ export function ProductCrudPage({
                             Seasonal
                           </span>
                         ) : null}
+                        {product.isHouseBlend ? (
+                          <span className="rounded-full border border-[#7d4d2f]/20 bg-[#fff8ed]/70 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-[#7d4d2f]">
+                            House Blend
+                          </span>
+                        ) : null}
                       </div>
                       <p className="mt-2 text-sm leading-6 text-[#5f4635]">
                         {product.flavorNotes.slice(0, 3).join(", ") ||
@@ -1190,6 +1308,11 @@ export function ProductCrudPage({
                         {product.productType === "craft_cocoa" &&
                         product.batchNumber
                           ? ` / ${product.batchNumber}`
+                          : ""}
+                        {product.productType === "coffee_bean" &&
+                        product.isHouseBlend &&
+                        product.houseBlendOrder !== undefined
+                          ? ` / House #${product.houseBlendOrder}`
                           : ""}
                       </p>
                     </div>

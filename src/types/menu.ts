@@ -95,6 +95,9 @@ export interface Product {
   imagePlaceholder: string;
   imageUrl?: string;
   availableFor: string;
+  isHouseBlend?: boolean;
+  houseBlendOrder?: number;
+  houseBlendLabel?: string;
   origin?: string;
   region?: string;
   producer?: string;
