@@ -29,6 +29,16 @@ export default async function Home() {
         menuItems.find((menuItem) => menuItem.id === mapping.menuItemId),
       )
       .find((item) => item?.isActive);
+  const heroTitle =
+    featuredSpecial?.name ?? featuredProduct?.name ?? "Seasonal Beverage Service";
+  const heroSubtitle =
+    featuredSpecial?.flavorNotes.slice(0, 3).join(" / ") ??
+    featuredProduct?.flavorNotes.slice(0, 3).join(" / ") ??
+    "Coffee / Matcha / Craft Cocoa";
+  const heroDescription =
+    heroContent.tastingNote ??
+    featuredProduct?.description ??
+    "A calm tasting experience across coffee, matcha, craft cocoa, and seasonal specials.";
 
   return (
     <main className="min-h-screen overflow-hidden bg-[#f6efe6] text-[#241710]">
@@ -64,36 +74,52 @@ export default async function Home() {
                 Explore Menu
               </Link>
               <Link
-                href="/find-your-cup"
+                href={heroContent.ctaHref ?? "/find-your-cup"}
                 className="inline-flex min-h-14 items-center justify-center rounded-full border border-[#3d2618]/20 bg-[#fff8ed]/55 px-7 text-sm font-semibold text-[#2b1a12] shadow-[0_14px_34px_rgba(84,55,34,0.12)] backdrop-blur transition hover:border-[#3d2618]/35 hover:bg-[#fff8ed]/80 focus:outline-none focus:ring-2 focus:ring-[#7d4d2f] focus:ring-offset-4 focus:ring-offset-[#f6efe6]"
               >
-                Find Your Cup
+                {heroContent.ctaLabel ?? "Find Your Cup"}
               </Link>
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-sm rounded-[1.5rem] border border-[#fff8ed]/42 bg-[#2b1a12]/78 p-4 shadow-[0_34px_90px_rgba(48,29,17,0.22)] backdrop-blur-md sm:max-w-md sm:p-5 lg:max-w-lg">
+          <div className="relative mx-auto w-full max-w-sm rounded-[1.5rem] border border-[#fff8ed]/42 bg-[#2b1a12]/82 p-4 shadow-[0_34px_90px_rgba(48,29,17,0.24)] backdrop-blur-md sm:max-w-md sm:p-5 lg:max-w-lg">
+            <div className="pointer-events-none absolute -left-8 top-10 h-24 w-24 rounded-full border border-[#ead9c2]/22" />
+            <div className="pointer-events-none absolute -right-8 bottom-20 h-32 w-32 rounded-full bg-[#b99069]/18 blur-2xl" />
             <HeroCard
               variant="large"
-              badge="Pinoc Experience"
-              title={featuredSpecial?.name ?? featuredProduct?.name ?? "Slow Beverage Service"}
-              subtitle={
-                featuredSpecial?.flavorNotes.slice(0, 3).join(", ") ??
-                featuredProduct?.flavorNotes.slice(0, 3).join(", ") ??
-                "Coffee, matcha, cocoa"
-              }
+              badge="Pinoc Tasting"
+              title={heroTitle}
+              subtitle={heroSubtitle}
               image={heroContent.imageUrl}
-              description="Pour-over clarity, cocoa warmth, matcha ceremony, and signature drinks composed like a fine dining beverage list."
+              description={heroDescription}
             />
 
-            <div className="mt-4 rounded-lg border border-[#fff8ed]/16 bg-[#fff8ed]/10 p-4 text-[#fff8ed]">
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="rounded-lg border border-[#fff8ed]/16 bg-[#fff8ed]/10 p-4 text-[#fff8ed]">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#e7caa7]">
+                  Seasonal
+                </p>
+                <p className="mt-3 text-sm leading-6 text-[#ead9c2]">
+                  {featuredProduct?.name ?? "Rotating origins"}
+                </p>
+              </div>
+              <div className="rounded-lg border border-[#fff8ed]/16 bg-[#fff8ed]/10 p-4 text-[#fff8ed]">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#e7caa7]">
+                  Special
+                </p>
+                <p className="mt-3 text-sm leading-6 text-[#ead9c2]">
+                  {featuredSpecial?.name ?? "Signature beverage"}
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-lg border border-[#fff8ed]/16 bg-[#fff8ed]/8 p-4 text-[#fff8ed]">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#e7caa7]">
-                Today at Pinoc
+                Discovery Note
               </p>
               <p className="mt-3 text-sm leading-6 text-[#ead9c2]">
-                {featuredProduct
-                  ? `${featuredProduct.name}: ${featuredProduct.description}`
-                  : "A calm tasting experience across coffee, matcha, craft cocoa, and seasonal specials."}
+                Fine-dining beverage logic, translated into a cup that feels
+                personal rather than technical.
               </p>
             </div>
           </div>

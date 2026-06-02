@@ -16,6 +16,9 @@ type HeroFormState = {
   title: string;
   subtitle: string;
   imageUrl: string;
+  tastingNote: string;
+  ctaLabel: string;
+  ctaHref: string;
   featuredProductId: string;
   featuredSpecialId: string;
 };
@@ -29,6 +32,9 @@ export function HeroContentForm({
     title: initialHeroContent.title,
     subtitle: initialHeroContent.subtitle,
     imageUrl: initialHeroContent.imageUrl ?? "",
+    tastingNote: initialHeroContent.tastingNote ?? "",
+    ctaLabel: initialHeroContent.ctaLabel ?? "Find Your Cup",
+    ctaHref: initialHeroContent.ctaHref ?? "/find-your-cup",
     featuredProductId: initialHeroContent.featuredProductId ?? "",
     featuredSpecialId: initialHeroContent.featuredSpecialId ?? "",
   });
@@ -48,6 +54,9 @@ export function HeroContentForm({
       title: formState.title.trim(),
       subtitle: formState.subtitle.trim(),
       imageUrl: formState.imageUrl.trim() || undefined,
+      tastingNote: formState.tastingNote.trim() || undefined,
+      ctaLabel: formState.ctaLabel.trim() || "Find Your Cup",
+      ctaHref: formState.ctaHref.trim() || "/find-your-cup",
       featuredProductId: formState.featuredProductId || undefined,
       featuredSpecialId: formState.featuredSpecialId || undefined,
     };
@@ -161,6 +170,50 @@ export function HeroContentForm({
                     Fallback editorial visual will be shown.
                   </div>
                 ) : null}
+
+                <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                  Hero Tasting Note
+                  <textarea
+                    value={formState.tastingNote}
+                    onChange={(event) =>
+                      setFormState((current) => ({
+                        ...current,
+                        tastingNote: event.target.value,
+                      }))
+                    }
+                    className="min-h-24 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 py-3 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                  />
+                </label>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    CTA Label
+                    <input
+                      value={formState.ctaLabel}
+                      onChange={(event) =>
+                        setFormState((current) => ({
+                          ...current,
+                          ctaLabel: event.target.value,
+                        }))
+                      }
+                      className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                    />
+                  </label>
+
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    CTA Link
+                    <input
+                      value={formState.ctaHref}
+                      onChange={(event) =>
+                        setFormState((current) => ({
+                          ...current,
+                          ctaHref: event.target.value,
+                        }))
+                      }
+                      className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                    />
+                  </label>
+                </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">

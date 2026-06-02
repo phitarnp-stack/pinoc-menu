@@ -13,7 +13,9 @@ import type {
   ProductType,
   PublicFieldVisibility,
   RecommendationAdventureLevel,
+  RecommendationComfortLevel,
   RecommendationDrinkType,
+  RecommendationFlavorPreference,
   RecommendationFeelingTag,
   RoastLevel,
   SpecialCategory,
@@ -170,6 +172,13 @@ export const mapMenuItemRow = (row: DbRecord): MenuItem => ({
     | RecommendationAdventureLevel
     | undefined,
   bodyLevel: asOptionalNumber(row.body_level),
+  flavorPreferences: asStringArray(
+    row.flavor_preferences,
+  ) as RecommendationFlavorPreference[],
+  comfortLevel: asOptionalString(row.comfort_level) as
+    | RecommendationComfortLevel
+    | undefined,
+  intensityLevel: asOptionalNumber(row.intensity_level),
   sortOrder: asNumber(row.sort_order),
 });
 
@@ -248,6 +257,9 @@ export const mapHeroContentRow = (row: DbRecord): HeroContent => ({
   title: asString(row.title),
   subtitle: asString(row.subtitle),
   imageUrl: asOptionalString(row.image_url),
+  tastingNote: asOptionalString(row.tasting_note),
+  ctaLabel: asOptionalString(row.cta_label),
+  ctaHref: asOptionalString(row.cta_href),
   featuredProductId: asOptionalString(row.featured_product_id),
   featuredSpecialId: asOptionalString(row.featured_special_id),
 });

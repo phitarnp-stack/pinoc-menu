@@ -31,6 +31,20 @@ export type RecommendationAdventureLevel =
   | "curious"
   | "adventurous";
 
+export type RecommendationFlavorPreference =
+  | "fruity"
+  | "citrus"
+  | "floral"
+  | "chocolatey"
+  | "nutty"
+  | "sweet_smooth";
+
+export type RecommendationComfortLevel =
+  | "comfort_zone"
+  | "something_new"
+  | "explore_origin"
+  | "surprise_me";
+
 export type PublicFieldVisibility = {
   origin?: boolean;
   producer?: boolean;
@@ -113,6 +127,9 @@ export interface MenuItem {
   feelingTags?: RecommendationFeelingTag[];
   adventureLevel?: RecommendationAdventureLevel;
   bodyLevel?: number;
+  flavorPreferences?: RecommendationFlavorPreference[];
+  comfortLevel?: RecommendationComfortLevel;
+  intensityLevel?: number;
   sortOrder: number;
 }
 
@@ -121,6 +138,9 @@ export interface HeroContent {
   title: string;
   subtitle: string;
   imageUrl?: string;
+  tastingNote?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
   featuredProductId?: string;
   featuredSpecialId?: string;
 }

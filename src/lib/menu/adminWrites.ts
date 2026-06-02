@@ -6,6 +6,7 @@ import type {
   MenuItem,
   Product,
   RecommendationDrinkType,
+  RecommendationFlavorPreference,
   RecommendationFeelingTag,
 } from "@/src/types/menu";
 
@@ -83,6 +84,9 @@ const menuItemRow = (item: MenuItem) => ({
   feeling_tags: item.feelingTags ?? [],
   adventure_level: nullable(item.adventureLevel),
   body_level: item.bodyLevel ?? null,
+  flavor_preferences: item.flavorPreferences ?? [],
+  comfort_level: nullable(item.comfortLevel),
+  intensity_level: item.intensityLevel ?? null,
   sort_order: item.sortOrder,
 });
 
@@ -119,6 +123,9 @@ const heroContentRow = (heroContent: HeroContent) => ({
   title: heroContent.title,
   subtitle: heroContent.subtitle,
   image_url: nullable(heroContent.imageUrl),
+  tasting_note: heroContent.tastingNote ?? "",
+  cta_label: heroContent.ctaLabel ?? "Find Your Cup",
+  cta_href: heroContent.ctaHref ?? "/find-your-cup",
   featured_product_id: nullable(heroContent.featuredProductId),
   featured_special_id: nullable(heroContent.featuredSpecialId),
 });
@@ -185,6 +192,9 @@ const buildMenuItemFromProduct = (
   feelingTags: inferFeelingTags(product),
   adventureLevel: product.isSeasonal ? "curious" : "familiar",
   bodyLevel: inferBodyLevel(product),
+  flavorPreferences: inferFlavorPreferences(product),
+  comfortLevel: product.isSeasonal ? "something_new" : "comfort_zone",
+  intensityLevel: inferBodyLevel(product),
   sortOrder: 1000,
 });
 
@@ -260,6 +270,41 @@ const inferBodyLevel = (product: Product) => {
   }
 
   return 3;
+};
+
+const inferFlavorPreferences = (
+  product: Product,
+): RecommendationFlavorPreference[] => {
+  const text = [product.name, product.description, ...product.flavorNotes]
+    .join(" ")
+    .toLowerCase();
+  const preferences: RecommendationFlavorPreference[] = [];
+
+  if (/fruit|strawberry|peach|apple|cherry|juicy/.test(text)) {
+    preferences.push("fruity");
+  }
+
+  if (/citrus|orange|mandarin|lemon|grapefruit/.test(text)) {
+    preferences.push("citrus");
+  }
+
+  if (/floral|jasmine|blossom|rose|geisha/.test(text)) {
+    preferences.push("floral");
+  }
+
+  if (/cocoa|cacao|chocolate|malt|molasses/.test(text)) {
+    preferences.push("chocolatey");
+  }
+
+  if (/nut|almond|hazelnut|macadamia/.test(text)) {
+    preferences.push("nutty");
+  }
+
+  if (/honey|caramel|sweet|cream|smooth|vanilla/.test(text)) {
+    preferences.push("sweet_smooth");
+  }
+
+  return preferences.length > 0 ? preferences : ["sweet_smooth"];
 };
 
 const productMenuHref = (categoryId: ProductMenuCategoryId, slug: string) =>

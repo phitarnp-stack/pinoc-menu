@@ -7,7 +7,9 @@ import type {
   MenuItem,
   MenuLabel,
   RecommendationAdventureLevel,
+  RecommendationComfortLevel,
   RecommendationDrinkType,
+  RecommendationFlavorPreference,
   RecommendationFeelingTag,
   SpecialCategory,
   TasteProfile,
@@ -45,6 +47,9 @@ type MenuItemFormState = {
   feelingTags: RecommendationFeelingTag[];
   adventureLevel: "" | RecommendationAdventureLevel;
   bodyLevel: string;
+  flavorPreferences: RecommendationFlavorPreference[];
+  comfortLevel: "" | RecommendationComfortLevel;
+  intensityLevel: string;
 };
 
 const specialCategoryOptions: {
@@ -95,6 +100,28 @@ const adventureLevelOptions: {
   { label: "Adventurous", value: "adventurous" },
 ];
 
+const flavorPreferenceOptions: {
+  label: string;
+  value: RecommendationFlavorPreference;
+}[] = [
+  { label: "Fruity", value: "fruity" },
+  { label: "Citrus", value: "citrus" },
+  { label: "Floral", value: "floral" },
+  { label: "Chocolatey", value: "chocolatey" },
+  { label: "Nutty", value: "nutty" },
+  { label: "Sweet & Smooth", value: "sweet_smooth" },
+];
+
+const comfortLevelOptions: {
+  label: string;
+  value: RecommendationComfortLevel;
+}[] = [
+  { label: "Comfort Zone", value: "comfort_zone" },
+  { label: "Something New", value: "something_new" },
+  { label: "Explore Origin", value: "explore_origin" },
+  { label: "Surprise Me", value: "surprise_me" },
+];
+
 const makeDefaultFormState = (
   menuCategories: MenuCategory[],
   fixedCategoryId?: string,
@@ -118,6 +145,9 @@ const makeDefaultFormState = (
   feelingTags: [],
   adventureLevel: "",
   bodyLevel: "3",
+  flavorPreferences: [],
+  comfortLevel: "",
+  intensityLevel: "3",
 });
 
 const normalizeNotes = (notes: string) =>
@@ -213,6 +243,9 @@ export function MenuItemCrudPage({
       feelingTags: formState.feelingTags,
       adventureLevel: formState.adventureLevel || undefined,
       bodyLevel: Number(formState.bodyLevel),
+      flavorPreferences: formState.flavorPreferences,
+      comfortLevel: formState.comfortLevel || undefined,
+      intensityLevel: Number(formState.intensityLevel),
       sortOrder: existingItem?.sortOrder ?? items.length + 1,
     };
 
@@ -270,6 +303,9 @@ export function MenuItemCrudPage({
       feelingTags: item.feelingTags ?? [],
       adventureLevel: item.adventureLevel ?? "",
       bodyLevel: String(item.bodyLevel ?? 3),
+      flavorPreferences: item.flavorPreferences ?? [],
+      comfortLevel: item.comfortLevel ?? "",
+      intensityLevel: String(item.intensityLevel ?? 3),
     });
   };
 
@@ -357,6 +393,17 @@ export function MenuItemCrudPage({
       feelingTags: current.feelingTags.includes(feelingTag)
         ? current.feelingTags.filter((tag) => tag !== feelingTag)
         : [...current.feelingTags, feelingTag],
+    }));
+  };
+
+  const toggleFlavorPreference = (
+    flavorPreference: RecommendationFlavorPreference,
+  ) => {
+    setFormState((current) => ({
+      ...current,
+      flavorPreferences: current.flavorPreferences.includes(flavorPreference)
+        ? current.flavorPreferences.filter((tag) => tag !== flavorPreference)
+        : [...current.flavorPreferences, flavorPreference],
     }));
   };
 
@@ -655,6 +702,87 @@ export function MenuItemCrudPage({
                       <span>Very Heavy</span>
                     </div>
                   </div>
+
+                  <div className="grid gap-2">
+                    <p className="text-sm font-semibold text-[#5f4635]">
+                      Flavor Preferences
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {flavorPreferenceOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => toggleFlavorPreference(option.value)}
+                          className={
+                            formState.flavorPreferences.includes(option.value)
+                              ? "rounded-full bg-[#2b1a12] px-4 py-2 text-sm font-semibold text-[#fff8ed]"
+                              : "rounded-full border border-[#3d2618]/14 px-4 py-2 text-sm font-semibold text-[#5f4635]"
+                          }
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <p className="text-sm font-semibold text-[#5f4635]">
+                      Customer Journey
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {comfortLevelOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() =>
+                            setFormState((current) => ({
+                              ...current,
+                              comfortLevel: option.value,
+                            }))
+                          }
+                          className={
+                            formState.comfortLevel === option.value
+                              ? "rounded-full bg-[#2b1a12] px-4 py-2 text-sm font-semibold text-[#fff8ed]"
+                              : "rounded-full border border-[#3d2618]/14 px-4 py-2 text-sm font-semibold text-[#5f4635]"
+                          }
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <div className="flex items-center justify-between gap-4">
+                      <p className="text-sm font-semibold text-[#5f4635]">
+                        Intensity
+                      </p>
+                      <p className="text-xs font-semibold text-[#7d4d2f]">
+                        {formState.intensityLevel}/5
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-5 gap-2">
+                      {[1, 2, 3, 4, 5].map((level) => (
+                        <button
+                          key={level}
+                          type="button"
+                          onClick={() =>
+                            setFormState((current) => ({
+                              ...current,
+                              intensityLevel: String(level),
+                            }))
+                          }
+                          className={
+                            formState.intensityLevel === String(level)
+                              ? "min-h-10 rounded-full bg-[#2b1a12] text-sm font-semibold text-[#fff8ed]"
+                              : "min-h-10 rounded-full border border-[#3d2618]/14 text-sm font-semibold text-[#5f4635]"
+                          }
+                        >
+                          {level}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
@@ -904,6 +1032,16 @@ export function MenuItemCrudPage({
                           Body {item.bodyLevel}/5
                         </span>
                       ) : null}
+                      {item.comfortLevel ? (
+                        <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
+                          {optionLabel(comfortLevelOptions, item.comfortLevel)}
+                        </span>
+                      ) : null}
+                      {item.intensityLevel ? (
+                        <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
+                          Intensity {item.intensityLevel}/5
+                        </span>
+                      ) : null}
                     </div>
                     {item.feelingTags && item.feelingTags.length > 0 ? (
                       <div className="mt-4 flex flex-wrap gap-2">
@@ -913,6 +1051,19 @@ export function MenuItemCrudPage({
                             className="rounded-full bg-[#7d4d2f]/12 px-3 py-1 text-xs font-semibold text-[#7d4d2f]"
                           >
                             {optionLabel(feelingTagOptions, tag)}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                    {item.flavorPreferences &&
+                    item.flavorPreferences.length > 0 ? (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {item.flavorPreferences.map((tag) => (
+                          <span
+                            key={tag}
+                            className="rounded-full bg-[#2b1a12]/8 px-3 py-1 text-xs font-semibold text-[#5f4635]"
+                          >
+                            {optionLabel(flavorPreferenceOptions, tag)}
                           </span>
                         ))}
                       </div>
