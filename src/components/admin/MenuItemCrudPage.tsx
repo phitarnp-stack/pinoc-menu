@@ -253,13 +253,14 @@ export function MenuItemCrudPage({
 
     try {
       const result = await saveMenuItem(nextItem, editingId ? "edit" : "create");
+      const savedItem = result.menuItem ?? nextItem;
 
       if (editingId) {
         setItems((current) =>
-          current.map((item) => (item.id === editingId ? nextItem : item)),
+          current.map((item) => (item.id === editingId ? savedItem : item)),
         );
       } else {
-        setItems((current) => [nextItem, ...current]);
+        setItems((current) => [savedItem, ...current]);
       }
 
       setFeedback(

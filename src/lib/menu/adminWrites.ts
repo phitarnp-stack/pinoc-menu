@@ -1,6 +1,7 @@
 "use client";
 
 import { createBrowserSupabaseClient } from "@/src/lib/supabase/client";
+import { mapMenuItemRow } from "@/src/lib/menu/repositories/mappers";
 import type {
   HeroContent,
   MenuItem,
@@ -21,6 +22,7 @@ export type ProductMenuCategoryId =
 export type AdminWriteResult = {
   source: "supabase" | "mock";
   warning?: string;
+  menuItem?: MenuItem;
 };
 
 export type PublishProductResult = AdminWriteResult & {
@@ -517,6 +519,36 @@ const replaceMenuItemTasteProfiles = async (
   }
 };
 
+const loadSavedMenuItem = async (
+  supabase: NonNullable<ReturnType<typeof createBrowserSupabaseClient>>,
+  item: MenuItem,
+) => {
+  const result = await supabase
+    .from("menu_items")
+    .select("*, menu_item_taste_profiles(taste_profile_id)")
+    .eq("id", item.id)
+    .maybeSingle();
+
+  if (result.error) {
+    throw new Error(
+      formatSupabaseError("Loading saved menu item", result.error),
+    );
+  }
+
+  if (!result.data) {
+    throw new Error(
+      `Saving menu item failed: Supabase did not return a row for id "${item.id}".`,
+    );
+  }
+
+  return {
+    ...mapMenuItemRow(result.data),
+    specialCategory: item.specialCategory,
+    visibility: item.visibility,
+    menuLabel: item.menuLabel,
+  };
+};
+
 const saveSpecialMapping = async (
   supabase: NonNullable<ReturnType<typeof createBrowserSupabaseClient>>,
   item: MenuItem,
@@ -553,15 +585,27 @@ export async function saveMenuItem(
     return mockWriteResult;
   }
 
+  const row = menuItemRow(item);
   const query =
     mode === "create"
-      ? supabase.from("menu_items").insert(menuItemRow(item))
-      : supabase.from("menu_items").update(menuItemRow(item)).eq("id", item.id);
+      ? supabase.from("menu_items").insert(row).select("id").single()
+      : supabase
+          .from("menu_items")
+          .update(row)
+          .eq("id", item.id)
+          .select("id")
+          .maybeSingle();
 
-  const { error } = await query;
+  const result = await query;
 
-  if (error) {
-    throw new Error(formatSupabaseError("Saving menu item", error));
+  if (result.error) {
+    throw new Error(formatSupabaseError("Saving menu item", result.error));
+  }
+
+  if (!result.data) {
+    throw new Error(
+      `Saving menu item failed: no Supabase row matched id "${item.id}".`,
+    );
   }
 
   await replaceMenuItemTasteProfiles(supabase, item);
@@ -570,7 +614,10 @@ export async function saveMenuItem(
     await saveSpecialMapping(supabase, item);
   }
 
-  return { source: "supabase" };
+  return {
+    source: "supabase",
+    menuItem: await loadSavedMenuItem(supabase, item),
+  };
 }
 
 export async function updateMenuItemStatus(
