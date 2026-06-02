@@ -24,6 +24,7 @@ import type {
 } from "@/src/types/menu";
 import { AdminBackLink } from "./AdminBackLink";
 import { ImageUploadField } from "./ImageUploadField";
+import { QRStampPanel } from "./QRStampPanel";
 import { HeroImageFrame } from "@/src/components/media/HeroImageFrame";
 
 type MenuItemCrudPageProps = {
@@ -1421,6 +1422,7 @@ export function MenuItemCrudPage({
                         </p>
                       </div>
                     </div>
+                    <QRStampPanel menuItemId={item.id} />
 
                     <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                       <button

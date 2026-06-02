@@ -11,7 +11,72 @@ import { deriveFlavorCollections, deriveOriginCollections } from "@/src/lib/pass
 import { readPassport } from "@/src/lib/passport/storage";
 import type { GuestPassport } from "@/src/types/passport";
 
-export function PassportDashboard() {
+type PassportDashboardProps = {
+  totalPublishedMenuItems: number;
+};
+
+const percent = (value: number, total: number) =>
+  total > 0 ? Math.round((value / total) * 100) : 0;
+
+const peaceOfMindRank = (verifiedPercent: number) => {
+  if (verifiedPercent >= 90) {
+    return {
+      name: "The Peaceful One",
+      description: "At home among the stories.",
+    };
+  }
+
+  if (verifiedPercent >= 70) {
+    return {
+      name: "The Keeper",
+      description: "Carrying many quiet moments with you.",
+    };
+  }
+
+  if (verifiedPercent >= 50) {
+    return {
+      name: "The Reflector",
+      description: "Taking time to understand each story.",
+    };
+  }
+
+  if (verifiedPercent >= 30) {
+    return {
+      name: "The Listener",
+      description: "Learning to notice the details.",
+    };
+  }
+
+  if (verifiedPercent >= 15) {
+    return {
+      name: "The Explorer",
+      description: "Finding new paths through Pinoc.",
+    };
+  }
+
+  if (verifiedPercent >= 5) {
+    return {
+      name: "The Seeker",
+      description: "Looking for something meaningful.",
+    };
+  }
+
+  if (verifiedPercent >= 1) {
+    return {
+      name: "The Wanderer",
+      description: "Beginning to slow down.",
+    };
+  }
+
+  return {
+    name: "New Guest",
+    description: "Your quiet journey is just beginning.",
+  };
+};
+
+export function PassportDashboard({
+  totalPublishedMenuItems,
+}: PassportDashboardProps) {
   const [passport, setPassport] = useState<GuestPassport | null>(null);
 
   useEffect(() => {
@@ -30,6 +95,28 @@ export function PassportDashboard() {
     () => deriveFlavorCollections(passport?.entries ?? []),
     [passport],
   );
+  const collectedMenuItemIds = useMemo(
+    () => new Set(passport?.entries.map((entry) => entry.menuItemId) ?? []),
+    [passport],
+  );
+  const verifiedMenuItemIds = useMemo(
+    () =>
+      new Set(
+        passport?.entries
+          .filter((entry) => entry.status === "verified")
+          .map((entry) => entry.menuItemId) ?? [],
+      ),
+    [passport],
+  );
+  const collectedPercent = percent(
+    collectedMenuItemIds.size,
+    totalPublishedMenuItems,
+  );
+  const verifiedPercent = percent(
+    verifiedMenuItemIds.size,
+    totalPublishedMenuItems,
+  );
+  const rank = peaceOfMindRank(verifiedPercent);
 
   if (!passport) {
     return (
@@ -57,16 +144,37 @@ export function PassportDashboard() {
         <h2 className="mt-3 text-2xl font-semibold">
           A gentle record of what you are discovering.
         </h2>
+        <div className="mt-5 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/58 p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7d4d2f]">
+            Peace of Mind
+          </p>
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-3xl font-semibold">{rank.name}</p>
+              <p className="mt-2 text-sm leading-6 text-[#5f4635]">
+                {rank.description}
+              </p>
+            </div>
+            <div className="grid gap-1 text-sm font-semibold text-[#5f4635]">
+              <span>Collected: {collectedPercent}%</span>
+              <span>Verified: {verifiedPercent}%</span>
+            </div>
+          </div>
+          <p className="mt-4 text-sm leading-7 text-[#5f4635]">
+            Collected cups are moments you saved. Verified discoveries are cups
+            you stamped at Pinoc.
+          </p>
+        </div>
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <SummaryCard
-            label="Total experiences"
-            value={passport.entries.length}
+            label="Collected discoveries"
+            value={collectedMenuItemIds.size}
           />
           <SummaryCard label="Origins met" value={origins.length} />
           <SummaryCard label="Flavors noticed" value={flavors.length} />
           <SummaryCard
-            label="Badges earned"
-            value={passport.badgeAwards.length}
+            label="Verified discoveries"
+            value={verifiedMenuItemIds.size}
           />
         </div>
       </section>

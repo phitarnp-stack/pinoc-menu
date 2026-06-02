@@ -1,10 +1,14 @@
 import { PassportDashboard } from "@/src/components/passport/PassportDashboard";
 import { PublicBackLink } from "@/src/components/navigation/PublicBackLink";
 import { PublicHeader } from "@/src/components/navigation/PublicHeader";
+import { getMenuItems } from "@/src/lib/menu/repositories";
 
 export const dynamic = "force-dynamic";
 
-export default function PassportPage() {
+export default async function PassportPage() {
+  const menuItems = await getMenuItems();
+  const totalPublishedMenuItems = menuItems.filter((item) => item.isActive).length;
+
   return (
     <main className="min-h-screen bg-[#f6efe6] text-[#241710]">
       <PublicHeader />
@@ -27,7 +31,7 @@ export default function PassportPage() {
             </p>
           </div>
 
-          <PassportDashboard />
+          <PassportDashboard totalPublishedMenuItems={totalPublishedMenuItems} />
         </div>
       </section>
     </main>

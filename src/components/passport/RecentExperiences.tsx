@@ -8,6 +8,9 @@ const formatDate = (date: string) =>
     year: "numeric",
   }).format(new Date(date));
 
+const statusLabel = (entry: PassportEntry) =>
+  entry.status === "verified" ? "Verified Discovery" : "Collected";
+
 export function RecentExperiences({ entries }: { entries: PassportEntry[] }) {
   return (
     <section className="rounded-[1.25rem] border border-[#3d2618]/10 bg-[#fff8ed]/48 p-6 shadow-[0_14px_42px_rgba(84,55,34,0.08)] backdrop-blur">
@@ -45,9 +48,25 @@ export function RecentExperiences({ entries }: { entries: PassportEntry[] }) {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7d4d2f]">
                   {entry.categoryName} · {formatDate(entry.triedAt)}
                 </p>
-                <h3 className="mt-2 text-xl font-semibold">
-                  {entry.nameSnapshot}
-                </h3>
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <h3 className="text-xl font-semibold">
+                    {entry.nameSnapshot}
+                  </h3>
+                  <span
+                    className={
+                      entry.status === "verified"
+                        ? "rounded-full bg-[#2b1a12] px-3 py-1 text-xs font-semibold text-[#fff8ed]"
+                        : "rounded-full border border-[#3d2618]/14 px-3 py-1 text-xs font-semibold text-[#7d4d2f]"
+                    }
+                  >
+                    {statusLabel(entry)}
+                  </span>
+                </div>
+                {entry.status === "verified" && entry.verifiedAt ? (
+                  <p className="mt-2 text-xs font-semibold uppercase tracking-[0.16em] text-[#8a6a55]">
+                    Stamped {formatDate(entry.verifiedAt)}
+                  </p>
+                ) : null}
                 <p className="mt-2 text-sm leading-6 text-[#5f4635]">
                   {entry.flavorNotes.slice(0, 4).join(", ")}
                 </p>

@@ -9,6 +9,12 @@ import type {
 
 export type PassportSyncStatus = "local_only" | "ready_for_sync" | "synced";
 
+export type PassportEntryStatus = "collected" | "verified";
+
+export type PassportVerificationMethod = "qr_stamp";
+
+export type PassportVerificationSource = "pinoc_staff" | "menu_qr";
+
 export type PassportFlavorSource =
   | "flavor_note"
   | "taste_profile"
@@ -36,6 +42,7 @@ export type PassportOriginSnapshot = {
 
 export type PassportEntry = {
   id: string;
+  status: PassportEntryStatus;
   menuItemId: string;
   productIds: string[];
   menuItemSlug: string;
@@ -47,6 +54,10 @@ export type PassportEntry = {
   imageUrlSnapshot?: string;
   priceSnapshot: number;
   triedAt: string;
+  verifiedAt?: string;
+  verificationMethod?: PassportVerificationMethod;
+  verificationCode?: string;
+  verificationSource?: PassportVerificationSource;
   note?: string;
   originSnapshots: PassportOriginSnapshot[];
   flavorNotes: string[];
