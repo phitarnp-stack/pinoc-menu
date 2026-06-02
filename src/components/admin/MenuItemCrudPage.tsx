@@ -263,6 +263,9 @@ export function MenuItemCrudPage({
     [items, menuView],
   );
   const isEditing = editingId !== null;
+  const editingItem = editingId
+    ? items.find((item) => item.id === editingId)
+    : undefined;
   const isSpecialForm = fixedCategoryId === "special";
   const imageBucket =
     isSpecialForm || formState.categoryId === "special"
@@ -613,6 +616,13 @@ export function MenuItemCrudPage({
                 >
                   {feedback.message}
                 </div>
+              ) : null}
+
+              {editingItem ? (
+                <QRStampPanel
+                  className="mt-5"
+                  menuItemId={editingItem.id}
+                />
               ) : null}
 
               <div className="mt-7 grid gap-4">
@@ -1422,8 +1432,6 @@ export function MenuItemCrudPage({
                         </p>
                       </div>
                     </div>
-                    <QRStampPanel menuItemId={item.id} />
-
                     <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                       <button
                         type="button"
@@ -1431,6 +1439,13 @@ export function MenuItemCrudPage({
                         className="min-h-11 rounded-full border border-[#3d2618]/14 px-5 text-sm font-semibold text-[#5f4635] transition hover:border-[#3d2618]/30 hover:bg-[#f6efe6]/70"
                       >
                         Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => editItem(item)}
+                        className="min-h-11 rounded-full border border-[#7d4d2f]/20 bg-[#fff8ed]/70 px-5 text-sm font-semibold text-[#7d4d2f] transition hover:border-[#7d4d2f]/35 hover:bg-[#f6efe6]/70"
+                      >
+                        QR Stamp
                       </button>
                       <button
                         type="button"

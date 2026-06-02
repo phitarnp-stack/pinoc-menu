@@ -3,10 +3,11 @@
 import { useState } from "react";
 
 type QRStampPanelProps = {
+  className?: string;
   menuItemId: string;
 };
 
-export function QRStampPanel({ menuItemId }: QRStampPanelProps) {
+export function QRStampPanel({ className = "", menuItemId }: QRStampPanelProps) {
   const [origin] = useState(() =>
     typeof window === "undefined" ? "" : window.location.origin,
   );
@@ -21,14 +22,20 @@ export function QRStampPanel({ menuItemId }: QRStampPanelProps) {
   };
 
   return (
-    <div className="mt-4 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 p-4">
+    <div
+      className={`rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 p-4 ${className}`}
+    >
       <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7d4d2f]">
         QR Stamp
       </p>
       <p className="mt-2 text-sm leading-6 text-[#5f4635]">
-        Print or display this QR for guests after serving this drink.
+        Print or display this QR after serving this drink so guests can stamp
+        My Cup.
       </p>
       <div className="mt-4 rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/70 p-3">
+        <p className="mb-2 text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[#8a6a55]">
+          QR Stamp URL
+        </p>
         <p className="break-all text-sm font-semibold text-[#241710]">
           {stampUrl}
         </p>
