@@ -1,7 +1,11 @@
 "use client";
 
 import { FormEvent, useMemo, useState } from "react";
-import { saveMenuItem, updateMenuItemStatus } from "@/src/lib/menu/adminWrites";
+import {
+  deleteMenuItem,
+  saveMenuItem,
+  updateMenuItemStatus,
+} from "@/src/lib/menu/adminWrites";
 import type {
   MenuCategory,
   MenuItem,
@@ -12,6 +16,7 @@ import type {
   RecommendationFlavorPreference,
   RecommendationFeelingTag,
   SpecialCategory,
+  StoryStatus,
   TasteProfile,
   VisibilityStatus,
 } from "@/src/types/menu";
@@ -26,6 +31,8 @@ type MenuItemCrudPageProps = {
   tasteProfiles: TasteProfile[];
   fixedCategoryId?: string;
 };
+
+type AdminMenuView = "active" | "archived";
 
 type MenuItemFormState = {
   name: string;
@@ -50,6 +57,12 @@ type MenuItemFormState = {
   flavorPreferences: RecommendationFlavorPreference[];
   comfortLevel: "" | RecommendationComfortLevel;
   intensityLevel: string;
+  storyStatus: StoryStatus;
+  storyTitle: string;
+  storyDescription: string;
+  servingRitual: string;
+  whyWeCreatedIt: string;
+  bestFor: string;
 };
 
 const specialCategoryOptions: {
@@ -148,6 +161,12 @@ const makeDefaultFormState = (
   flavorPreferences: [],
   comfortLevel: "",
   intensityLevel: "3",
+  storyStatus: "default",
+  storyTitle: "",
+  storyDescription: "",
+  servingRitual: "",
+  whyWeCreatedIt: "",
+  bestFor: "",
 });
 
 const normalizeNotes = (notes: string) =>
@@ -168,11 +187,6 @@ const createId = (name: string) =>
 
 const formatPrice = (price: number) => `฿${price}`;
 
-const optionLabel = <Value extends string>(
-  options: { label: string; value: Value }[],
-  value: Value | undefined,
-) => options.find((option) => option.value === value)?.label ?? value;
-
 export function MenuItemCrudPage({
   title,
   description,
@@ -191,10 +205,19 @@ export function MenuItemCrudPage({
     message: string;
   } | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [menuView, setMenuView] = useState<AdminMenuView>("active");
 
   const activeCount = useMemo(
     () => items.filter((item) => item.isActive).length,
     [items],
+  );
+  const archivedCount = items.length - activeCount;
+  const visibleItems = useMemo(
+    () =>
+      items.filter((item) =>
+        menuView === "active" ? item.isActive : !item.isActive,
+      ),
+    [items, menuView],
   );
   const isEditing = editingId !== null;
   const isSpecialForm = fixedCategoryId === "special";
@@ -246,6 +269,12 @@ export function MenuItemCrudPage({
       flavorPreferences: formState.flavorPreferences,
       comfortLevel: formState.comfortLevel || undefined,
       intensityLevel: Number(formState.intensityLevel),
+      storyStatus: formState.storyStatus,
+      storyTitle: formState.storyTitle.trim() || undefined,
+      storyDescription: formState.storyDescription.trim() || undefined,
+      servingRitual: formState.servingRitual.trim() || undefined,
+      whyWeCreatedIt: formState.whyWeCreatedIt.trim() || undefined,
+      bestFor: normalizeNotes(formState.bestFor),
       sortOrder: existingItem?.sortOrder ?? items.length + 1,
     };
 
@@ -307,6 +336,12 @@ export function MenuItemCrudPage({
       flavorPreferences: item.flavorPreferences ?? [],
       comfortLevel: item.comfortLevel ?? "",
       intensityLevel: String(item.intensityLevel ?? 3),
+      storyStatus: item.storyStatus ?? "default",
+      storyTitle: item.storyTitle ?? "",
+      storyDescription: item.storyDescription ?? "",
+      servingRitual: item.servingRitual ?? "",
+      whyWeCreatedIt: item.whyWeCreatedIt ?? "",
+      bestFor: item.bestFor?.join(", ") ?? "",
     });
   };
 
@@ -377,6 +412,51 @@ export function MenuItemCrudPage({
     }
 
     await toggleStatus(item.id);
+  };
+
+  const permanentlyDeleteItem = async (item: MenuItem) => {
+    const confirmed = window.confirm(
+      `Permanently delete ${item.name}? This removes the menu item and its menu/product links. Products will not be deleted.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setFeedback(null);
+    setPendingId(`delete-${item.id}`);
+
+    try {
+      const result = await deleteMenuItem(item);
+
+      setItems((current) =>
+        current.filter((currentItem) => currentItem.id !== item.id),
+      );
+      setFeedback(
+        result.source === "mock"
+          ? {
+              tone: "warning",
+              message:
+                result.warning ??
+                "Deleted locally. Supabase is unavailable for this session.",
+            }
+          : { tone: "success", message: "Menu item permanently deleted." },
+      );
+
+      if (editingId === item.id) {
+        resetForm();
+      }
+    } catch (error) {
+      setFeedback({
+        tone: "error",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Supabase delete failed. Please try again.",
+      });
+    } finally {
+      setPendingId(null);
+    }
   };
 
   const toggleTasteProfile = (tasteProfileId: string) => {
@@ -786,6 +866,115 @@ export function MenuItemCrudPage({
                   </div>
                 </div>
 
+                <div className="grid gap-4 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 p-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7d4d2f]">
+                      Drink Story
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-[#5f4635]">
+                      Leave Default for the Pinoc house story, or write a custom
+                      editorial story for this drink.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {(["default", "custom"] as StoryStatus[]).map((status) => (
+                      <button
+                        key={status}
+                        type="button"
+                        onClick={() =>
+                          setFormState((current) => ({
+                            ...current,
+                            storyStatus: status,
+                          }))
+                        }
+                        className={
+                          formState.storyStatus === status
+                            ? "rounded-full bg-[#2b1a12] px-4 py-2 text-sm font-semibold capitalize text-[#fff8ed]"
+                            : "rounded-full border border-[#3d2618]/14 px-4 py-2 text-sm font-semibold capitalize text-[#5f4635]"
+                        }
+                      >
+                        {status}
+                      </button>
+                    ))}
+                  </div>
+
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    Story Title
+                    <input
+                      value={formState.storyTitle}
+                      onChange={(event) =>
+                        setFormState((current) => ({
+                          ...current,
+                          storyTitle: event.target.value,
+                        }))
+                      }
+                      className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                      placeholder="A Journey Worth Slowing Down"
+                    />
+                  </label>
+
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    Story Description
+                    <textarea
+                      value={formState.storyDescription}
+                      onChange={(event) =>
+                        setFormState((current) => ({
+                          ...current,
+                          storyDescription: event.target.value,
+                        }))
+                      }
+                      className="min-h-24 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 py-3 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                      placeholder="A cup designed to reveal its character gradually."
+                    />
+                  </label>
+
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    Serving Ritual
+                    <textarea
+                      value={formState.servingRitual}
+                      onChange={(event) =>
+                        setFormState((current) => ({
+                          ...current,
+                          servingRitual: event.target.value,
+                        }))
+                      }
+                      className="min-h-24 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 py-3 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                      placeholder="Served with intention. Notice the aroma before the first sip."
+                    />
+                  </label>
+
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    Why We Created It
+                    <textarea
+                      value={formState.whyWeCreatedIt}
+                      onChange={(event) =>
+                        setFormState((current) => ({
+                          ...current,
+                          whyWeCreatedIt: event.target.value,
+                        }))
+                      }
+                      className="min-h-24 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 py-3 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                      placeholder="We believe every drink deserves a story."
+                    />
+                  </label>
+
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    Best For
+                    <input
+                      value={formState.bestFor}
+                      onChange={(event) =>
+                        setFormState((current) => ({
+                          ...current,
+                          bestFor: event.target.value,
+                        }))
+                      }
+                      className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                      placeholder="Slow moments, Curious minds, Meaningful conversations"
+                    />
+                  </label>
+                </div>
+
                 <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
                   Recommended For
                   <input
@@ -952,7 +1141,35 @@ export function MenuItemCrudPage({
             </form>
 
             <div className="grid gap-4">
-              {items.map((item) => {
+              <div className="grid grid-cols-2 rounded-full border border-[#3d2618]/12 bg-[#fff8ed]/58 p-1 shadow-[0_14px_34px_rgba(84,55,34,0.1)] backdrop-blur">
+                {([
+                  ["active", `Active Menu Items (${activeCount})`],
+                  ["archived", `Archived Menu Items (${archivedCount})`],
+                ] as [AdminMenuView, string][]).map(([view, label]) => (
+                  <button
+                    key={view}
+                    type="button"
+                    onClick={() => setMenuView(view)}
+                    className={
+                      menuView === view
+                        ? "min-h-11 rounded-full bg-[#2b1a12] px-4 text-sm font-semibold text-[#fff8ed]"
+                        : "min-h-11 rounded-full px-4 text-sm font-semibold text-[#5f4635] transition hover:bg-[#f6efe6]/70"
+                    }
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {visibleItems.length === 0 ? (
+                <div className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-6 text-sm leading-7 text-[#5f4635] shadow-[0_14px_34px_rgba(84,55,34,0.1)] backdrop-blur">
+                  {menuView === "active"
+                    ? "No active menu items here yet."
+                    : "No archived menu items yet."}
+                </div>
+              ) : null}
+
+              {visibleItems.map((item) => {
                 const category = menuCategories.find(
                   (menuCategory) => menuCategory.id === item.categoryId,
                 );
@@ -960,131 +1177,50 @@ export function MenuItemCrudPage({
                 return (
                   <article
                     key={item.id}
-                    className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-6 shadow-[0_18px_48px_rgba(84,55,34,0.12)] backdrop-blur"
+                    className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-4 shadow-[0_14px_34px_rgba(84,55,34,0.1)] backdrop-blur"
                   >
-                    {item.imageUrl ? (
-                      <img
-                        alt={item.name}
-                        src={item.imageUrl}
-                        className="mb-5 aspect-[4/3] w-full rounded-lg object-cover"
-                      />
-                    ) : (
-                      <div className="mb-5 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/60 px-4 py-8 text-sm font-semibold text-[#7d4d2f]">
-                        {item.imagePlaceholder}
+                    <div className="grid gap-4 sm:grid-cols-[4.25rem_1fr]">
+                      <div className="h-16 w-16 overflow-hidden rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/70">
+                        {item.imageUrl ? (
+                          <img
+                            alt={item.name}
+                            src={item.imageUrl}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full items-center justify-center px-2 text-center text-[0.62rem] font-semibold uppercase leading-3 tracking-[0.12em] text-[#7d4d2f]">
+                            {item.imagePlaceholder || "Menu"}
+                          </div>
+                        )}
                       </div>
-                    )}
 
-                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <h2 className="text-2xl font-semibold">{item.name}</h2>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <h2 className="text-lg font-semibold leading-tight">
+                            {item.name}
+                          </h2>
+                          <span
+                            className={
+                              item.isActive
+                                ? "rounded-full bg-[#2b1a12] px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-[#fff8ed]"
+                                : "rounded-full bg-[#7d4d2f]/15 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-[#7d4d2f]"
+                            }
+                          >
+                            {item.isActive ? "active" : "archived"}
+                          </span>
+                        </div>
                         <p className="mt-2 text-sm leading-6 text-[#5f4635]">
-                          {item.description}
+                          {item.flavorNotes.slice(0, 3).join(", ") ||
+                            item.description}
+                        </p>
+                        <p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#8a6a55]">
+                          {category?.name ?? "Uncategorized"} /{" "}
+                          {formatPrice(item.price)}
                         </p>
                       </div>
-                      <span
-                        className={
-                          item.isActive
-                            ? "w-fit rounded-full bg-[#2b1a12] px-3 py-1 text-xs font-semibold text-[#fff8ed]"
-                            : "w-fit rounded-full bg-[#7d4d2f]/15 px-3 py-1 text-xs font-semibold text-[#7d4d2f]"
-                        }
-                      >
-                        {item.isActive ? "active" : "inactive"}
-                      </span>
                     </div>
-                    <div className="mt-5 flex flex-wrap gap-2">
-                      <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
-                        {category?.name ?? "Uncategorized"}
-                      </span>
-                      <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
-                        {formatPrice(item.price)}
-                      </span>
-                      {item.specialCategory ? (
-                        <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
-                          {specialCategoryOptions.find(
-                            (option) => option.value === item.specialCategory,
-                          )?.label ?? item.specialCategory}
-                        </span>
-                      ) : null}
-                      {item.menuLabel ? (
-                        <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#7d4d2f]">
-                          {item.menuLabel}
-                        </span>
-                      ) : null}
-                      {item.visibility ? (
-                        <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
-                          {item.visibility}
-                        </span>
-                      ) : null}
-                      {item.drinkType ? (
-                        <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
-                          {optionLabel(drinkTypeOptions, item.drinkType)}
-                        </span>
-                      ) : null}
-                      {item.adventureLevel ? (
-                        <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
-                          {optionLabel(
-                            adventureLevelOptions,
-                            item.adventureLevel,
-                          )}
-                        </span>
-                      ) : null}
-                      {item.bodyLevel ? (
-                        <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
-                          Body {item.bodyLevel}/5
-                        </span>
-                      ) : null}
-                      {item.comfortLevel ? (
-                        <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
-                          {optionLabel(comfortLevelOptions, item.comfortLevel)}
-                        </span>
-                      ) : null}
-                      {item.intensityLevel ? (
-                        <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
-                          Intensity {item.intensityLevel}/5
-                        </span>
-                      ) : null}
-                    </div>
-                    {item.feelingTags && item.feelingTags.length > 0 ? (
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {item.feelingTags.map((tag) => (
-                          <span
-                            key={tag}
-                            className="rounded-full bg-[#7d4d2f]/12 px-3 py-1 text-xs font-semibold text-[#7d4d2f]"
-                          >
-                            {optionLabel(feelingTagOptions, tag)}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-                    {item.flavorPreferences &&
-                    item.flavorPreferences.length > 0 ? (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {item.flavorPreferences.map((tag) => (
-                          <span
-                            key={tag}
-                            className="rounded-full bg-[#2b1a12]/8 px-3 py-1 text-xs font-semibold text-[#5f4635]"
-                          >
-                            {optionLabel(flavorPreferenceOptions, tag)}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-                    <p className="mt-5 text-sm leading-7 text-[#5f4635]">
-                      <span className="font-semibold text-[#241710]">
-                        Flavor:
-                      </span>{" "}
-                      {item.flavorNotes.join(", ")}
-                    </p>
-                    {item.availableFrom || item.availableUntil ? (
-                      <p className="mt-3 text-sm leading-7 text-[#5f4635]">
-                        <span className="font-semibold text-[#241710]">
-                          Dates:
-                        </span>{" "}
-                        {item.availableFrom ?? "Now"} -{" "}
-                        {item.availableUntil ?? "Open"}
-                      </p>
-                    ) : null}
-                    <div className="mt-6 flex flex-col gap-2 sm:flex-row">
+
+                    <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                       <button
                         type="button"
                         onClick={() => editItem(item)}
@@ -1111,6 +1247,16 @@ export function MenuItemCrudPage({
                         className="min-h-11 rounded-full border border-[#3d2618]/14 px-5 text-sm font-semibold text-[#5f4635] transition hover:border-[#3d2618]/30 hover:bg-[#f6efe6]/70 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         {item.isActive ? "Archive" : "Archived"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => permanentlyDeleteItem(item)}
+                        disabled={pendingId === `delete-${item.id}`}
+                        className="min-h-11 rounded-full border border-red-900/25 bg-red-50/70 px-5 text-sm font-semibold text-red-900 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        {pendingId === `delete-${item.id}`
+                          ? "Deleting..."
+                          : "Delete"}
                       </button>
                     </div>
                   </article>

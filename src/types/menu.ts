@@ -10,6 +10,8 @@ export type VisibilityStatus = "visible" | "hidden";
 
 export type MenuLabel = "new" | "seasonal" | "limited";
 
+export type StoryStatus = "default" | "custom";
+
 export type RecommendationDrinkType =
   | "coffee"
   | "milk_coffee"
@@ -83,6 +85,9 @@ export interface Product {
   origin?: string;
   region?: string;
   producer?: string;
+  batchNumber?: string;
+  season?: string;
+  percent?: string;
   altitude?: string;
   variety?: string;
   process?: string;
@@ -130,6 +135,12 @@ export interface MenuItem {
   flavorPreferences?: RecommendationFlavorPreference[];
   comfortLevel?: RecommendationComfortLevel;
   intensityLevel?: number;
+  storyStatus?: StoryStatus;
+  storyTitle?: string;
+  storyDescription?: string;
+  servingRitual?: string;
+  whyWeCreatedIt?: string;
+  bestFor?: string[];
   sortOrder: number;
 }
 

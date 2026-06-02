@@ -38,6 +38,9 @@ type ProductFormState = {
   origin: string;
   region: string;
   producer: string;
+  batchNumber: string;
+  season: string;
+  percent: string;
   altitude: string;
   variety: string;
   process: string;
@@ -139,6 +142,9 @@ const makeDefaultFormState = (
   origin: "",
   region: "",
   producer: "",
+  batchNumber: "",
+  season: "",
+  percent: "",
   altitude: "",
   variety: "",
   process: "",
@@ -274,6 +280,7 @@ export function ProductCrudPage({
     message: string;
   } | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [customAvailableFor, setCustomAvailableFor] = useState("");
   const [coffeeMenuCategoryByProductId, setCoffeeMenuCategoryByProductId] =
     useState<Record<string, ProductMenuCategoryId | "">>({});
   const [publishedMenuItems, setPublishedMenuItems] = useState<
@@ -293,7 +300,24 @@ export function ProductCrudPage({
 
   const inactiveCount = products.length - activeCount;
   const isEditing = editingId !== null;
-  const selectedAvailableFor = normalizeAvailableFor(formState.availableFor);
+  const isCraftCocoaForm = formState.productType === "craft_cocoa";
+  const selectedAvailableFor = useMemo(
+    () => normalizeAvailableFor(formState.availableFor),
+    [formState.availableFor],
+  );
+  const availableForChoices = useMemo(
+    () =>
+      Array.from(
+        new Set([
+          ...availableForOptions,
+          ...products.flatMap((product) =>
+            normalizeAvailableFor(product.availableFor),
+          ),
+          ...selectedAvailableFor,
+        ]),
+      ).filter(Boolean),
+    [products, selectedAvailableFor],
+  );
 
   const updateField = <Key extends keyof ProductFormState>(
     field: Key,
@@ -308,6 +332,7 @@ export function ProductCrudPage({
   const resetForm = () => {
     setEditingId(null);
     setFormState(makeDefaultFormState(defaultProductType));
+    setCustomAvailableFor("");
   };
 
   const toggleAvailableFor = (option: string) => {
@@ -316,6 +341,23 @@ export function ProductCrudPage({
       : [...selectedAvailableFor, option];
 
     updateField("availableFor", nextOptions.join(", "));
+  };
+
+  const addCustomAvailableFor = () => {
+    const nextOption = customAvailableFor.trim();
+
+    if (!nextOption) {
+      return;
+    }
+
+    if (!selectedAvailableFor.includes(nextOption)) {
+      updateField(
+        "availableFor",
+        [...selectedAvailableFor, nextOption].join(", "),
+      );
+    }
+
+    setCustomAvailableFor("");
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -332,15 +374,27 @@ export function ProductCrudPage({
       productType: formState.productType,
       status: formState.status,
       price: Number(formState.price),
-      description: formState.description.trim(),
+      description:
+        formState.description.trim() ||
+        (isCraftCocoaForm
+          ? normalizeNotes(formState.flavorNotes).join(", ")
+          : ""),
       flavorNotes: normalizeNotes(formState.flavorNotes),
       tasteProfileIds: [],
-      imagePlaceholder: formState.imagePlaceholder.trim(),
+      imagePlaceholder:
+        formState.imagePlaceholder.trim() ||
+        formState.name.trim() ||
+        productTypeLabel(formState.productType),
       imageUrl: formState.imageUrl.trim() || undefined,
-      availableFor: formState.availableFor.trim(),
+      availableFor:
+        formState.availableFor.trim() ||
+        (isCraftCocoaForm ? "Cocoa Latte" : ""),
       origin: formState.origin.trim() || undefined,
       region: formState.region.trim() || undefined,
       producer: formState.producer.trim() || undefined,
+      batchNumber: formState.batchNumber.trim() || undefined,
+      season: formState.season.trim() || undefined,
+      percent: formState.percent.trim() || undefined,
       altitude: formState.altitude.trim() || undefined,
       variety: formState.variety.trim() || undefined,
       process: formState.process.trim() || undefined,
@@ -404,6 +458,9 @@ export function ProductCrudPage({
       origin: product.origin ?? "",
       region: product.region ?? "",
       producer: product.producer ?? "",
+      batchNumber: product.batchNumber ?? "",
+      season: product.season ?? "",
+      percent: product.percent ?? "",
       altitude: product.altitude ?? "",
       variety: product.variety ?? "",
       process: product.process ?? "",
@@ -682,42 +739,73 @@ export function ProductCrudPage({
                     />
                   </label>
 
-                  <div className="grid gap-2">
-                    <VisibilityFieldHeader
-                      label="Roast Level"
-                      isVisible={formState.publicFieldVisibility.roastLevel}
-                      onToggle={() => togglePublicFieldVisibility("roastLevel")}
-                    />
-                    <select
-                      value={formState.roastLevel}
-                      onChange={(event) =>
-                        updateField("roastLevel", event.target.value as RoastLevel)
-                      }
-                      className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
-                    >
-                      {roastLevels.map((level) => (
-                        <option key={level} value={level}>
-                          {level}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  {isCraftCocoaForm ? (
+                    <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                      Percent
+                      <input
+                        value={formState.percent}
+                        onChange={(event) =>
+                          updateField("percent", event.target.value)
+                        }
+                        className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                        placeholder="70%"
+                      />
+                    </label>
+                  ) : (
+                    <div className="grid gap-2">
+                      <VisibilityFieldHeader
+                        label="Roast Level"
+                        isVisible={formState.publicFieldVisibility.roastLevel}
+                        onToggle={() => togglePublicFieldVisibility("roastLevel")}
+                      />
+                      <select
+                        value={formState.roastLevel}
+                        onChange={(event) =>
+                          updateField(
+                            "roastLevel",
+                            event.target.value as RoastLevel,
+                          )
+                        }
+                        className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                      >
+                        {roastLevels.map((level) => (
+                          <option key={level} value={level}>
+                            {level}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
 
-                <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
-                  Description
-                  <textarea
-                    required
-                    value={formState.description}
-                    onChange={(event) =>
-                      updateField("description", event.target.value)
-                    }
-                    className="min-h-28 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 py-3 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
-                  />
-                </label>
+                {isCraftCocoaForm ? (
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    BATCH #?
+                    <input
+                      value={formState.batchNumber}
+                      onChange={(event) =>
+                        updateField("batchNumber", event.target.value)
+                      }
+                      className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                      placeholder="#308"
+                    />
+                  </label>
+                ) : (
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    Description
+                    <textarea
+                      required
+                      value={formState.description}
+                      onChange={(event) =>
+                        updateField("description", event.target.value)
+                      }
+                      className="min-h-28 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 py-3 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                    />
+                  </label>
+                )}
 
                 <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
-                  Flavor Notes
+                  {isCraftCocoaForm ? "Tasting Note" : "Flavor Notes"}
                   <input
                     required
                     value={formState.flavorNotes}
@@ -725,10 +813,39 @@ export function ProductCrudPage({
                       updateField("flavorNotes", event.target.value)
                     }
                     className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
-                    placeholder="Jasmine, cacao, honey"
+                    placeholder={
+                      isCraftCocoaForm
+                        ? "Cacao nib, dried fruit, brown sugar"
+                        : "Jasmine, cacao, honey"
+                    }
                   />
                 </label>
 
+                {isCraftCocoaForm ? (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                      Province
+                      <input
+                        value={formState.region}
+                        onChange={(event) =>
+                          updateField("region", event.target.value)
+                        }
+                        className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                      />
+                    </label>
+
+                    <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                      Farmer
+                      <input
+                        value={formState.producer}
+                        onChange={(event) =>
+                          updateField("producer", event.target.value)
+                        }
+                        className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                      />
+                    </label>
+                  </div>
+                ) : (
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="grid gap-2">
                     <VisibilityFieldHeader
@@ -760,7 +877,9 @@ export function ProductCrudPage({
                     />
                   </div>
                 </div>
+                )}
 
+                {!isCraftCocoaForm ? (
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="grid gap-2">
                     <VisibilityFieldHeader
@@ -793,7 +912,9 @@ export function ProductCrudPage({
                     />
                   </div>
                 </div>
+                ) : null}
 
+                {!isCraftCocoaForm ? (
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="grid gap-2">
                     <VisibilityFieldHeader
@@ -825,7 +946,9 @@ export function ProductCrudPage({
                     />
                   </div>
                 </div>
+                ) : null}
 
+                {!isCraftCocoaForm ? (
                 <div className="grid gap-2">
                   <VisibilityFieldHeader
                     label="Brew Recommendation"
@@ -845,7 +968,9 @@ export function ProductCrudPage({
                     placeholder="Best as filter with a gentle pour, or as a bright Americano."
                   />
                 </div>
+                ) : null}
 
+                {!isCraftCocoaForm ? (
                 <div className="grid gap-2">
                   <VisibilityFieldHeader
                     label="Available For"
@@ -853,7 +978,7 @@ export function ProductCrudPage({
                     onToggle={() => togglePublicFieldVisibility("availableFor")}
                   />
                   <div className="flex flex-wrap gap-2">
-                    {availableForOptions.map((option) => (
+                    {availableForChoices.map((option) => (
                       <button
                         key={option}
                         type="button"
@@ -877,8 +1002,39 @@ export function ProductCrudPage({
                     className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
                     placeholder="Selected usages"
                   />
+                  <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+                    <input
+                      value={customAvailableFor}
+                      onChange={(event) =>
+                        setCustomAvailableFor(event.target.value)
+                      }
+                      className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                      placeholder="Add custom option"
+                    />
+                    <button
+                      type="button"
+                      onClick={addCustomAvailableFor}
+                      className="min-h-12 rounded-full border border-[#3d2618]/14 px-5 text-sm font-semibold text-[#5f4635] transition hover:bg-[#f6efe6]/70"
+                    >
+                      Add
+                    </button>
+                  </div>
                 </div>
+                ) : null}
 
+                {isCraftCocoaForm ? (
+                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                    Season
+                    <input
+                      value={formState.season}
+                      onChange={(event) =>
+                        updateField("season", event.target.value)
+                      }
+                      className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                      placeholder="2025 harvest"
+                    />
+                  </label>
+                ) : (
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div className="grid gap-2">
                     <VisibilityFieldHeader
@@ -929,7 +1085,9 @@ export function ProductCrudPage({
                     />
                   </label>
                 </div>
+                )}
 
+                {!isCraftCocoaForm ? (
                 <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
                   Image Placeholder
                   <input
@@ -941,6 +1099,7 @@ export function ProductCrudPage({
                     className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
                   />
                 </label>
+                ) : null}
 
                 <ImageUploadField
                   bucket="products"
@@ -950,9 +1109,11 @@ export function ProductCrudPage({
                   onChange={(url) => updateField("imageUrl", url)}
                 />
 
+                {!isCraftCocoaForm ? (
                 <p className="rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#7d4d2f]">
                   Click each field label icon to control public visibility.
                 </p>
+                ) : null}
               </div>
 
               <button
@@ -976,116 +1137,56 @@ export function ProductCrudPage({
                 return (
                 <article
                   key={product.id}
-                  className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-6 shadow-[0_18px_48px_rgba(84,55,34,0.12)] backdrop-blur"
+                  className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-4 shadow-[0_14px_34px_rgba(84,55,34,0.1)] backdrop-blur"
                 >
-                  {product.imageUrl ? (
-                    <img
-                      alt={product.name}
-                      src={product.imageUrl}
-                      className="mb-5 aspect-[4/3] w-full rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="mb-5 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/60 px-4 py-8 text-sm font-semibold text-[#7d4d2f]">
-                      {product.imagePlaceholder}
+                  <div className="grid gap-4 sm:grid-cols-[4.25rem_1fr]">
+                    <div className="h-16 w-16 overflow-hidden rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/70">
+                      {product.imageUrl ? (
+                        <img
+                          alt={product.name}
+                          src={product.imageUrl}
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full items-center justify-center px-2 text-center text-[0.62rem] font-semibold uppercase leading-3 tracking-[0.12em] text-[#7d4d2f]">
+                          {product.imagePlaceholder || "Product"}
+                        </div>
+                      )}
                     </div>
-                  )}
 
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <h2 className="text-2xl font-semibold">{product.name}</h2>
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h2 className="text-lg font-semibold leading-tight">
+                          {product.name}
+                        </h2>
+                        <span
+                          className={
+                            product.status === "active"
+                              ? "rounded-full bg-[#2b1a12] px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-[#fff8ed]"
+                              : "rounded-full bg-[#7d4d2f]/15 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-[#7d4d2f]"
+                          }
+                        >
+                          {product.status}
+                        </span>
+                        {product.isSeasonal ? (
+                          <span className="rounded-full border border-[#3d2618]/12 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-[#7d4d2f]">
+                            Seasonal
+                          </span>
+                        ) : null}
+                      </div>
                       <p className="mt-2 text-sm leading-6 text-[#5f4635]">
-                        {product.description}
+                        {product.flavorNotes.slice(0, 3).join(", ") ||
+                          product.description}
+                      </p>
+                      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#8a6a55]">
+                        {productTypeLabel(product.productType)} /{" "}
+                        {formatPrice(product.price)}
+                        {product.productType === "craft_cocoa" &&
+                        product.batchNumber
+                          ? ` / ${product.batchNumber}`
+                          : ""}
                       </p>
                     </div>
-                    <span
-                      className={
-                        product.status === "active"
-                          ? "w-fit rounded-full bg-[#2b1a12] px-3 py-1 text-xs font-semibold text-[#fff8ed]"
-                          : "w-fit rounded-full bg-[#7d4d2f]/15 px-3 py-1 text-xs font-semibold text-[#7d4d2f]"
-                      }
-                    >
-                      {product.status}
-                    </span>
-                  </div>
-
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
-                      {productTypeLabel(product.productType)}
-                    </span>
-                    <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
-                      {formatPrice(product.price)}
-                    </span>
-                    {product.roastLevel ? (
-                      <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
-                        {product.roastLevel}
-                      </span>
-                    ) : null}
-                    {product.isSeasonal ? (
-                      <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#7d4d2f]">
-                        Seasonal
-                      </span>
-                    ) : null}
-                  </div>
-
-                  <div className="mt-5 grid gap-3 text-sm leading-7 text-[#5f4635]">
-                    <p>
-                      <span className="font-semibold text-[#241710]">
-                        Flavor:
-                      </span>{" "}
-                      {product.flavorNotes.join(", ")}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-[#241710]">
-                        Producer / Farm:
-                      </span>{" "}
-                      {product.producer ?? "Not set"}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-[#241710]">
-                        Region:
-                      </span>{" "}
-                      {product.region ?? "Not set"}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-[#241710]">
-                        Altitude:
-                      </span>{" "}
-                      {product.altitude ?? "Not set"}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-[#241710]">
-                        Variety:
-                      </span>{" "}
-                      {product.variety ?? "Not set"}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-[#241710]">
-                        Brew:
-                      </span>{" "}
-                      {product.brewRecommendation ?? "Not set"}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-[#241710]">
-                        Available for:
-                      </span>{" "}
-                      {product.availableFor}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-[#241710]">
-                        Availability:
-                      </span>{" "}
-                      {product.availableFrom || product.availableUntil
-                        ? `${product.availableFrom ?? "Now"} - ${
-                            product.availableUntil ?? "Open"
-                          }`
-                        : "Ongoing"}
-                    </p>
-                    <p>
-                      <span className="font-semibold text-[#241710]">
-                        Image:
-                      </span>{" "}
-                      {product.imagePlaceholder}
-                    </p>
                   </div>
 
                   <div className="mt-6 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 p-4">

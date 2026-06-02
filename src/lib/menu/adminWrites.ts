@@ -55,6 +55,9 @@ const productRow = (product: Product) => ({
   origin: nullable(product.origin),
   region: nullable(product.region),
   producer: nullable(product.producer),
+  batch_number: nullable(product.batchNumber),
+  season: nullable(product.season),
+  percent: nullable(product.percent),
   altitude: nullable(product.altitude),
   variety: nullable(product.variety),
   process: nullable(product.process),
@@ -89,6 +92,12 @@ const menuItemRow = (item: MenuItem) => ({
   flavor_preferences: item.flavorPreferences ?? [],
   comfort_level: nullable(item.comfortLevel),
   intensity_level: item.intensityLevel ?? null,
+  story_status: item.storyStatus ?? "default",
+  story_title: nullable(item.storyTitle),
+  story_description: nullable(item.storyDescription),
+  serving_ritual: nullable(item.servingRitual),
+  why_we_created_it: nullable(item.whyWeCreatedIt),
+  best_for: item.bestFor ?? [],
   sort_order: item.sortOrder,
 });
 
@@ -197,6 +206,8 @@ const buildMenuItemFromProduct = (
   flavorPreferences: inferFlavorPreferences(product),
   comfortLevel: product.isSeasonal ? "something_new" : "comfort_zone",
   intensityLevel: inferBodyLevel(product),
+  storyStatus: "default",
+  bestFor: [],
   sortOrder: 1000,
 });
 
@@ -651,6 +662,48 @@ export async function updateMenuItemStatus(
         formatSupabaseError("Updating special menu visibility", specialResult.error),
       );
     }
+  }
+
+  return { source: "supabase" };
+}
+
+export async function deleteMenuItem(item: MenuItem): Promise<AdminWriteResult> {
+  const supabase = createBrowserSupabaseClient();
+
+  if (!supabase) {
+    return mockWriteResult;
+  }
+
+  const dependentDeletes = [
+    {
+      action: "Deleting menu item product links",
+      query: supabase.from("menu_item_products").delete().eq("menu_item_id", item.id),
+    },
+    {
+      action: "Deleting menu item taste profiles",
+      query: supabase
+        .from("menu_item_taste_profiles")
+        .delete()
+        .eq("menu_item_id", item.id),
+    },
+    {
+      action: "Deleting special menu mapping",
+      query: supabase.from("specials").delete().eq("menu_item_id", item.id),
+    },
+  ];
+
+  for (const dependentDelete of dependentDeletes) {
+    const { error } = await dependentDelete.query;
+
+    if (error) {
+      throw new Error(formatSupabaseError(dependentDelete.action, error));
+    }
+  }
+
+  const { error } = await supabase.from("menu_items").delete().eq("id", item.id);
+
+  if (error) {
+    throw new Error(formatSupabaseError("Deleting menu item", error));
   }
 
   return { source: "supabase" };

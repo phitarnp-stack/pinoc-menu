@@ -4,6 +4,7 @@ import { BilingualLabel } from "@/src/components/language/BilingualLabel";
 import { ProductOptionsPanel } from "@/src/components/menu/ProductOptionsPanel";
 import { PublicBackLink } from "@/src/components/navigation/PublicBackLink";
 import { PublicHeader } from "@/src/components/navigation/PublicHeader";
+import { PassportAddButton } from "@/src/components/passport/PassportAddButton";
 import {
   getCustomerFavorites,
   getCustomerTastings,
@@ -14,6 +15,7 @@ import {
   getMenuItems,
   getProducts,
 } from "@/src/lib/menu/repositories";
+import { getMenuItemStory } from "@/src/lib/menu/story";
 import type { MenuItemProduct, Product } from "@/src/types/menu";
 
 type ItemPageProps = {
@@ -82,6 +84,8 @@ export default async function ItemPage({ params }: ItemPageProps) {
         entry.product !== undefined,
     );
 
+  const story = getMenuItemStory(item);
+
   return (
     <main className="min-h-screen bg-[#f6efe6] text-[#241710]">
       <PublicHeader />
@@ -97,9 +101,6 @@ export default async function ItemPage({ params }: ItemPageProps) {
                 label={`Back to ${category.name}`}
               />
 
-              <p className="mb-5 text-sm font-semibold text-[#7d4d2f]">
-                {formatPrice(item.price)}
-              </p>
               <h1 className="text-5xl font-semibold leading-[0.98] tracking-normal sm:text-6xl lg:text-7xl">
                 {item.name}
               </h1>
@@ -117,7 +118,7 @@ export default async function ItemPage({ params }: ItemPageProps) {
               ) : null}
 
               <div className="mt-8 rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/42 p-5 backdrop-blur">
-              <p className="text-sm leading-7 text-[#5f4635]">
+                <p className="text-sm leading-7 text-[#5f4635]">
                   Guest Mode is always open. LINE login will let you save your
                   tasting history later.
                   <span className="mt-1 block text-xs text-[#8a6a55]">
@@ -128,34 +129,80 @@ export default async function ItemPage({ params }: ItemPageProps) {
             </div>
 
             <div className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/58 p-6 shadow-[0_24px_58px_rgba(84,55,34,0.16)] backdrop-blur sm:p-8">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
-                <BilingualLabel english="Flavor Notes" thai="โน้ตรสชาติ" />
-              </p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {item.flavorNotes.map((note) => (
-                  <span
-                    key={note}
-                    className="rounded-full border border-[#3d2618]/12 bg-[#f6efe6]/75 px-4 py-2 text-sm text-[#5f4635]"
-                  >
-                    {note}
-                  </span>
-                ))}
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
+                  Drink Story
+                </p>
+                <h2 className="mt-4 text-3xl font-semibold leading-tight">
+                  {story.storyTitle}
+                </h2>
+                <p className="mt-4 text-base leading-8 text-[#5f4635]">
+                  {story.storyDescription}
+                </p>
+              </div>
+
+              <div className="mt-8 border-t border-[#3d2618]/10 pt-8">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
+                  <BilingualLabel english="Flavor Journey" thai="เส้นทางรสชาติ" />
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {item.flavorNotes.map((note) => (
+                    <span
+                      key={note}
+                      className="rounded-full border border-[#3d2618]/12 bg-[#f6efe6]/75 px-4 py-2 text-sm text-[#5f4635]"
+                    >
+                      {note}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <StoryField
+                title="Serving Ritual"
+                thai="วิธีดื่ม"
+                value={story.servingRitual}
+              />
+              <StoryField
+                title="Why We Created It"
+                thai="เหตุผลของแก้วนี้"
+                value={story.whyWeCreatedIt}
+              />
+
+              <div className="mt-8 border-t border-[#3d2618]/10 pt-8">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
+                  <BilingualLabel english="Best For" thai="เหมาะกับช่วงเวลา" />
+                </p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {story.bestFor.map((bestForItem) => (
+                    <span
+                      key={bestForItem}
+                      className="rounded-full bg-[#2b1a12] px-4 py-2 text-sm font-semibold text-[#fff8ed]"
+                    >
+                      {bestForItem}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-8 border-t border-[#3d2618]/10 pt-8">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
+                  Price
+                </p>
+                <p className="mt-3 text-3xl font-semibold text-[#241710]">
+                  {formatPrice(item.price)}
+                </p>
               </div>
             </div>
-
-            <div className="mt-8 border-t border-[#3d2618]/10 pt-8">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
-                <BilingualLabel english="Recommended For" thai="เหมาะสำหรับ" />
-              </p>
-              <p className="mt-4 text-base leading-8 text-[#5f4635]">
-                {item.recommendedFor}
-              </p>
-            </div>
-
-            <ProductOptionsPanel linkedProducts={linkedProducts} />
-            </div>
           </div>
+
+          <PassportAddButton
+            item={item}
+            categorySlug={category.slug}
+            categoryName={category.name}
+            linkedProducts={linkedProducts.map((entry) => entry.product)}
+          />
+
+          <ProductOptionsPanel linkedProducts={linkedProducts} />
 
           <MenuItemMemberActions
             item={item}
@@ -167,5 +214,24 @@ export default async function ItemPage({ params }: ItemPageProps) {
         </div>
       </section>
     </main>
+  );
+}
+
+function StoryField({
+  title,
+  thai,
+  value,
+}: {
+  title: string;
+  thai: string;
+  value: string;
+}) {
+  return (
+    <div className="mt-8 border-t border-[#3d2618]/10 pt-8">
+      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
+        <BilingualLabel english={title} thai={thai} />
+      </p>
+      <p className="mt-4 text-base leading-8 text-[#5f4635]">{value}</p>
+    </div>
   );
 }

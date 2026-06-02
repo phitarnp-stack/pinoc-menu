@@ -21,6 +21,7 @@ import type {
   SpecialCategory,
   SpecialCategoryRecord,
   SpecialMenuItem,
+  StoryStatus,
   TasteProfile,
 } from "@/src/types/menu";
 
@@ -116,6 +117,9 @@ export const mapProductRow = (row: DbRecord): Product => ({
   origin: asOptionalString(row.origin),
   region: asOptionalString(row.region),
   producer: asOptionalString(row.producer),
+  batchNumber: asOptionalString(row.batch_number),
+  season: asOptionalString(row.season),
+  percent: asOptionalString(row.percent),
   altitude: asOptionalString(row.altitude),
   variety: asOptionalString(row.variety),
   process: asOptionalString(row.process),
@@ -179,6 +183,12 @@ export const mapMenuItemRow = (row: DbRecord): MenuItem => ({
     | RecommendationComfortLevel
     | undefined,
   intensityLevel: asOptionalNumber(row.intensity_level),
+  storyStatus: asString(row.story_status, "default") as StoryStatus,
+  storyTitle: asOptionalString(row.story_title),
+  storyDescription: asOptionalString(row.story_description),
+  servingRitual: asOptionalString(row.serving_ritual),
+  whyWeCreatedIt: asOptionalString(row.why_we_created_it),
+  bestFor: asStringArray(row.best_for),
   sortOrder: asNumber(row.sort_order),
 });
 

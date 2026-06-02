@@ -5,6 +5,7 @@ const links = [
   { href: "/", label: "Home" },
   { href: "/menu", label: "Menu" },
   { href: "/special", label: "Special" },
+  { href: "/passport", label: "Passport" },
   { href: "/account", label: "My Cup" },
 ];
 
@@ -22,7 +23,7 @@ export function PublicHeader() {
           <DataSourceIndicator />
         </div>
 
-        <div className="grid grid-cols-4 gap-1 sm:flex sm:items-center">
+        <div className="grid grid-cols-5 gap-1 sm:flex sm:items-center">
           {links.map((link) => (
             <Link
               key={link.href}
