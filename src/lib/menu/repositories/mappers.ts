@@ -4,6 +4,7 @@ import type {
   CustomerTasteProfileScore,
   CustomerTasting,
   FeelingTag,
+  HeroContent,
   MenuCategory,
   MenuItem,
   MenuItemProduct,
@@ -215,6 +216,15 @@ export const mapTasteProfileRow = (row: DbRecord): TasteProfile => ({
   description: asString(row.description),
   sortOrder: asNumber(row.sort_order),
   isActive: asBoolean(row.is_active),
+});
+
+export const mapHeroContentRow = (row: DbRecord): HeroContent => ({
+  id: asString(row.id, "home"),
+  title: asString(row.title),
+  subtitle: asString(row.subtitle),
+  imageUrl: asOptionalString(row.image_url),
+  featuredProductId: asOptionalString(row.featured_product_id),
+  featuredSpecialId: asOptionalString(row.featured_special_id),
 });
 
 export const mapCustomerTastingRow = (row: DbRecord): CustomerTasting => ({

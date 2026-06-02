@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { BilingualLabel } from "@/src/components/language/BilingualLabel";
 import type { MenuItem } from "@/src/types/menu";
 
 type MenuView = "grid" | "list" | "flavor-map";
@@ -251,7 +252,11 @@ export function MenuItemsBrowser({
                       </p>
                       <p className="mt-3 text-sm leading-7 text-[#5f4635]">
                         <span className="font-semibold text-[#241710]">
-                          Recommended for:
+                          <BilingualLabel
+                            english="Recommended for"
+                            thai="เหมาะสำหรับ"
+                            compact
+                          />
                         </span>{" "}
                         {item.recommendedFor}
                       </p>

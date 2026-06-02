@@ -9,7 +9,7 @@ export default async function AdminBeansPage() {
   return (
     <ProductCrudPage
       title="Coffee Beans"
-      description="Manage House Blend options, seasonal filter beans, and active availability with local mock state."
+      description="Manage House Blend options, seasonal filter beans, and active availability."
       initialProducts={coffeeBeanProducts}
       defaultProductType="coffee_bean"
     />

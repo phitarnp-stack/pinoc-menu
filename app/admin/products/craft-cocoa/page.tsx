@@ -9,7 +9,7 @@ export default async function AdminCraftCocoaProductsPage() {
   return (
     <ProductCrudPage
       title="Craft Cocoa"
-      description="Manage cocoa origins, cocoa latte bases, and active craft cocoa products with local mock state."
+      description="Manage cocoa origins, cocoa latte bases, and active craft cocoa products."
       initialProducts={craftCocoaProducts}
       defaultProductType="craft_cocoa"
     />

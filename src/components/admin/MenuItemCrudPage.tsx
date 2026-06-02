@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { FormEvent, useMemo, useState } from "react";
 import { saveMenuItem, updateMenuItemStatus } from "@/src/lib/menu/adminWrites";
 import type {
@@ -11,6 +10,7 @@ import type {
   TasteProfile,
   VisibilityStatus,
 } from "@/src/types/menu";
+import { AdminBackLink } from "./AdminBackLink";
 
 type MenuItemCrudPageProps = {
   title: string;
@@ -296,12 +296,10 @@ export function MenuItemCrudPage({
         <div className="relative z-10 mx-auto w-full max-w-6xl py-12 sm:py-16">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <Link
-                href="/admin"
-                className="mb-8 inline-flex text-xs font-semibold uppercase tracking-[0.28em] text-[#7d4d2f] transition hover:text-[#2b1a12]"
-              >
-                Admin
-              </Link>
+              <AdminBackLink
+                label="Back to Admin"
+                fallbackHref="/admin"
+              />
               <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">
                 {title}
               </h1>

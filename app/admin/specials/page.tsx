@@ -38,7 +38,7 @@ export default async function AdminSpecialsPage() {
   return (
     <MenuItemCrudPage
       title="Specials"
-      description="Manage Special Menu items for Coffee, Non Coffee, and Cold Brew using local mock data."
+      description="Manage Special Menu items for Coffee, Non Coffee, and Cold Brew."
       initialItems={specialItems}
       menuCategories={menuCategories}
       tasteProfiles={tasteProfiles}

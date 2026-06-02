@@ -1,7 +1,7 @@
 "use client";
 
 import { createBrowserSupabaseClient } from "@/src/lib/supabase/client";
-import type { MenuItem, Product } from "@/src/types/menu";
+import type { HeroContent, MenuItem, Product } from "@/src/types/menu";
 
 type WriteMode = "create" | "edit";
 export type ProductMenuCategoryId =
@@ -102,6 +102,15 @@ const specialRow = (item: MenuItem) => ({
   sort_order: item.sortOrder,
   available_from: nullable(item.availableFrom),
   available_until: nullable(item.availableUntil),
+});
+
+const heroContentRow = (heroContent: HeroContent) => ({
+  id: heroContent.id,
+  title: heroContent.title,
+  subtitle: heroContent.subtitle,
+  image_url: nullable(heroContent.imageUrl),
+  featured_product_id: nullable(heroContent.featuredProductId),
+  featured_special_id: nullable(heroContent.featuredSpecialId),
 });
 
 const formatSupabaseError = (
@@ -462,6 +471,26 @@ export async function updateMenuItemStatus(
         formatSupabaseError("Updating special menu visibility", specialResult.error),
       );
     }
+  }
+
+  return { source: "supabase" };
+}
+
+export async function saveHeroContent(
+  heroContent: HeroContent,
+): Promise<AdminWriteResult> {
+  const supabase = createBrowserSupabaseClient();
+
+  if (!supabase) {
+    return mockWriteResult;
+  }
+
+  const { error } = await supabase
+    .from("hero_content")
+    .upsert(heroContentRow(heroContent), { onConflict: "id" });
+
+  if (error) {
+    throw new Error(formatSupabaseError("Saving hero content", error));
   }
 
   return { source: "supabase" };

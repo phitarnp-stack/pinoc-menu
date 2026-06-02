@@ -12,6 +12,12 @@ const adminSections = [
       "Manage Coffee Beans, Matcha, and Craft Cocoa as reusable product assets.",
   },
   {
+    title: "Hero Content",
+    href: "/admin/hero",
+    description:
+      "Curate the homepage hero image, headline, and featured seasonal beverage story.",
+  },
+  {
     title: "Coffee Beans",
     href: "/admin/products/coffee-beans",
     description:
@@ -88,8 +94,8 @@ export default async function AdminPage() {
               Admin Backoffice
             </h1>
             <p className="mt-5 max-w-xl text-base leading-8 text-[#5f4635] sm:text-lg">
-              Temporary local control center for monthly menu and bean rotation.
-              The structure is ready to connect to Supabase later.
+              Supabase-backed control center for monthly menu rotation, product
+              knowledge, and the homepage beverage story.
             </p>
           </div>
 

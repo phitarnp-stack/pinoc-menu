@@ -2,6 +2,7 @@ export * from "./customers";
 export * from "./customerTastings";
 export * from "./dataSource";
 export * from "./favorites";
+export * from "./heroContent";
 export * from "./menuCategories";
 export * from "./menuItemProducts";
 export * from "./menuItems";

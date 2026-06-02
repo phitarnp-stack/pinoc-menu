@@ -11,6 +11,7 @@ export type VisibilityStatus = "visible" | "hidden";
 export type MenuLabel = "new" | "seasonal" | "limited";
 
 export type PublicFieldVisibility = {
+  origin?: boolean;
   producer?: boolean;
   region?: boolean;
   altitude?: boolean;
@@ -88,6 +89,15 @@ export interface MenuItem {
   availableUntil?: string;
   publicFieldVisibility?: PublicFieldVisibility;
   sortOrder: number;
+}
+
+export interface HeroContent {
+  id: string;
+  title: string;
+  subtitle: string;
+  imageUrl?: string;
+  featuredProductId?: string;
+  featuredSpecialId?: string;
 }
 
 export interface MenuItemProduct {

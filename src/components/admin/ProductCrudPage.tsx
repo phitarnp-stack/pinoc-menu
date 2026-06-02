@@ -15,6 +15,7 @@ import type {
   PublicFieldVisibility,
   RoastLevel,
 } from "@/src/types/menu";
+import { AdminBackLink } from "./AdminBackLink";
 
 type ProductCrudPageProps = {
   title: string;
@@ -80,26 +81,12 @@ const coffeeMenuCategoryOptions: {
   { label: "Special", value: "special" },
 ];
 
-const fieldVisibilityOptions: {
-  key: keyof Required<PublicFieldVisibility>;
-  label: string;
-}[] = [
-  { key: "producer", label: "Producer / farm" },
-  { key: "region", label: "Region" },
-  { key: "altitude", label: "Altitude" },
-  { key: "variety", label: "Variety" },
-  { key: "process", label: "Process" },
-  { key: "roastLevel", label: "Roast level" },
-  { key: "brewRecommendation", label: "Brew recommendation" },
-  { key: "availableFor", label: "Available for" },
-  { key: "seasonalAvailability", label: "Seasonal availability" },
-];
-
 const productVisibilityDefaults: Record<
   ProductType,
   Required<PublicFieldVisibility>
 > = {
   coffee_bean: {
+    origin: true,
     producer: true,
     region: true,
     altitude: true,
@@ -111,6 +98,7 @@ const productVisibilityDefaults: Record<
     seasonalAvailability: true,
   },
   matcha: {
+    origin: true,
     producer: true,
     region: true,
     altitude: false,
@@ -122,6 +110,7 @@ const productVisibilityDefaults: Record<
     seasonalAvailability: true,
   },
   craft_cocoa: {
+    origin: true,
     producer: true,
     region: true,
     altitude: false,
@@ -186,6 +175,79 @@ const createId = (name: string) =>
   `product-${createSlug(name)}-${Date.now().toString(36)}`;
 
 const formatPrice = (price: number) => `฿${price}`;
+
+function VisibilityIcon({ isVisible }: { isVisible: boolean }) {
+  return isVisible ? (
+    <svg
+      aria-hidden="true"
+      className="h-4 w-4"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="M3 12s3.4-6 9-6 9 6 9 6-3.4 6-9 6-9-6-9-6Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <circle cx="12" cy="12" r="2.4" fill="currentColor" />
+    </svg>
+  ) : (
+    <svg
+      aria-hidden="true"
+      className="h-4 w-4"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <path
+        d="m4 4 16 16M10.7 6.2A9.8 9.8 0 0 1 12 6c5.6 0 9 6 9 6a16.4 16.4 0 0 1-2.2 2.8M7.2 7.5C4.5 9.1 3 12 3 12s3.4 6 9 6c1.4 0 2.7-.4 3.8-.9"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M10.4 10.6a2.4 2.4 0 0 0 3 3"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  );
+}
+
+function VisibilityFieldHeader({
+  label,
+  isVisible,
+  onToggle,
+}: {
+  label: string;
+  isVisible: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className={
+        isVisible
+          ? "flex w-fit items-center gap-2 text-sm font-semibold text-[#5f4635] transition hover:text-[#2b1a12]"
+          : "flex w-fit items-center gap-2 text-sm font-semibold text-[#8b7666] transition hover:text-[#5f4635]"
+      }
+      aria-pressed={isVisible}
+      title={isVisible ? "Visible publicly" : "Hidden publicly"}
+    >
+      <span>{label}</span>
+      <span
+        className={
+          isVisible
+            ? "inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#2b1a12] text-[#fff8ed]"
+            : "inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#3d2618]/14 bg-[#f6efe6]/70 text-[#8b7666]"
+        }
+      >
+        <VisibilityIcon isVisible={isVisible} />
+      </span>
+    </button>
+  );
+}
 
 const normalizeVisibility = (
   productType: ProductType,
@@ -486,12 +548,7 @@ export function ProductCrudPage({
         <div className="relative z-10 mx-auto w-full max-w-6xl py-12 sm:py-16">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <Link
-                href="/admin"
-                className="mb-8 inline-flex text-xs font-semibold uppercase tracking-[0.28em] text-[#7d4d2f] transition hover:text-[#2b1a12]"
-              >
-                Admin
-              </Link>
+              <AdminBackLink label="Back to Products" fallbackHref="/admin/products" />
               <h1 className="text-4xl font-semibold leading-tight sm:text-5xl">
                 {title}
               </h1>
@@ -624,8 +681,12 @@ export function ProductCrudPage({
                     />
                   </label>
 
-                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
-                    Roast Level
+                  <div className="grid gap-2">
+                    <VisibilityFieldHeader
+                      label="Roast Level"
+                      isVisible={formState.publicFieldVisibility.roastLevel}
+                      onToggle={() => togglePublicFieldVisibility("roastLevel")}
+                    />
                     <select
                       value={formState.roastLevel}
                       onChange={(event) =>
@@ -639,7 +700,7 @@ export function ProductCrudPage({
                         </option>
                       ))}
                     </select>
-                  </label>
+                  </div>
                 </div>
 
                 <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
@@ -668,8 +729,12 @@ export function ProductCrudPage({
                 </label>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
-                    Origin
+                  <div className="grid gap-2">
+                    <VisibilityFieldHeader
+                      label="Origin"
+                      isVisible={formState.publicFieldVisibility.origin}
+                      onToggle={() => togglePublicFieldVisibility("origin")}
+                    />
                     <input
                       value={formState.origin}
                       onChange={(event) =>
@@ -677,10 +742,14 @@ export function ProductCrudPage({
                       }
                       className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
                     />
-                  </label>
+                  </div>
 
-                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
-                    Region
+                  <div className="grid gap-2">
+                    <VisibilityFieldHeader
+                      label="Region"
+                      isVisible={formState.publicFieldVisibility.region}
+                      onToggle={() => togglePublicFieldVisibility("region")}
+                    />
                     <input
                       value={formState.region}
                       onChange={(event) =>
@@ -688,12 +757,16 @@ export function ProductCrudPage({
                       }
                       className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
                     />
-                  </label>
+                  </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
-                    Producer / Farm
+                  <div className="grid gap-2">
+                    <VisibilityFieldHeader
+                      label="Producer / Farm"
+                      isVisible={formState.publicFieldVisibility.producer}
+                      onToggle={() => togglePublicFieldVisibility("producer")}
+                    />
                     <input
                       value={formState.producer}
                       onChange={(event) =>
@@ -701,10 +774,14 @@ export function ProductCrudPage({
                       }
                       className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
                     />
-                  </label>
+                  </div>
 
-                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
-                    Altitude
+                  <div className="grid gap-2">
+                    <VisibilityFieldHeader
+                      label="Altitude"
+                      isVisible={formState.publicFieldVisibility.altitude}
+                      onToggle={() => togglePublicFieldVisibility("altitude")}
+                    />
                     <input
                       value={formState.altitude}
                       onChange={(event) =>
@@ -713,12 +790,16 @@ export function ProductCrudPage({
                       className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
                       placeholder="1,750 masl"
                     />
-                  </label>
+                  </div>
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
-                    Variety
+                  <div className="grid gap-2">
+                    <VisibilityFieldHeader
+                      label="Variety"
+                      isVisible={formState.publicFieldVisibility.variety}
+                      onToggle={() => togglePublicFieldVisibility("variety")}
+                    />
                     <input
                       value={formState.variety}
                       onChange={(event) =>
@@ -726,10 +807,14 @@ export function ProductCrudPage({
                       }
                       className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
                     />
-                  </label>
+                  </div>
 
-                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
-                    Process
+                  <div className="grid gap-2">
+                    <VisibilityFieldHeader
+                      label="Process"
+                      isVisible={formState.publicFieldVisibility.process}
+                      onToggle={() => togglePublicFieldVisibility("process")}
+                    />
                     <input
                       value={formState.process}
                       onChange={(event) =>
@@ -737,11 +822,19 @@ export function ProductCrudPage({
                       }
                       className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
                     />
-                  </label>
+                  </div>
                 </div>
 
-                <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
-                  Brew Recommendation
+                <div className="grid gap-2">
+                  <VisibilityFieldHeader
+                    label="Brew Recommendation"
+                    isVisible={
+                      formState.publicFieldVisibility.brewRecommendation
+                    }
+                    onToggle={() =>
+                      togglePublicFieldVisibility("brewRecommendation")
+                    }
+                  />
                   <textarea
                     value={formState.brewRecommendation}
                     onChange={(event) =>
@@ -750,10 +843,14 @@ export function ProductCrudPage({
                     className="min-h-24 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 py-3 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
                     placeholder="Best as filter with a gentle pour, or as a bright Americano."
                   />
-                </label>
+                </div>
 
-                <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
-                  Available For
+                <div className="grid gap-2">
+                  <VisibilityFieldHeader
+                    label="Available For"
+                    isVisible={formState.publicFieldVisibility.availableFor}
+                    onToggle={() => togglePublicFieldVisibility("availableFor")}
+                  />
                   <div className="flex flex-wrap gap-2">
                     {availableForOptions.map((option) => (
                       <button
@@ -779,11 +876,19 @@ export function ProductCrudPage({
                     className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
                     placeholder="Selected usages"
                   />
-                </label>
+                </div>
 
                 <div className="grid gap-4 sm:grid-cols-3">
-                  <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
-                    Seasonal
+                  <div className="grid gap-2">
+                    <VisibilityFieldHeader
+                      label="Seasonal"
+                      isVisible={
+                        formState.publicFieldVisibility.seasonalAvailability
+                      }
+                      onToggle={() =>
+                        togglePublicFieldVisibility("seasonalAvailability")
+                      }
+                    />
                     <select
                       value={formState.isSeasonal}
                       onChange={(event) =>
@@ -797,7 +902,7 @@ export function ProductCrudPage({
                       <option value="no">No</option>
                       <option value="yes">Yes</option>
                     </select>
-                  </label>
+                  </div>
 
                   <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
                     Available From
@@ -859,34 +964,9 @@ export function ProductCrudPage({
                   </div>
                 ) : null}
 
-                <div className="grid gap-3 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7d4d2f]">
-                    Public detail fields
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {fieldVisibilityOptions.map((option) => {
-                      const isVisible =
-                        formState.publicFieldVisibility[option.key];
-
-                      return (
-                        <button
-                          key={option.key}
-                          type="button"
-                          onClick={() =>
-                            togglePublicFieldVisibility(option.key)
-                          }
-                          className={
-                            isVisible
-                              ? "rounded-full bg-[#2b1a12] px-4 py-2 text-sm font-semibold text-[#fff8ed]"
-                              : "rounded-full border border-[#3d2618]/14 px-4 py-2 text-sm font-semibold text-[#5f4635]"
-                          }
-                        >
-                          {isVisible ? "Show" : "Hide"} {option.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+                <p className="rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#7d4d2f]">
+                  Click each field label icon to control public visibility.
+                </p>
               </div>
 
               <button

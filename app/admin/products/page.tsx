@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AdminBackLink } from "@/src/components/admin/AdminBackLink";
 import { getProducts } from "@/src/lib/menu/repositories";
 
 const productSections = [
@@ -36,18 +37,13 @@ export default async function AdminProductsPage() {
         <div className="absolute inset-0 bg-[linear-gradient(135deg,#f9f1e7_0%,#ead9c2_48%,#caa37a_100%)]" />
         <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl flex-col justify-center gap-10 py-16 sm:py-20">
           <div className="max-w-2xl">
-            <Link
-              href="/admin"
-              className="mb-8 inline-flex text-xs font-semibold uppercase tracking-[0.28em] text-[#7d4d2f] transition hover:text-[#2b1a12]"
-            >
-              Admin
-            </Link>
+            <AdminBackLink label="Back to Admin" fallbackHref="/admin" />
             <h1 className="text-4xl font-semibold leading-tight sm:text-5xl lg:text-6xl">
               Products
             </h1>
             <p className="mt-5 max-w-xl text-base leading-8 text-[#5f4635] sm:text-lg">
-              Manage the product assets behind Pinoc drinks before Supabase is
-              connected.
+              Manage the product assets behind Pinoc drinks, then publish them
+              into the customer-facing menu when ready.
             </p>
           </div>
 

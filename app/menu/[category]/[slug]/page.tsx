@@ -1,6 +1,8 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MenuItemMemberActions } from "@/src/components/customer/MenuItemMemberActions";
+import { BilingualLabel } from "@/src/components/language/BilingualLabel";
+import { ProductOptionsPanel } from "@/src/components/menu/ProductOptionsPanel";
+import { PublicBackLink } from "@/src/components/navigation/PublicBackLink";
 import { PublicHeader } from "@/src/components/navigation/PublicHeader";
 import {
   getCustomerFavorites,
@@ -22,21 +24,6 @@ type ItemPageProps = {
 };
 
 const formatPrice = (price: number) => `฿${price}`;
-
-const formatAvailability = (product: Product) => {
-  if (!product.isSeasonal && !product.availableFrom && !product.availableUntil) {
-    return "Ongoing";
-  }
-
-  return `${product.availableFrom ?? "Now"} - ${
-    product.availableUntil ?? "Open"
-  }`;
-};
-
-const isProductFieldVisible = (
-  product: Product,
-  field: keyof NonNullable<Product["publicFieldVisibility"]>,
-) => product.publicFieldVisibility?.[field] ?? true;
 
 const demoCustomerId = "customer-pinoc-demo";
 
@@ -105,12 +92,10 @@ export default async function ItemPage({ params }: ItemPageProps) {
         <div className="relative z-10 mx-auto w-full max-w-6xl pb-16 pt-36 sm:pb-20 sm:pt-40 lg:pt-32">
           <div className="grid gap-8 lg:grid-cols-[0.96fr_1.04fr] lg:items-start">
             <div>
-              <Link
+              <PublicBackLink
                 href={`/menu/${category.slug}`}
-                className="mb-8 inline-flex text-xs font-semibold uppercase tracking-[0.28em] text-[#7d4d2f] transition hover:text-[#2b1a12] focus:outline-none focus:ring-2 focus:ring-[#7d4d2f] focus:ring-offset-4 focus:ring-offset-[#f6efe6]"
-              >
-                {category.name}
-              </Link>
+                label={`Back to ${category.name}`}
+              />
 
               <p className="mb-5 text-sm font-semibold text-[#7d4d2f]">
                 {formatPrice(item.price)}
@@ -132,9 +117,12 @@ export default async function ItemPage({ params }: ItemPageProps) {
               ) : null}
 
               <div className="mt-8 rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/42 p-5 backdrop-blur">
-                <p className="text-sm leading-7 text-[#5f4635]">
-                  Guest Mode is always open. Sign in with LINE to save your
-                  tasting history when member login is connected.
+              <p className="text-sm leading-7 text-[#5f4635]">
+                  Guest Mode is always open. LINE login will let you save your
+                  tasting history later.
+                  <span className="mt-1 block text-xs text-[#8a6a55]">
+                    ตอนนี้ดูเมนูได้เลย ไม่ต้องเข้าสู่ระบบ
+                  </span>
                 </p>
               </div>
             </div>
@@ -142,7 +130,7 @@ export default async function ItemPage({ params }: ItemPageProps) {
             <div className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/58 p-6 shadow-[0_24px_58px_rgba(84,55,34,0.16)] backdrop-blur sm:p-8">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
-                Flavor Notes
+                <BilingualLabel english="Flavor Notes" thai="โน้ตรสชาติ" />
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {item.flavorNotes.map((note) => (
@@ -158,134 +146,14 @@ export default async function ItemPage({ params }: ItemPageProps) {
 
             <div className="mt-8 border-t border-[#3d2618]/10 pt-8">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
-                Recommended For
+                <BilingualLabel english="Recommended For" thai="เหมาะสำหรับ" />
               </p>
               <p className="mt-4 text-base leading-8 text-[#5f4635]">
                 {item.recommendedFor}
               </p>
             </div>
 
-            {linkedProducts.length > 0 ? (
-              <div className="mt-8 border-t border-[#3d2618]/10 pt-8">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
-                  Product Options
-                </p>
-                <div className="mt-4 grid gap-3">
-                  {linkedProducts.map(({ mapping, product }) => (
-                    <div
-                      key={mapping.id}
-                      className="rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/70 p-4"
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <h2 className="font-semibold">{product.name}</h2>
-                          <p className="mt-1 text-sm text-[#5f4635]">
-                            {product.origin}
-                            {product.region ? `, ${product.region}` : ""}
-                          </p>
-                        </div>
-                        {product.roastLevel &&
-                        isProductFieldVisible(product, "roastLevel") ? (
-                          <span className="rounded-full bg-[#2b1a12] px-3 py-1 text-xs font-semibold text-[#fff8ed]">
-                            {product.roastLevel}
-                          </span>
-                        ) : null}
-                      </div>
-                      {product.imageUrl ? (
-                        <img
-                          alt={product.name}
-                          src={product.imageUrl}
-                          className="mt-4 aspect-[4/3] w-full rounded-lg object-cover"
-                        />
-                      ) : null}
-                      <p className="mt-3 text-sm leading-6 text-[#5f4635]">
-                        {product.flavorNotes.join(", ")}
-                      </p>
-                      <div className="mt-4 grid gap-3 border-t border-[#3d2618]/10 pt-4 text-sm leading-6 text-[#5f4635] sm:grid-cols-2">
-                        {isProductFieldVisible(product, "producer") ? (
-                          <p>
-                            <span className="font-semibold text-[#241710]">
-                              Producer / Farm:
-                            </span>{" "}
-                            {product.producer ?? "Not listed"}
-                          </p>
-                        ) : null}
-                        {isProductFieldVisible(product, "region") ? (
-                          <p>
-                            <span className="font-semibold text-[#241710]">
-                              Region:
-                            </span>{" "}
-                            {product.region ?? "Not listed"}
-                          </p>
-                        ) : null}
-                        {isProductFieldVisible(product, "altitude") ? (
-                          <p>
-                            <span className="font-semibold text-[#241710]">
-                              Altitude:
-                            </span>{" "}
-                            {product.altitude ?? "Not listed"}
-                          </p>
-                        ) : null}
-                        {isProductFieldVisible(product, "variety") ? (
-                          <p>
-                            <span className="font-semibold text-[#241710]">
-                              Variety:
-                            </span>{" "}
-                            {product.variety ?? "Not listed"}
-                          </p>
-                        ) : null}
-                        {isProductFieldVisible(product, "process") ? (
-                          <p>
-                            <span className="font-semibold text-[#241710]">
-                              Process:
-                            </span>{" "}
-                            {product.process ?? "Not listed"}
-                          </p>
-                        ) : null}
-                        {isProductFieldVisible(product, "roastLevel") ? (
-                          <p>
-                            <span className="font-semibold text-[#241710]">
-                              Roast Level:
-                            </span>{" "}
-                            {product.roastLevel ?? "Not listed"}
-                          </p>
-                        ) : null}
-                        {isProductFieldVisible(
-                          product,
-                          "brewRecommendation",
-                        ) ? (
-                          <p className="sm:col-span-2">
-                            <span className="font-semibold text-[#241710]">
-                              Brew Recommendation:
-                            </span>{" "}
-                            {product.brewRecommendation ?? "Not listed"}
-                          </p>
-                        ) : null}
-                        {isProductFieldVisible(
-                          product,
-                          "seasonalAvailability",
-                        ) ? (
-                          <p>
-                            <span className="font-semibold text-[#241710]">
-                              Seasonal Availability:
-                            </span>{" "}
-                            {formatAvailability(product)}
-                          </p>
-                        ) : null}
-                        {isProductFieldVisible(product, "availableFor") ? (
-                          <p>
-                            <span className="font-semibold text-[#241710]">
-                              Suitable Menu Usage:
-                            </span>{" "}
-                            {product.availableFor}
-                          </p>
-                        ) : null}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
+            <ProductOptionsPanel linkedProducts={linkedProducts} />
             </div>
           </div>
 

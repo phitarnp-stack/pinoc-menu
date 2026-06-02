@@ -17,7 +17,7 @@ export default async function AdminMenuItemsPage() {
   return (
     <MenuItemCrudPage
       title="Menu Items"
-      description="Manage customer-facing drinks, categories, taste profiles, prices, and active state with local mock data."
+      description="Manage customer-facing drinks, categories, taste profiles, prices, and active state."
       initialItems={menuItems}
       menuCategories={menuCategories}
       tasteProfiles={tasteProfiles}

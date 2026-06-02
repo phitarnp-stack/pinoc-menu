@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { MenuItemsBrowser } from "@/src/components/menu/MenuItemsBrowser";
+import { PublicBackLink } from "@/src/components/navigation/PublicBackLink";
 import { PublicHeader } from "@/src/components/navigation/PublicHeader";
 import {
   getMenuItems,
@@ -44,12 +44,7 @@ export default async function SpecialPage() {
 
         <div className="relative z-10 mx-auto flex min-h-[calc(100vh-4rem)] w-full max-w-6xl flex-col justify-center gap-10 pb-16 pt-36 sm:pb-20 sm:pt-40 lg:pt-32">
           <div className="max-w-2xl">
-            <Link
-              href="/menu"
-              className="mb-8 inline-flex text-xs font-semibold uppercase tracking-[0.28em] text-[#7d4d2f] transition hover:text-[#2b1a12] focus:outline-none focus:ring-2 focus:ring-[#7d4d2f] focus:ring-offset-4 focus:ring-offset-[#f6efe6]"
-            >
-              Menu
-            </Link>
+            <PublicBackLink href="/menu" label="Back to Menu" />
 
             <h1 className="text-5xl font-semibold leading-[0.98] tracking-normal sm:text-6xl lg:text-7xl">
               Special Menu
