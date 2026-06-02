@@ -1,10 +1,13 @@
 import { notFound } from "next/navigation";
+import { ClassicMenuPage } from "@/src/components/menu/ClassicMenuPage";
 import { MenuItemsBrowser } from "@/src/components/menu/MenuItemsBrowser";
 import { PublicBackLink } from "@/src/components/navigation/PublicBackLink";
 import { PublicHeader } from "@/src/components/navigation/PublicHeader";
 import {
   getMenuCategories,
+  getMenuItemProducts,
   getMenuItemsByCategory,
+  getProducts,
 } from "@/src/lib/menu/repositories";
 
 type CategoryPageProps = {
@@ -33,6 +36,10 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   }
 
   const items = await getMenuItemsByCategory(category.id);
+  const classicMenuData =
+    category.slug === "classic-coffee"
+      ? await Promise.all([getProducts(), getMenuItemProducts()])
+      : null;
 
   return (
     <main className="min-h-screen bg-[#f6efe6] text-[#241710]">
@@ -58,16 +65,24 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             </p>
           </div>
 
-          <MenuItemsBrowser
-            itemBaseHref={`/menu/${category.slug}`}
-            sections={[
-              {
-                id: category.id,
-                name: category.name,
-                items,
-              },
-            ]}
-          />
+          {classicMenuData ? (
+            <ClassicMenuPage
+              items={items}
+              menuItemProducts={classicMenuData[1]}
+              products={classicMenuData[0]}
+            />
+          ) : (
+            <MenuItemsBrowser
+              itemBaseHref={`/menu/${category.slug}`}
+              sections={[
+                {
+                  id: category.id,
+                  name: category.name,
+                  items,
+                },
+              ]}
+            />
+          )}
         </div>
       </section>
     </main>
