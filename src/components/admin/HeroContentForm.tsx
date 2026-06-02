@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { saveHeroContent } from "@/src/lib/menu/adminWrites";
 import type { HeroContent, MenuItem, Product } from "@/src/types/menu";
 import { AdminBackLink } from "./AdminBackLink";
+import { ImageUploadField } from "./ImageUploadField";
 
 type HeroContentFormProps = {
   initialHeroContent: HeroContent;
@@ -142,33 +143,24 @@ export function HeroContentForm({
                   />
                 </label>
 
-                <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
-                  Hero Image URL
-                  <input
-                    type="url"
-                    value={formState.imageUrl}
-                    onChange={(event) =>
-                      setFormState((current) => ({
-                        ...current,
-                        imageUrl: event.target.value,
-                      }))
-                    }
-                    className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
-                    placeholder="https://example.com/pinoc-hero.jpg"
-                  />
-                </label>
+                <ImageUploadField
+                  bucket="hero"
+                  currentUrl={formState.imageUrl}
+                  label="Hero Image"
+                  objectNameSeed="homepage-hero"
+                  onChange={(url) =>
+                    setFormState((current) => ({
+                      ...current,
+                      imageUrl: url,
+                    }))
+                  }
+                />
 
-                {formState.imageUrl ? (
-                  <img
-                    alt="Hero preview"
-                    src={formState.imageUrl}
-                    className="aspect-[4/3] w-full rounded-lg object-cover"
-                  />
-                ) : (
+                {!formState.imageUrl ? (
                   <div className="rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/60 px-4 py-8 text-sm font-semibold text-[#7d4d2f]">
                     Fallback editorial visual will be shown.
                   </div>
-                )}
+                ) : null}
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">

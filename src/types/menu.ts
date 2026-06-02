@@ -10,6 +10,27 @@ export type VisibilityStatus = "visible" | "hidden";
 
 export type MenuLabel = "new" | "seasonal" | "limited";
 
+export type RecommendationDrinkType =
+  | "coffee"
+  | "milk_coffee"
+  | "matcha"
+  | "craft_cocoa"
+  | "non_coffee"
+  | "cold_brew";
+
+export type RecommendationFeelingTag =
+  | "light_refreshing"
+  | "bright_fruity"
+  | "deep_chocolatey"
+  | "creamy_smooth"
+  | "clean_delicate"
+  | "bold_intense";
+
+export type RecommendationAdventureLevel =
+  | "familiar"
+  | "curious"
+  | "adventurous";
+
 export type PublicFieldVisibility = {
   origin?: boolean;
   producer?: boolean;
@@ -88,6 +109,10 @@ export interface MenuItem {
   availableFrom?: string;
   availableUntil?: string;
   publicFieldVisibility?: PublicFieldVisibility;
+  drinkType?: RecommendationDrinkType;
+  feelingTags?: RecommendationFeelingTag[];
+  adventureLevel?: RecommendationAdventureLevel;
+  bodyLevel?: number;
   sortOrder: number;
 }
 

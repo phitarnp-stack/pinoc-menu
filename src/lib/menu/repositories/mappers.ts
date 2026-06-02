@@ -12,6 +12,9 @@ import type {
   ProductStatus,
   ProductType,
   PublicFieldVisibility,
+  RecommendationAdventureLevel,
+  RecommendationDrinkType,
+  RecommendationFeelingTag,
   RoastLevel,
   SpecialCategory,
   SpecialCategoryRecord,
@@ -35,6 +38,20 @@ const asNumber = (value: unknown, fallback = 0) => {
   }
 
   return fallback;
+};
+
+const asOptionalNumber = (value: unknown) => {
+  if (typeof value === "number") {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const parsed = Number(value);
+
+    return Number.isFinite(parsed) ? parsed : undefined;
+  }
+
+  return undefined;
 };
 
 const asBoolean = (value: unknown, fallback = false) =>
@@ -145,6 +162,14 @@ export const mapMenuItemRow = (row: DbRecord): MenuItem => ({
   availableFrom: asOptionalString(row.available_from),
   availableUntil: asOptionalString(row.available_until),
   publicFieldVisibility: asPublicFieldVisibility(row.public_field_visibility),
+  drinkType: asOptionalString(row.drink_type) as
+    | RecommendationDrinkType
+    | undefined,
+  feelingTags: asStringArray(row.feeling_tags) as RecommendationFeelingTag[],
+  adventureLevel: asOptionalString(row.adventure_level) as
+    | RecommendationAdventureLevel
+    | undefined,
+  bodyLevel: asOptionalNumber(row.body_level),
   sortOrder: asNumber(row.sort_order),
 });
 

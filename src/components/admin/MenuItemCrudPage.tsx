@@ -6,11 +6,15 @@ import type {
   MenuCategory,
   MenuItem,
   MenuLabel,
+  RecommendationAdventureLevel,
+  RecommendationDrinkType,
+  RecommendationFeelingTag,
   SpecialCategory,
   TasteProfile,
   VisibilityStatus,
 } from "@/src/types/menu";
 import { AdminBackLink } from "./AdminBackLink";
+import { ImageUploadField } from "./ImageUploadField";
 
 type MenuItemCrudPageProps = {
   title: string;
@@ -37,6 +41,10 @@ type MenuItemFormState = {
   menuLabel: "" | MenuLabel;
   availableFrom: string;
   availableUntil: string;
+  drinkType: "" | RecommendationDrinkType;
+  feelingTags: RecommendationFeelingTag[];
+  adventureLevel: "" | RecommendationAdventureLevel;
+  bodyLevel: string;
 };
 
 const specialCategoryOptions: {
@@ -52,6 +60,39 @@ const menuLabelOptions: { label: string; value: MenuLabel }[] = [
   { label: "New", value: "new" },
   { label: "Seasonal", value: "seasonal" },
   { label: "Limited", value: "limited" },
+];
+
+const drinkTypeOptions: {
+  label: string;
+  value: RecommendationDrinkType;
+}[] = [
+  { label: "Coffee", value: "coffee" },
+  { label: "Milk Coffee", value: "milk_coffee" },
+  { label: "Matcha", value: "matcha" },
+  { label: "Craft Cocoa", value: "craft_cocoa" },
+  { label: "Non Coffee", value: "non_coffee" },
+  { label: "Cold Brew", value: "cold_brew" },
+];
+
+const feelingTagOptions: {
+  label: string;
+  value: RecommendationFeelingTag;
+}[] = [
+  { label: "Light & Refreshing", value: "light_refreshing" },
+  { label: "Bright & Fruity", value: "bright_fruity" },
+  { label: "Deep & Chocolatey", value: "deep_chocolatey" },
+  { label: "Creamy & Smooth", value: "creamy_smooth" },
+  { label: "Clean & Delicate", value: "clean_delicate" },
+  { label: "Bold & Intense", value: "bold_intense" },
+];
+
+const adventureLevelOptions: {
+  label: string;
+  value: RecommendationAdventureLevel;
+}[] = [
+  { label: "Familiar", value: "familiar" },
+  { label: "Curious", value: "curious" },
+  { label: "Adventurous", value: "adventurous" },
 ];
 
 const makeDefaultFormState = (
@@ -73,6 +114,10 @@ const makeDefaultFormState = (
   menuLabel: "",
   availableFrom: "",
   availableUntil: "",
+  drinkType: "",
+  feelingTags: [],
+  adventureLevel: "",
+  bodyLevel: "3",
 });
 
 const normalizeNotes = (notes: string) =>
@@ -92,6 +137,11 @@ const createId = (name: string) =>
   `item-${createSlug(name)}-${Date.now().toString(36)}`;
 
 const formatPrice = (price: number) => `฿${price}`;
+
+const optionLabel = <Value extends string>(
+  options: { label: string; value: Value }[],
+  value: Value | undefined,
+) => options.find((option) => option.value === value)?.label ?? value;
 
 export function MenuItemCrudPage({
   title,
@@ -118,6 +168,10 @@ export function MenuItemCrudPage({
   );
   const isEditing = editingId !== null;
   const isSpecialForm = fixedCategoryId === "special";
+  const imageBucket =
+    isSpecialForm || formState.categoryId === "special"
+      ? "specials"
+      : "menu-items";
 
   const resetForm = () => {
     setEditingId(null);
@@ -155,6 +209,10 @@ export function MenuItemCrudPage({
       isSeasonal: isSpecialForm && formState.menuLabel === "seasonal",
       availableFrom: formState.availableFrom || undefined,
       availableUntil: formState.availableUntil || undefined,
+      drinkType: formState.drinkType || undefined,
+      feelingTags: formState.feelingTags,
+      adventureLevel: formState.adventureLevel || undefined,
+      bodyLevel: Number(formState.bodyLevel),
       sortOrder: existingItem?.sortOrder ?? items.length + 1,
     };
 
@@ -208,6 +266,10 @@ export function MenuItemCrudPage({
       menuLabel: item.menuLabel ?? "",
       availableFrom: item.availableFrom ?? "",
       availableUntil: item.availableUntil ?? "",
+      drinkType: item.drinkType ?? "",
+      feelingTags: item.feelingTags ?? [],
+      adventureLevel: item.adventureLevel ?? "",
+      bodyLevel: String(item.bodyLevel ?? 3),
     });
   };
 
@@ -286,6 +348,15 @@ export function MenuItemCrudPage({
       tasteProfileIds: current.tasteProfileIds.includes(tasteProfileId)
         ? current.tasteProfileIds.filter((id) => id !== tasteProfileId)
         : [...current.tasteProfileIds, tasteProfileId],
+    }));
+  };
+
+  const toggleFeelingTag = (feelingTag: RecommendationFeelingTag) => {
+    setFormState((current) => ({
+      ...current,
+      feelingTags: current.feelingTags.includes(feelingTag)
+        ? current.feelingTags.filter((tag) => tag !== feelingTag)
+        : [...current.feelingTags, feelingTag],
     }));
   };
 
@@ -462,6 +533,130 @@ export function MenuItemCrudPage({
                   </div>
                 </div>
 
+                <div className="grid gap-4 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 p-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7d4d2f]">
+                      Find Your Cup Profile
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-[#5f4635]">
+                      Quick tags for recommendations, search, and future
+                      personalization.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <p className="text-sm font-semibold text-[#5f4635]">
+                      Drink Type
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {drinkTypeOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() =>
+                            setFormState((current) => ({
+                              ...current,
+                              drinkType: option.value,
+                            }))
+                          }
+                          className={
+                            formState.drinkType === option.value
+                              ? "rounded-full bg-[#2b1a12] px-4 py-2 text-sm font-semibold text-[#fff8ed]"
+                              : "rounded-full border border-[#3d2618]/14 px-4 py-2 text-sm font-semibold text-[#5f4635]"
+                          }
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <p className="text-sm font-semibold text-[#5f4635]">
+                      Feeling Tags
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {feelingTagOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => toggleFeelingTag(option.value)}
+                          className={
+                            formState.feelingTags.includes(option.value)
+                              ? "rounded-full bg-[#2b1a12] px-4 py-2 text-sm font-semibold text-[#fff8ed]"
+                              : "rounded-full border border-[#3d2618]/14 px-4 py-2 text-sm font-semibold text-[#5f4635]"
+                          }
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <p className="text-sm font-semibold text-[#5f4635]">
+                      Adventure Level
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {adventureLevelOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() =>
+                            setFormState((current) => ({
+                              ...current,
+                              adventureLevel: option.value,
+                            }))
+                          }
+                          className={
+                            formState.adventureLevel === option.value
+                              ? "rounded-full bg-[#2b1a12] px-4 py-2 text-sm font-semibold text-[#fff8ed]"
+                              : "rounded-full border border-[#3d2618]/14 px-4 py-2 text-sm font-semibold text-[#5f4635]"
+                          }
+                        >
+                          {option.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <div className="flex items-center justify-between gap-4">
+                      <p className="text-sm font-semibold text-[#5f4635]">
+                        Body / Strength
+                      </p>
+                      <p className="text-xs font-semibold text-[#7d4d2f]">
+                        {formState.bodyLevel}/5
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-5 gap-2">
+                      {[1, 2, 3, 4, 5].map((level) => (
+                        <button
+                          key={level}
+                          type="button"
+                          onClick={() =>
+                            setFormState((current) => ({
+                              ...current,
+                              bodyLevel: String(level),
+                            }))
+                          }
+                          className={
+                            formState.bodyLevel === String(level)
+                              ? "min-h-10 rounded-full bg-[#2b1a12] text-sm font-semibold text-[#fff8ed]"
+                              : "min-h-10 rounded-full border border-[#3d2618]/14 text-sm font-semibold text-[#5f4635]"
+                          }
+                        >
+                          {level}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex justify-between text-xs text-[#8a6a55]">
+                      <span>Very Light</span>
+                      <span>Very Heavy</span>
+                    </div>
+                  </div>
+                </div>
+
                 <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
                   Recommended For
                   <input
@@ -492,31 +687,18 @@ export function MenuItemCrudPage({
                   />
                 </label>
 
-                <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
-                  Image URL
-                  <input
-                    type="url"
-                    value={formState.imageUrl}
-                    onChange={(event) =>
-                      setFormState((current) => ({
-                        ...current,
-                        imageUrl: event.target.value,
-                      }))
-                    }
-                    className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
-                    placeholder="https://example.com/menu-item.jpg"
-                  />
-                </label>
-
-                {formState.imageUrl ? (
-                  <div className="overflow-hidden rounded-lg border border-[#3d2618]/12 bg-[#f6efe6]/60">
-                    <img
-                      alt={`${formState.name || "Menu item"} preview`}
-                      src={formState.imageUrl}
-                      className="aspect-[4/3] w-full object-cover"
-                    />
-                  </div>
-                ) : null}
+                <ImageUploadField
+                  bucket={imageBucket}
+                  currentUrl={formState.imageUrl}
+                  label={isSpecialForm ? "Special Image" : "Menu Item Image"}
+                  objectNameSeed={formState.name || "menu-item"}
+                  onChange={(url) =>
+                    setFormState((current) => ({
+                      ...current,
+                      imageUrl: url,
+                    }))
+                  }
+                />
 
                 {isSpecialForm ? (
                   <div className="grid gap-4 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 p-4">
@@ -704,7 +886,37 @@ export function MenuItemCrudPage({
                           {item.visibility}
                         </span>
                       ) : null}
+                      {item.drinkType ? (
+                        <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
+                          {optionLabel(drinkTypeOptions, item.drinkType)}
+                        </span>
+                      ) : null}
+                      {item.adventureLevel ? (
+                        <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
+                          {optionLabel(
+                            adventureLevelOptions,
+                            item.adventureLevel,
+                          )}
+                        </span>
+                      ) : null}
+                      {item.bodyLevel ? (
+                        <span className="rounded-full border border-[#3d2618]/12 px-3 py-1 text-xs font-semibold text-[#5f4635]">
+                          Body {item.bodyLevel}/5
+                        </span>
+                      ) : null}
                     </div>
+                    {item.feelingTags && item.feelingTags.length > 0 ? (
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {item.feelingTags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="rounded-full bg-[#7d4d2f]/12 px-3 py-1 text-xs font-semibold text-[#7d4d2f]"
+                          >
+                            {optionLabel(feelingTagOptions, tag)}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
                     <p className="mt-5 text-sm leading-7 text-[#5f4635]">
                       <span className="font-semibold text-[#241710]">
                         Flavor:

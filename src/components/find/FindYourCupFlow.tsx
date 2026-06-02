@@ -2,30 +2,23 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import type { MenuCategory, MenuItem } from "@/src/types/menu";
+import type {
+  MenuCategory,
+  MenuItem,
+  RecommendationAdventureLevel,
+  RecommendationDrinkType,
+  RecommendationFeelingTag,
+} from "@/src/types/menu";
 
 type FindYourCupFlowProps = {
   menuItems: MenuItem[];
   menuCategories: MenuCategory[];
 };
 
-type MoodChoice =
-  | "coffee"
-  | "milk-coffee"
-  | "matcha"
-  | "craft-cocoa"
-  | "non-coffee"
-  | "cold-brew";
+type FeelingChoice = RecommendationFeelingTag | "surprise";
 
-type FeelingChoice =
-  | "light-refreshing"
-  | "bright-fruity"
-  | "deep-chocolatey"
-  | "creamy-smooth"
-  | "clean-delicate"
-  | "surprise";
-
-type AdventureChoice = "safe" | "little-new" | "surprise";
+type AdventureChoice = RecommendationAdventureLevel;
+type MoodChoice = RecommendationDrinkType;
 
 type Step = 1 | 2 | 3 | 4;
 
@@ -42,26 +35,26 @@ const moodOptions: {
     categoryHints: ["classic-coffee", "filter-coffee"],
   },
   {
-    value: "milk-coffee",
+    value: "milk_coffee",
     label: "Milk Coffee",
     thai: "กาแฟนม",
     categoryHints: ["classic-coffee"],
   },
   { value: "matcha", label: "Matcha", thai: "มัทฉะ", categoryHints: ["matcha"] },
   {
-    value: "craft-cocoa",
+    value: "craft_cocoa",
     label: "Craft Cocoa",
     thai: "โกโก้พิเศษ",
     categoryHints: ["craft-cocoa"],
   },
   {
-    value: "non-coffee",
+    value: "non_coffee",
     label: "Non Coffee",
     thai: "ไม่มีกาแฟ",
     categoryHints: ["matcha", "craft-cocoa", "special"],
   },
   {
-    value: "cold-brew",
+    value: "cold_brew",
     label: "Cold Brew",
     thai: "สกัดเย็น",
     categoryHints: ["special", "filter-coffee"],
@@ -76,35 +69,35 @@ const feelingOptions: {
   reason: string;
 }[] = [
   {
-    value: "light-refreshing",
+    value: "light_refreshing",
     label: "Light & Refreshing",
     thai: "☀️ สดชื่น เบาสบาย",
     keywords: ["refreshing", "tea", "jasmine", "citrus", "mandarin", "orange"],
     reason: "แก้วนี้น่าจะให้ความรู้สึกเบา สดชื่น และดื่มง่าย",
   },
   {
-    value: "bright-fruity",
+    value: "bright_fruity",
     label: "Bright & Fruity",
     thai: "🍓 หอมผลไม้ สดใส",
     keywords: ["fruit", "strawberry", "peach", "apple", "orange", "juicy"],
     reason: "แก้วนี้มีโทนผลไม้หรือความสดใสที่เข้ากับอารมณ์วันนี้",
   },
   {
-    value: "deep-chocolatey",
+    value: "deep_chocolatey",
     label: "Deep & Chocolatey",
     thai: "🍫 เข้มข้น อบอุ่น",
     keywords: ["cocoa", "cacao", "chocolate", "malt", "molasses"],
     reason: "แก้วนี้ให้โทนเข้ม อบอุ่น หรือช็อกโกแลตชัดขึ้น",
   },
   {
-    value: "creamy-smooth",
+    value: "creamy_smooth",
     label: "Creamy & Smooth",
     thai: "🥛 นุ่มละมุน",
     keywords: ["cream", "creamy", "milk", "latte", "smooth"],
     reason: "แก้วนี้เน้นสัมผัสนุ่ม ละมุน และดื่มสบาย",
   },
   {
-    value: "clean-delicate",
+    value: "clean_delicate",
     label: "Clean & Delicate",
     thai: "🌿 สะอาด สบาย",
     keywords: ["clean", "tea", "floral", "jasmine", "delicate", "washed"],
@@ -120,9 +113,9 @@ const feelingOptions: {
 ];
 
 const adventureOptions: { value: AdventureChoice; label: string; thai: string }[] = [
-  { value: "safe", label: "Safe and familiar", thai: "คุ้นเคย ดื่มง่าย" },
-  { value: "little-new", label: "A little new", thai: "ขอลองอะไรใหม่นิดหน่อย" },
-  { value: "surprise", label: "Surprise me", thai: "จัดมาเลย" },
+  { value: "familiar", label: "Familiar", thai: "คุ้นเคย ดื่มง่าย" },
+  { value: "curious", label: "Curious", thai: "ขอลองอะไรใหม่นิดหน่อย" },
+  { value: "adventurous", label: "Adventurous", thai: "จัดมาเลย" },
 ];
 
 const categoryName = (categories: MenuCategory[], categoryId: string) =>
@@ -130,6 +123,24 @@ const categoryName = (categories: MenuCategory[], categoryId: string) =>
 
 const categorySlug = (categories: MenuCategory[], categoryId: string) =>
   categories.find((category) => category.id === categoryId)?.slug ?? categoryId;
+
+const optionLabel = <Value extends string>(
+  options: { label: string; value: Value }[],
+  value: Value | undefined | null,
+) => options.find((option) => option.value === value)?.label ?? value;
+
+const matchSummary = (
+  mood: MoodChoice | null,
+  feeling: FeelingChoice | null,
+  adventure: AdventureChoice | null,
+) =>
+  [
+    optionLabel(moodOptions, mood),
+    optionLabel(feelingOptions, feeling),
+    optionLabel(adventureOptions, adventure),
+  ]
+    .filter(Boolean)
+    .join(" + ");
 
 const itemText = (item: MenuItem) =>
   [
@@ -152,26 +163,36 @@ const scoreItem = (
   const text = itemText(item);
   let score = 0;
 
-  if (moodOption?.categoryHints.includes(item.categoryId)) {
+  if (item.drinkType === mood) {
+    score += 10;
+  } else if (!item.drinkType && moodOption?.categoryHints.includes(item.categoryId)) {
     score += 5;
   }
 
-  for (const keyword of feelingOption?.keywords ?? []) {
-    if (text.includes(keyword)) {
-      score += 2;
+  if (feeling !== "surprise" && item.feelingTags?.includes(feeling)) {
+    score += 6;
+  } else {
+    for (const keyword of feelingOption?.keywords ?? []) {
+      if (text.includes(keyword)) {
+        score += 2;
+      }
     }
   }
 
-  if (adventure === "safe" && item.categoryId === "classic-coffee") {
-    score += 2;
-  }
+  if (item.adventureLevel === adventure) {
+    score += 5;
+  } else if (!item.adventureLevel) {
+    if (adventure === "familiar" && item.categoryId === "classic-coffee") {
+      score += 2;
+    }
 
-  if (adventure === "little-new" && item.isSeasonal) {
-    score += 2;
-  }
+    if (adventure === "curious" && item.isSeasonal) {
+      score += 2;
+    }
 
-  if (adventure === "surprise" && item.categoryId === "special") {
-    score += 3;
+    if (adventure === "adventurous" && item.categoryId === "special") {
+      score += 3;
+    }
   }
 
   return score;
@@ -205,6 +226,7 @@ export function FindYourCupFlow({
   const selectedFeeling = feelingOptions.find(
     (option) => option.value === feeling,
   );
+  const selectedSummary = matchSummary(mood, feeling, adventure);
 
   const startAgain = () => {
     setMood(null);
@@ -338,8 +360,15 @@ export function FindYourCupFlow({
                   <span className="font-semibold text-[#241710]">
                     ทำไมถึงแนะนำ:
                   </span>{" "}
-                  {selectedFeeling?.reason ??
-                    "เพราะเข้ากับอารมณ์ที่คุณเลือกวันนี้"}
+                  Recommended because you selected {selectedSummary}.{" "}
+                  {item.drinkType === mood &&
+                  feeling !== null &&
+                  feeling !== "surprise" &&
+                  item.feelingTags?.includes(feeling) &&
+                  item.adventureLevel === adventure
+                    ? "This menu item matches all three preferences."
+                    : (selectedFeeling?.reason ??
+                      "It matches the direction you chose today.")}
                 </p>
                 <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                   <Link

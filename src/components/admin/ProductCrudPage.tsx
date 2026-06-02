@@ -16,6 +16,7 @@ import type {
   RoastLevel,
 } from "@/src/types/menu";
 import { AdminBackLink } from "./AdminBackLink";
+import { ImageUploadField } from "./ImageUploadField";
 
 type ProductCrudPageProps = {
   title: string;
@@ -941,28 +942,13 @@ export function ProductCrudPage({
                   />
                 </label>
 
-                <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
-                  Image URL
-                  <input
-                    type="url"
-                    value={formState.imageUrl}
-                    onChange={(event) =>
-                      updateField("imageUrl", event.target.value)
-                    }
-                    className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
-                    placeholder="https://example.com/product.jpg"
-                  />
-                </label>
-
-                {formState.imageUrl ? (
-                  <div className="overflow-hidden rounded-lg border border-[#3d2618]/12 bg-[#f6efe6]/60">
-                    <img
-                      alt={`${formState.name || "Product"} preview`}
-                      src={formState.imageUrl}
-                      className="aspect-[4/3] w-full object-cover"
-                    />
-                  </div>
-                ) : null}
+                <ImageUploadField
+                  bucket="products"
+                  currentUrl={formState.imageUrl}
+                  label="Product Image"
+                  objectNameSeed={formState.name || "product"}
+                  onChange={(url) => updateField("imageUrl", url)}
+                />
 
                 <p className="rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#7d4d2f]">
                   Click each field label icon to control public visibility.

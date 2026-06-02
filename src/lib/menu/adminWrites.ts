@@ -1,7 +1,13 @@
 "use client";
 
 import { createBrowserSupabaseClient } from "@/src/lib/supabase/client";
-import type { HeroContent, MenuItem, Product } from "@/src/types/menu";
+import type {
+  HeroContent,
+  MenuItem,
+  Product,
+  RecommendationDrinkType,
+  RecommendationFeelingTag,
+} from "@/src/types/menu";
 
 type WriteMode = "create" | "edit";
 export type ProductMenuCategoryId =
@@ -73,6 +79,10 @@ const menuItemRow = (item: MenuItem) => ({
   available_from: nullable(item.availableFrom),
   available_until: nullable(item.availableUntil),
   public_field_visibility: item.publicFieldVisibility ?? {},
+  drink_type: nullable(item.drinkType),
+  feeling_tags: item.feelingTags ?? [],
+  adventure_level: nullable(item.adventureLevel),
+  body_level: item.bodyLevel ?? null,
   sort_order: item.sortOrder,
 });
 
@@ -171,8 +181,86 @@ const buildMenuItemFromProduct = (
   availableFrom: product.availableFrom,
   availableUntil: product.availableUntil,
   publicFieldVisibility: product.publicFieldVisibility,
+  drinkType: inferDrinkType(product, categoryId),
+  feelingTags: inferFeelingTags(product),
+  adventureLevel: product.isSeasonal ? "curious" : "familiar",
+  bodyLevel: inferBodyLevel(product),
   sortOrder: 1000,
 });
+
+const inferDrinkType = (
+  product: Product,
+  categoryId: ProductMenuCategoryId,
+): RecommendationDrinkType => {
+  if (product.productType === "matcha") {
+    return "matcha";
+  }
+
+  if (product.productType === "craft_cocoa") {
+    return "craft_cocoa";
+  }
+
+  if (categoryId === "classic-coffee") {
+    return product.availableFor.toLowerCase().includes("latte")
+      ? "milk_coffee"
+      : "coffee";
+  }
+
+  if (categoryId === "special") {
+    return "coffee";
+  }
+
+  return "coffee";
+};
+
+const inferFeelingTags = (product: Product): RecommendationFeelingTag[] => {
+  const text = [product.name, product.description, ...product.flavorNotes]
+    .join(" ")
+    .toLowerCase();
+  const tags: RecommendationFeelingTag[] = [];
+
+  if (/citrus|jasmine|tea|mandarin|refresh/.test(text)) {
+    tags.push("light_refreshing");
+  }
+
+  if (/fruit|strawberry|peach|apple|orange|juicy/.test(text)) {
+    tags.push("bright_fruity");
+  }
+
+  if (/cocoa|cacao|chocolate|molasses|malt/.test(text)) {
+    tags.push("deep_chocolatey");
+  }
+
+  if (/cream|creamy|latte|milk|velvet/.test(text)) {
+    tags.push("creamy_smooth");
+  }
+
+  if (/washed|clean|floral|delicate/.test(text)) {
+    tags.push("clean_delicate");
+  }
+
+  if (/bold|intense|dark|espresso/.test(text)) {
+    tags.push("bold_intense");
+  }
+
+  return tags.length > 0 ? tags : ["clean_delicate"];
+};
+
+const inferBodyLevel = (product: Product) => {
+  if (product.roastLevel === "Medium-Dark") {
+    return 4;
+  }
+
+  if (product.productType === "craft_cocoa") {
+    return 4;
+  }
+
+  if (product.roastLevel === "Light") {
+    return 2;
+  }
+
+  return 3;
+};
 
 const productMenuHref = (categoryId: ProductMenuCategoryId, slug: string) =>
   `/menu/${categorySlugById[categoryId]}/${slug}`;
