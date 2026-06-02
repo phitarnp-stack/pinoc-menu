@@ -8,8 +8,10 @@ import {
 } from "@/src/lib/menu/adminWrites";
 import type {
   MenuCategory,
+  HeroContentMode,
   MenuItem,
   MenuLabel,
+  OverlayField,
   RecommendationAdventureLevel,
   RecommendationComfortLevel,
   RecommendationDrinkType,
@@ -22,6 +24,7 @@ import type {
 } from "@/src/types/menu";
 import { AdminBackLink } from "./AdminBackLink";
 import { ImageUploadField } from "./ImageUploadField";
+import { HeroImageFrame } from "@/src/components/media/HeroImageFrame";
 
 type MenuItemCrudPageProps = {
   title: string;
@@ -44,6 +47,10 @@ type MenuItemFormState = {
   recommendedFor: string;
   imagePlaceholder: string;
   imageUrl: string;
+  heroContentMode: HeroContentMode;
+  customOverlayTitle: string;
+  customOverlayText: string;
+  overlayFields: OverlayField[];
   isActive: "active" | "inactive";
   specialCategory: SpecialCategory;
   visibility: VisibilityStatus;
@@ -135,6 +142,37 @@ const comfortLevelOptions: {
   { label: "Surprise Me", value: "surprise_me" },
 ];
 
+const heroContentModeOptions: {
+  description: string;
+  label: string;
+  value: HeroContentMode;
+}[] = [
+  {
+    description: "Only the image. Best for editorial or campaign photography.",
+    label: "Image only",
+    value: "image_only",
+  },
+  {
+    description: "Use selected menu details on top of the image.",
+    label: "Image with menu info",
+    value: "image_with_menu_info",
+  },
+  {
+    description: "Write your own overlay text for launches or collaborations.",
+    label: "Custom overlay",
+    value: "custom_overlay",
+  },
+];
+
+const overlayFieldOptions: { label: string; value: OverlayField }[] = [
+  { label: "Name", value: "name" },
+  { label: "Taste Note", value: "taste_note" },
+  { label: "Description", value: "description" },
+  { label: "Story Title", value: "story_title" },
+  { label: "Story Description", value: "story_description" },
+  { label: "Price", value: "price" },
+];
+
 const makeDefaultFormState = (
   menuCategories: MenuCategory[],
   fixedCategoryId?: string,
@@ -148,6 +186,10 @@ const makeDefaultFormState = (
   recommendedFor: "",
   imagePlaceholder: "",
   imageUrl: "",
+  heroContentMode: "image_with_menu_info",
+  customOverlayTitle: "",
+  customOverlayText: "",
+  overlayFields: ["name", "taste_note", "price"],
   isActive: "active",
   specialCategory: "coffee",
   visibility: "visible",
@@ -253,6 +295,10 @@ export function MenuItemCrudPage({
       recommendedFor: formState.recommendedFor.trim(),
       imagePlaceholder: formState.imagePlaceholder.trim(),
       imageUrl: formState.imageUrl.trim() || undefined,
+      heroContentMode: formState.heroContentMode,
+      customOverlayTitle: formState.customOverlayTitle.trim() || undefined,
+      customOverlayText: formState.customOverlayText.trim() || undefined,
+      overlayFields: formState.overlayFields,
       isActive: formState.isActive === "active",
       specialCategory: isSpecialForm ? formState.specialCategory : undefined,
       visibility: isSpecialForm ? formState.visibility : undefined,
@@ -323,6 +369,12 @@ export function MenuItemCrudPage({
       recommendedFor: item.recommendedFor,
       imagePlaceholder: item.imagePlaceholder,
       imageUrl: item.imageUrl ?? "",
+      heroContentMode: item.heroContentMode ?? "image_with_menu_info",
+      customOverlayTitle: item.customOverlayTitle ?? "",
+      customOverlayText: item.customOverlayText ?? "",
+      overlayFields: item.overlayFields?.length
+        ? item.overlayFields
+        : ["name", "taste_note", "price"],
       isActive: item.isActive ? "active" : "inactive",
       specialCategory: item.specialCategory ?? "coffee",
       visibility: item.visibility ?? (item.isActive ? "visible" : "hidden"),
@@ -485,6 +537,15 @@ export function MenuItemCrudPage({
       flavorPreferences: current.flavorPreferences.includes(flavorPreference)
         ? current.flavorPreferences.filter((tag) => tag !== flavorPreference)
         : [...current.flavorPreferences, flavorPreference],
+    }));
+  };
+
+  const toggleOverlayField = (overlayField: OverlayField) => {
+    setFormState((current) => ({
+      ...current,
+      overlayFields: current.overlayFields.includes(overlayField)
+        ? current.overlayFields.filter((field) => field !== overlayField)
+        : [...current.overlayFields, overlayField],
     }));
   };
 
@@ -1008,6 +1069,12 @@ export function MenuItemCrudPage({
                 <ImageUploadField
                   bucket={imageBucket}
                   currentUrl={formState.imageUrl}
+                  guidelines={{
+                    recommendedSize: "1080 x 1350 px",
+                    aspectRatio: "4:5",
+                    minimumWidth: "1080 px",
+                    formats: "JPG / PNG / WEBP",
+                  }}
                   label={isSpecialForm ? "Special Image" : "Menu Item Image"}
                   objectNameSeed={formState.name || "menu-item"}
                   onChange={(url) =>
@@ -1017,6 +1084,141 @@ export function MenuItemCrudPage({
                     }))
                   }
                 />
+
+                <div className="grid gap-4 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 p-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7d4d2f]">
+                      Image Presentation
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-[#5f4635]">
+                      Image first, story second. Choose whether this visual
+                      speaks alone or carries selected menu information.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <p className="text-sm font-semibold text-[#5f4635]">
+                      Hero Content Mode
+                    </p>
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      {heroContentModeOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() =>
+                            setFormState((current) => ({
+                              ...current,
+                              heroContentMode: option.value,
+                            }))
+                          }
+                          className={
+                            formState.heroContentMode === option.value
+                              ? "rounded-lg bg-[#2b1a12] px-4 py-3 text-left text-sm font-semibold text-[#fff8ed]"
+                              : "rounded-lg border border-[#3d2618]/14 px-4 py-3 text-left text-sm font-semibold text-[#5f4635]"
+                          }
+                        >
+                          <span>{option.label}</span>
+                          <span
+                            className={
+                              formState.heroContentMode === option.value
+                                ? "mt-1 block text-xs font-medium leading-5 text-[#ead9c2]"
+                                : "mt-1 block text-xs font-medium leading-5 text-[#8a6a55]"
+                            }
+                          >
+                            {option.description}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {formState.heroContentMode === "image_with_menu_info" ? (
+                    <div className="grid gap-2">
+                      <p className="text-sm font-semibold text-[#5f4635]">
+                        Overlay Content
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {overlayFieldOptions.map((option) => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => toggleOverlayField(option.value)}
+                            className={
+                              formState.overlayFields.includes(option.value)
+                                ? "rounded-full bg-[#2b1a12] px-4 py-2 text-sm font-semibold text-[#fff8ed]"
+                                : "rounded-full border border-[#3d2618]/14 px-4 py-2 text-sm font-semibold text-[#5f4635]"
+                            }
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {formState.heroContentMode === "custom_overlay" ? (
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                        Custom Overlay Title
+                        <input
+                          value={formState.customOverlayTitle}
+                          onChange={(event) =>
+                            setFormState((current) => ({
+                              ...current,
+                              customOverlayTitle: event.target.value,
+                            }))
+                          }
+                          className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                          placeholder="THE BRICE FRIEND"
+                        />
+                      </label>
+
+                      <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                        Custom Overlay Text
+                        <textarea
+                          value={formState.customOverlayText}
+                          onChange={(event) =>
+                            setFormState((current) => ({
+                              ...current,
+                              customOverlayText: event.target.value,
+                            }))
+                          }
+                          className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 py-3 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                          placeholder="A seasonal collaboration. Coming soon."
+                        />
+                      </label>
+                    </div>
+                  ) : null}
+
+                  <div className="grid gap-2">
+                    <p className="text-sm font-semibold text-[#5f4635]">
+                      Live Preview
+                    </p>
+                    <HeroImageFrame
+                      alt={formState.name || "Menu image preview"}
+                      imageUrl={formState.imageUrl || undefined}
+                      placeholder={formState.imagePlaceholder || "Menu"}
+                      mode={formState.heroContentMode}
+                      overlayFields={formState.overlayFields}
+                      compact
+                      content={{
+                        name: formState.name || "Menu Name",
+                        tasteNote:
+                          normalizeNotes(formState.flavorNotes)
+                            .slice(0, 3)
+                            .join(" / ") || "Taste note",
+                        description: formState.description,
+                        storyTitle: formState.storyTitle,
+                        storyDescription: formState.storyDescription,
+                        price: formState.price ? formatPrice(Number(formState.price)) : "",
+                        customTitle: formState.customOverlayTitle,
+                        customText: formState.customOverlayText,
+                      }}
+                      aspectClass="aspect-[4/5]"
+                      className="rounded-lg border border-[#3d2618]/10"
+                    />
+                  </div>
+                </div>
 
                 {isSpecialForm ? (
                   <div className="grid gap-4 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 p-4">

@@ -34,7 +34,7 @@ export function PassportDashboard() {
   if (!passport) {
     return (
       <div className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-6 text-sm font-semibold text-[#5f4635] shadow-[0_18px_48px_rgba(84,55,34,0.12)] backdrop-blur">
-        Opening your Guest Passport...
+        Opening My Cup...
       </div>
     );
   }

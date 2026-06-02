@@ -2,9 +2,16 @@
 
 import { FormEvent, useState } from "react";
 import { saveHeroContent } from "@/src/lib/menu/adminWrites";
-import type { HeroContent, MenuItem, Product } from "@/src/types/menu";
+import type {
+  HeroContent,
+  HeroContentMode,
+  MenuItem,
+  OverlayField,
+  Product,
+} from "@/src/types/menu";
 import { AdminBackLink } from "./AdminBackLink";
 import { ImageUploadField } from "./ImageUploadField";
+import { HeroImageFrame } from "@/src/components/media/HeroImageFrame";
 
 type HeroContentFormProps = {
   initialHeroContent: HeroContent;
@@ -16,12 +23,44 @@ type HeroFormState = {
   title: string;
   subtitle: string;
   imageUrl: string;
+  heroContentMode: HeroContentMode;
+  customOverlayTitle: string;
+  customOverlayText: string;
+  overlayFields: OverlayField[];
   tastingNote: string;
   ctaLabel: string;
   ctaHref: string;
   featuredProductId: string;
   featuredSpecialId: string;
 };
+
+const heroContentModeOptions: {
+  description: string;
+  label: string;
+  value: HeroContentMode;
+}[] = [
+  {
+    description: "Only the image. Best for mood photography.",
+    label: "Image only",
+    value: "image_only",
+  },
+  {
+    description: "Use selected hero details on top of the image.",
+    label: "Image with info",
+    value: "image_with_menu_info",
+  },
+  {
+    description: "Write campaign or launch text by hand.",
+    label: "Custom overlay",
+    value: "custom_overlay",
+  },
+];
+
+const heroOverlayFieldOptions: { label: string; value: OverlayField }[] = [
+  { label: "Name", value: "name" },
+  { label: "Taste Note", value: "taste_note" },
+  { label: "Description", value: "description" },
+];
 
 export function HeroContentForm({
   initialHeroContent,
@@ -32,6 +71,13 @@ export function HeroContentForm({
     title: initialHeroContent.title,
     subtitle: initialHeroContent.subtitle,
     imageUrl: initialHeroContent.imageUrl ?? "",
+    heroContentMode:
+      initialHeroContent.heroContentMode ?? "image_with_menu_info",
+    customOverlayTitle: initialHeroContent.customOverlayTitle ?? "",
+    customOverlayText: initialHeroContent.customOverlayText ?? "",
+    overlayFields: initialHeroContent.overlayFields?.length
+      ? initialHeroContent.overlayFields
+      : ["name", "taste_note"],
     tastingNote: initialHeroContent.tastingNote ?? "",
     ctaLabel: initialHeroContent.ctaLabel ?? "Find Your Cup",
     ctaHref: initialHeroContent.ctaHref ?? "/find-your-cup",
@@ -54,6 +100,10 @@ export function HeroContentForm({
       title: formState.title.trim(),
       subtitle: formState.subtitle.trim(),
       imageUrl: formState.imageUrl.trim() || undefined,
+      heroContentMode: formState.heroContentMode,
+      customOverlayTitle: formState.customOverlayTitle.trim() || undefined,
+      customOverlayText: formState.customOverlayText.trim() || undefined,
+      overlayFields: formState.overlayFields,
       tastingNote: formState.tastingNote.trim() || undefined,
       ctaLabel: formState.ctaLabel.trim() || "Find Your Cup",
       ctaHref: formState.ctaHref.trim() || "/find-your-cup",
@@ -80,6 +130,15 @@ export function HeroContentForm({
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const toggleOverlayField = (overlayField: OverlayField) => {
+    setFormState((current) => ({
+      ...current,
+      overlayFields: current.overlayFields.includes(overlayField)
+        ? current.overlayFields.filter((field) => field !== overlayField)
+        : [...current.overlayFields, overlayField],
+    }));
   };
 
   return (
@@ -155,6 +214,12 @@ export function HeroContentForm({
                 <ImageUploadField
                   bucket="hero"
                   currentUrl={formState.imageUrl}
+                  guidelines={{
+                    recommendedSize: "1440 x 1920 px",
+                    aspectRatio: "3:4",
+                    minimumWidth: "1440 px",
+                    formats: "JPG / PNG / WEBP",
+                  }}
                   label="Hero Image"
                   objectNameSeed="homepage-hero"
                   onChange={(url) =>
@@ -170,6 +235,134 @@ export function HeroContentForm({
                     Fallback editorial visual will be shown.
                   </div>
                 ) : null}
+
+                <div className="grid gap-4 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/50 p-4">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#7d4d2f]">
+                      Hero Image Presentation
+                    </p>
+                    <p className="mt-2 text-sm leading-6 text-[#5f4635]">
+                      Let the homepage image speak alone, carry selected hero
+                      information, or use a custom campaign overlay.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <p className="text-sm font-semibold text-[#5f4635]">
+                      Hero Content Mode
+                    </p>
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      {heroContentModeOptions.map((option) => (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() =>
+                            setFormState((current) => ({
+                              ...current,
+                              heroContentMode: option.value,
+                            }))
+                          }
+                          className={
+                            formState.heroContentMode === option.value
+                              ? "rounded-lg bg-[#2b1a12] px-4 py-3 text-left text-sm font-semibold text-[#fff8ed]"
+                              : "rounded-lg border border-[#3d2618]/14 px-4 py-3 text-left text-sm font-semibold text-[#5f4635]"
+                          }
+                        >
+                          <span>{option.label}</span>
+                          <span
+                            className={
+                              formState.heroContentMode === option.value
+                                ? "mt-1 block text-xs font-medium leading-5 text-[#ead9c2]"
+                                : "mt-1 block text-xs font-medium leading-5 text-[#8a6a55]"
+                            }
+                          >
+                            {option.description}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {formState.heroContentMode === "image_with_menu_info" ? (
+                    <div className="grid gap-2">
+                      <p className="text-sm font-semibold text-[#5f4635]">
+                        Overlay Content
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {heroOverlayFieldOptions.map((option) => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            onClick={() => toggleOverlayField(option.value)}
+                            className={
+                              formState.overlayFields.includes(option.value)
+                                ? "rounded-full bg-[#2b1a12] px-4 py-2 text-sm font-semibold text-[#fff8ed]"
+                                : "rounded-full border border-[#3d2618]/14 px-4 py-2 text-sm font-semibold text-[#5f4635]"
+                            }
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {formState.heroContentMode === "custom_overlay" ? (
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                        Custom Overlay Title
+                        <input
+                          value={formState.customOverlayTitle}
+                          onChange={(event) =>
+                            setFormState((current) => ({
+                              ...current,
+                              customOverlayTitle: event.target.value,
+                            }))
+                          }
+                          className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                          placeholder="THE BRICE FRIEND"
+                        />
+                      </label>
+
+                      <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
+                        Custom Overlay Text
+                        <textarea
+                          value={formState.customOverlayText}
+                          onChange={(event) =>
+                            setFormState((current) => ({
+                              ...current,
+                              customOverlayText: event.target.value,
+                            }))
+                          }
+                          className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 py-3 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
+                          placeholder="A seasonal collaboration. Coming soon."
+                        />
+                      </label>
+                    </div>
+                  ) : null}
+
+                  <div className="grid gap-2">
+                    <p className="text-sm font-semibold text-[#5f4635]">
+                      Live Preview
+                    </p>
+                    <HeroImageFrame
+                      alt="Homepage hero preview"
+                      imageUrl={formState.imageUrl || undefined}
+                      placeholder="Pinoc hero"
+                      mode={formState.heroContentMode}
+                      overlayFields={formState.overlayFields}
+                      content={{
+                        name: formState.title || "Hero Title",
+                        tasteNote: formState.tastingNote,
+                        description: formState.subtitle,
+                        customTitle: formState.customOverlayTitle,
+                        customText: formState.customOverlayText,
+                      }}
+                      aspectClass="aspect-[3/4]"
+                      className="rounded-lg border border-[#3d2618]/10"
+                    />
+                  </div>
+                </div>
 
                 <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
                   Hero Tasting Note

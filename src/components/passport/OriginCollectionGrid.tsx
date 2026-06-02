@@ -8,7 +8,7 @@ export function OriginCollectionGrid({
   return (
     <section className="rounded-[1.25rem] border border-[#3d2618]/10 bg-[#fff8ed]/48 p-6 shadow-[0_14px_42px_rgba(84,55,34,0.08)] backdrop-blur">
       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
-        Origin Collection
+        Origins Met
       </p>
       <h2 className="mt-3 text-2xl font-semibold">Origins you have met</h2>
 

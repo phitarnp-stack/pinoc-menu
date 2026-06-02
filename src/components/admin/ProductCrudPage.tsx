@@ -1104,6 +1104,12 @@ export function ProductCrudPage({
                 <ImageUploadField
                   bucket="products"
                   currentUrl={formState.imageUrl}
+                  guidelines={{
+                    recommendedSize: "1080 x 1350 px",
+                    aspectRatio: "4:5",
+                    minimumWidth: "1080 px",
+                    formats: "JPG / PNG / WEBP",
+                  }}
                   label="Product Image"
                   objectNameSeed={formState.name || "product"}
                   onChange={(url) => updateField("imageUrl", url)}

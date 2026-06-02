@@ -92,6 +92,10 @@ export default async function Home() {
               subtitle={heroSubtitle}
               image={heroContent.imageUrl}
               description={heroDescription}
+              mode={heroContent.heroContentMode}
+              customOverlayTitle={heroContent.customOverlayTitle}
+              customOverlayText={heroContent.customOverlayText}
+              overlayFields={heroContent.overlayFields}
             />
 
             <p className="mt-5 border-t border-[#fff8ed]/14 pt-5 text-sm leading-7 text-[#ead9c2]">

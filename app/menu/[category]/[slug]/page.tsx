@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { MenuItemMemberActions } from "@/src/components/customer/MenuItemMemberActions";
 import { BilingualLabel } from "@/src/components/language/BilingualLabel";
+import { HeroImageFrame } from "@/src/components/media/HeroImageFrame";
 import { ProductOptionsPanel } from "@/src/components/menu/ProductOptionsPanel";
 import { PublicBackLink } from "@/src/components/navigation/PublicBackLink";
 import { PublicHeader } from "@/src/components/navigation/PublicHeader";
@@ -114,10 +115,24 @@ export default async function ItemPage({ params }: ItemPageProps) {
               </p>
 
               {item.imageUrl ? (
-                <img
+                <HeroImageFrame
                   alt={item.name}
-                  src={item.imageUrl}
-                  className="mt-8 aspect-[4/3] w-full max-w-xl rounded-lg object-cover shadow-[0_24px_58px_rgba(84,55,34,0.16)]"
+                  imageUrl={item.imageUrl}
+                  placeholder={item.imagePlaceholder}
+                  mode={item.heroContentMode}
+                  overlayFields={item.overlayFields}
+                  content={{
+                    name: item.name,
+                    tasteNote: item.flavorNotes.slice(0, 3).join(" / "),
+                    description: item.description,
+                    storyTitle: story.storyTitle,
+                    storyDescription: story.storyDescription,
+                    price: formatPrice(item.price),
+                    customTitle: item.customOverlayTitle,
+                    customText: item.customOverlayText,
+                  }}
+                  aspectClass="aspect-[4/5]"
+                  className="mt-8 w-full max-w-xl rounded-lg shadow-[0_24px_58px_rgba(84,55,34,0.16)]"
                 />
               ) : null}
 

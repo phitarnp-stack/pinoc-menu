@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BilingualLabel } from "@/src/components/language/BilingualLabel";
+import { HeroImageFrame } from "@/src/components/media/HeroImageFrame";
 import type { MenuItem } from "@/src/types/menu";
 
 type MenuView = "grid" | "list" | "flavor-map";
@@ -205,21 +206,26 @@ export function MenuItemsBrowser({
                   href={`${itemBaseHref}/${item.slug}`}
                   className="group flex min-h-[25rem] flex-col overflow-hidden rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/46 shadow-[0_14px_38px_rgba(84,55,34,0.08)] backdrop-blur transition hover:-translate-y-1 hover:bg-[#fff8ed]/70"
                 >
-                  <div className="relative aspect-[4/3] overflow-hidden border-b border-[#3d2618]/10 bg-[radial-gradient(circle_at_30%_25%,rgba(255,248,237,0.94),transparent_35%),linear-gradient(135deg,#ead9c2,#8f5c39)]">
-                    {item.imageUrl ? (
-                      <img
-                        alt={item.name}
-                        src={item.imageUrl}
-                        className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="absolute inset-x-5 bottom-5 rounded-lg border border-[#fff8ed]/36 bg-[#2b1a12]/58 px-4 py-3 text-[#fff8ed] backdrop-blur">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#e7caa7]">
-                          {item.imagePlaceholder}
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                  <HeroImageFrame
+                    alt={item.name}
+                    imageUrl={item.imageUrl}
+                    placeholder={item.imagePlaceholder}
+                    mode={item.heroContentMode}
+                    overlayFields={item.overlayFields}
+                    compact
+                    content={{
+                      name: item.name,
+                      tasteNote: item.flavorNotes.slice(0, 3).join(" / "),
+                      description: item.description,
+                      storyTitle: item.storyTitle,
+                      storyDescription: item.storyDescription,
+                      price: formatPrice(item.price),
+                      customTitle: item.customOverlayTitle,
+                      customText: item.customOverlayText,
+                    }}
+                    aspectClass="aspect-[4/5]"
+                    className="border-b border-[#3d2618]/10 transition duration-500 group-hover:scale-[1.02]"
+                  />
                   <div className="flex flex-1 flex-col justify-between p-6">
                     <div>
                       <div className="mb-5">
@@ -257,21 +263,18 @@ export function MenuItemsBrowser({
                   className="group rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/46 p-5 shadow-[0_10px_30px_rgba(84,55,34,0.08)] backdrop-blur transition hover:bg-[#fff8ed]/70 sm:p-6"
                 >
                   <div className="grid gap-4 sm:grid-cols-[7rem_1fr] lg:grid-cols-[7rem_1fr_auto] lg:items-start">
-                    <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-[#3d2618]/10 bg-[radial-gradient(circle_at_30%_25%,rgba(255,248,237,0.94),transparent_35%),linear-gradient(135deg,#ead9c2,#8f5c39)]">
-                      {item.imageUrl ? (
-                        <img
-                          alt={item.name}
-                          src={item.imageUrl}
-                          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="flex h-full items-end p-3">
-                          <p className="text-[0.64rem] font-semibold uppercase leading-4 tracking-[0.16em] text-[#fff8ed]">
-                            {item.imagePlaceholder}
-                          </p>
-                        </div>
-                      )}
-                    </div>
+                    <HeroImageFrame
+                      alt={item.name}
+                      imageUrl={item.imageUrl}
+                      placeholder={item.imagePlaceholder}
+                      mode="image_only"
+                      compact
+                      content={{
+                        name: item.name,
+                      }}
+                      aspectClass="aspect-[4/3]"
+                      className="rounded-lg border border-[#3d2618]/10"
+                    />
                     <div>
                       <div className="flex flex-wrap items-center gap-3">
                         <h3 className="text-xl font-semibold">{item.name}</h3>

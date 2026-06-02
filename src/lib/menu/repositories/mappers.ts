@@ -5,6 +5,7 @@ import type {
   CustomerTasting,
   FeelingTag,
   HeroContent,
+  HeroContentMode,
   MenuCategory,
   MenuItem,
   MenuItemProduct,
@@ -12,6 +13,7 @@ import type {
   ProductStatus,
   ProductType,
   PublicFieldVisibility,
+  OverlayField,
   RecommendationAdventureLevel,
   RecommendationComfortLevel,
   RecommendationDrinkType,
@@ -67,6 +69,18 @@ const asStringArray = (value: unknown) =>
   Array.isArray(value)
     ? value.filter((item): item is string => typeof item === "string")
     : [];
+
+const asOverlayFields = (value: unknown): OverlayField[] =>
+  asStringArray(value).filter((item): item is OverlayField =>
+    [
+      "name",
+      "taste_note",
+      "description",
+      "story_title",
+      "story_description",
+      "price",
+    ].includes(item),
+  );
 
 const asPublicFieldVisibility = (
   value: unknown,
@@ -156,6 +170,13 @@ export const mapMenuItemRow = (row: DbRecord): MenuItem => ({
   recommendedFor: asString(row.recommended_for),
   imagePlaceholder: asString(row.image_placeholder),
   imageUrl: asOptionalString(row.image_url),
+  heroContentMode: asString(
+    row.hero_content_mode,
+    "image_with_menu_info",
+  ) as HeroContentMode,
+  customOverlayTitle: asOptionalString(row.custom_overlay_title),
+  customOverlayText: asOptionalString(row.custom_overlay_text),
+  overlayFields: asOverlayFields(row.overlay_fields),
   isActive: asBoolean(row.is_active),
   specialCategory: asOptionalString(row.special_category) as
     | SpecialCategory
@@ -267,6 +288,13 @@ export const mapHeroContentRow = (row: DbRecord): HeroContent => ({
   title: asString(row.title),
   subtitle: asString(row.subtitle),
   imageUrl: asOptionalString(row.image_url),
+  heroContentMode: asString(
+    row.hero_content_mode,
+    "image_with_menu_info",
+  ) as HeroContentMode,
+  customOverlayTitle: asOptionalString(row.custom_overlay_title),
+  customOverlayText: asOptionalString(row.custom_overlay_text),
+  overlayFields: asOverlayFields(row.overlay_fields),
   tastingNote: asOptionalString(row.tasting_note),
   ctaLabel: asOptionalString(row.cta_label),
   ctaHref: asOptionalString(row.cta_href),

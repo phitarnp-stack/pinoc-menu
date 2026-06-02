@@ -2,10 +2,10 @@ import Link from "next/link";
 import { DataSourceIndicator } from "./DataSourceIndicator";
 
 const links = [
-  { href: "/menu", label: "Explore" },
-  { href: "/find-your-cup", label: "Find" },
-  { href: "/special", label: "Special" },
-  { href: "/passport", label: "Passport" },
+  { href: "/", label: "Home" },
+  { href: "/menu", label: "Menu" },
+  { href: "/find-your-cup", label: "Find Your Cup" },
+  { href: "/passport", label: "My Cup" },
 ];
 
 export function PublicHeader() {
@@ -29,7 +29,7 @@ export function PublicHeader() {
             <Link
               key={link.href}
               href={link.href}
-              className="inline-flex min-h-10 items-center justify-center rounded-full px-3 text-xs font-semibold text-[#5f4635] transition hover:bg-[#f6efe6]/76 hover:text-[#2b1a12] focus:outline-none focus:ring-2 focus:ring-[#7d4d2f] focus:ring-offset-2 focus:ring-offset-[#fff8ed]/70 sm:px-4 sm:text-sm"
+              className="inline-flex min-h-10 shrink-0 items-center justify-center rounded-full px-3 text-xs font-semibold text-[#5f4635] transition hover:bg-[#f6efe6]/76 hover:text-[#2b1a12] focus:outline-none focus:ring-2 focus:ring-[#7d4d2f] focus:ring-offset-2 focus:ring-offset-[#fff8ed]/70 sm:px-4 sm:text-sm"
             >
               {link.label}
             </Link>

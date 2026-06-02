@@ -61,14 +61,14 @@ export function PassportAddButton({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
-            Coffee Passport
+            My Cup
           </p>
           <h2 className="mt-3 text-2xl font-semibold">
             Remember this cup
           </h2>
           <p className="mt-3 text-sm leading-7 text-[#5f4635]">
             Save this moment on your device. Pinoc will keep the origin,
-            flavor notes, and quiet milestones in your Passport.
+            flavor notes, and quiet milestones in My Cup.
           </p>
         </div>
         {entryCount > 0 ? (
@@ -94,21 +94,21 @@ export function PassportAddButton({
             type="submit"
             className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#2b1a12] px-6 text-sm font-semibold text-[#fff8ed] shadow-[0_14px_30px_rgba(43,26,18,0.18)] transition hover:bg-[#412719]"
           >
-            Save to Passport
+            Save to My Cup
           </button>
           <Link
             href="/passport"
             className="inline-flex min-h-12 items-center justify-center rounded-full border border-[#3d2618]/14 px-6 text-sm font-semibold text-[#5f4635] transition hover:bg-[#f6efe6]/70"
           >
-            View Passport
+            View My Cup
           </Link>
         </div>
       </form>
 
       {isSaved ? (
         <div className="mt-5 rounded-lg border border-[#3d2618]/10 bg-[#f6efe6]/68 p-4 text-sm leading-7 text-[#5f4635]">
-          Saved to your Guest Passport. Your discovery journal is stored on this
-          device for now.
+          Saved to My Cup. Your discovery journal is stored on this device for
+          now.
         </div>
       ) : null}
     </div>

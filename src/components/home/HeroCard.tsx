@@ -1,9 +1,16 @@
+import { HeroImageFrame } from "@/src/components/media/HeroImageFrame";
+import type { HeroContentMode, OverlayField } from "@/src/types/menu";
+
 type HeroCardProps = {
   title: string;
   subtitle?: string;
   image?: string;
   badge?: string;
   description?: string;
+  mode?: HeroContentMode;
+  customOverlayTitle?: string;
+  customOverlayText?: string;
+  overlayFields?: OverlayField[];
   variant?: "large" | "compact";
 };
 
@@ -35,6 +42,10 @@ export function HeroCard({
   image,
   badge,
   description,
+  mode = "image_with_menu_info",
+  customOverlayTitle,
+  customOverlayText,
+  overlayFields,
   variant = "compact",
 }: HeroCardProps) {
   const isLarge = variant === "large";
@@ -47,37 +58,53 @@ export function HeroCard({
           : "overflow-hidden rounded-lg border border-[#fff8ed]/36 bg-[#fff8ed]/18 shadow-[0_18px_48px_rgba(48,29,17,0.16)] backdrop-blur"
       }
     >
-      <div className={isLarge ? "aspect-[4/3]" : "aspect-[16/10]"}>
-        {image ? (
-          <img alt={title} src={image} className="h-full w-full object-cover" />
-        ) : (
+      {image ? (
+        <HeroImageFrame
+          alt={title}
+          imageUrl={image}
+          mode={mode}
+          overlayFields={overlayFields}
+          compact={!isLarge}
+          content={{
+            name: title,
+            tasteNote: subtitle,
+            description,
+            customTitle: customOverlayTitle,
+            customText: customOverlayText,
+          }}
+          aspectClass={isLarge ? "aspect-[3/4]" : "aspect-[16/10]"}
+        />
+      ) : (
+        <div className={isLarge ? "aspect-[3/4]" : "aspect-[16/10]"}>
           <FallbackVisual compact={!isLarge} />
-        )}
-      </div>
-      <div className={isLarge ? "p-6 sm:p-7" : "p-4"}>
-        {badge ? (
-          <p className="mb-3 text-[0.66rem] font-semibold uppercase tracking-[0.22em] text-[#b99069]">
-            {badge}
-          </p>
-        ) : null}
-        <h2
-          className={
-            isLarge
-              ? "text-3xl font-semibold leading-tight text-[#fff8ed]"
-              : "text-lg font-semibold leading-tight text-[#fff8ed]"
-          }
-        >
-          {title}
-        </h2>
-        {subtitle ? (
-          <p className="mt-2 text-sm leading-6 text-[#ead9c2]">{subtitle}</p>
-        ) : null}
-        {description ? (
-          <p className="mt-4 text-sm leading-6 text-[#fff8ed]/78">
-            {description}
-          </p>
-        ) : null}
-      </div>
+        </div>
+      )}
+      {image || mode === "image_only" || mode === "custom_overlay" ? null : (
+        <div className={isLarge ? "p-6 sm:p-7" : "p-4"}>
+          {badge ? (
+            <p className="mb-3 text-[0.66rem] font-semibold uppercase tracking-[0.22em] text-[#b99069]">
+              {badge}
+            </p>
+          ) : null}
+          <h2
+            className={
+              isLarge
+                ? "text-3xl font-semibold leading-tight text-[#fff8ed]"
+                : "text-lg font-semibold leading-tight text-[#fff8ed]"
+            }
+          >
+            {title}
+          </h2>
+          {subtitle ? (
+            <p className="mt-2 text-sm leading-6 text-[#ead9c2]">{subtitle}</p>
+          ) : null}
+          {description ? (
+            <p className="mt-4 text-sm leading-6 text-[#fff8ed]/78">
+              {description}
+            </p>
+          ) : null}
+        </div>
+      )}
     </article>
   );
 }

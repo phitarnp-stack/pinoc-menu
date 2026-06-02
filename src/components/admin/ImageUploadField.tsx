@@ -6,6 +6,12 @@ import { createBrowserSupabaseClient } from "@/src/lib/supabase/client";
 type ImageUploadFieldProps = {
   bucket: "products" | "menu-items" | "specials" | "hero";
   currentUrl: string;
+  guidelines?: {
+    aspectRatio: string;
+    formats: string;
+    minimumWidth: string;
+    recommendedSize: string;
+  };
   label: string;
   objectNameSeed: string;
   onChange: (url: string) => void;
@@ -21,6 +27,7 @@ const safeSegment = (value: string) =>
 export function ImageUploadField({
   bucket,
   currentUrl,
+  guidelines,
   label,
   objectNameSeed,
   onChange,
@@ -98,6 +105,27 @@ export function ImageUploadField({
           <p className="mt-1 text-xs leading-5 text-[#8a6a55]">
             Upload to Supabase Storage, or keep using an existing image URL.
           </p>
+          {guidelines ? (
+            <div className="mt-3 grid gap-1 text-xs leading-5 text-[#8a6a55]">
+              <p>
+                Recommended:{" "}
+                <span className="font-semibold text-[#5f4635]">
+                  {guidelines.recommendedSize}
+                </span>
+              </p>
+              <p>
+                Aspect ratio:{" "}
+                <span className="font-semibold text-[#5f4635]">
+                  {guidelines.aspectRatio}
+                </span>{" "}
+                / Minimum width:{" "}
+                <span className="font-semibold text-[#5f4635]">
+                  {guidelines.minimumWidth}
+                </span>
+              </p>
+              <p>Formats: {guidelines.formats}</p>
+            </div>
+          ) : null}
         </div>
         <label className="inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full bg-[#2b1a12] px-5 text-sm font-semibold text-[#fff8ed] transition hover:bg-[#412719]">
           {currentUrl ? "Replace Image" : "Choose File"}

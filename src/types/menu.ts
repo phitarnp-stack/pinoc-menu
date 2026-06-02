@@ -12,6 +12,19 @@ export type MenuLabel = "new" | "seasonal" | "limited";
 
 export type StoryStatus = "default" | "custom";
 
+export type HeroContentMode =
+  | "image_only"
+  | "image_with_menu_info"
+  | "custom_overlay";
+
+export type OverlayField =
+  | "name"
+  | "taste_note"
+  | "description"
+  | "story_title"
+  | "story_description"
+  | "price";
+
 export type RecommendationDrinkType =
   | "coffee"
   | "milk_coffee"
@@ -120,6 +133,10 @@ export interface MenuItem {
   recommendedFor: string;
   imagePlaceholder: string;
   imageUrl?: string;
+  heroContentMode?: HeroContentMode;
+  customOverlayTitle?: string;
+  customOverlayText?: string;
+  overlayFields?: OverlayField[];
   isActive: boolean;
   specialCategory?: SpecialCategory;
   visibility?: VisibilityStatus;
@@ -149,6 +166,10 @@ export interface HeroContent {
   title: string;
   subtitle: string;
   imageUrl?: string;
+  heroContentMode?: HeroContentMode;
+  customOverlayTitle?: string;
+  customOverlayText?: string;
+  overlayFields?: OverlayField[];
   tastingNote?: string;
   ctaLabel?: string;
   ctaHref?: string;
