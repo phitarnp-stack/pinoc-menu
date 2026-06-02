@@ -14,9 +14,11 @@ export function RecentExperiences({ entries }: { entries: PassportEntry[] }) {
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
-            Recent Experiences
+            Recent Moments
           </p>
-          <h2 className="mt-3 text-2xl font-semibold">Cups you collected</h2>
+          <h2 className="mt-3 text-2xl font-semibold">
+            Recent saved cups and discoveries
+          </h2>
         </div>
         <span className="text-sm font-semibold text-[#7d4d2f]">
           {entries.length}

@@ -8,9 +8,9 @@ export function OriginCollectionGrid({
   return (
     <section className="rounded-[1.25rem] border border-[#3d2618]/10 bg-[#fff8ed]/48 p-6 shadow-[0_14px_42px_rgba(84,55,34,0.08)] backdrop-blur">
       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
-        Origins Met
+        Origins You&apos;ve Met
       </p>
-      <h2 className="mt-3 text-2xl font-semibold">Origins you have met</h2>
+      <h2 className="mt-3 text-2xl font-semibold">Origins you&apos;ve met</h2>
 
       {origins.length > 0 ? (
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
@@ -33,7 +33,7 @@ export function OriginCollectionGrid({
         </div>
       ) : (
         <p className="mt-5 text-sm leading-7 text-[#5f4635]">
-          Add a cup with linked product details to begin collecting origins.
+          Add a cup with linked product details to begin meeting origins.
         </p>
       )}
     </section>

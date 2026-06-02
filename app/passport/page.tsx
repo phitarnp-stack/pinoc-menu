@@ -22,8 +22,8 @@ export default function PassportPage() {
               Your journey
             </h1>
             <p className="mt-6 max-w-xl text-base leading-8 text-[#5f4635] sm:text-lg">
-              A collection of cups, origins, flavors, and quiet moments you
-              chose to remember at Pinoc.
+              A quiet collection of cups, stories, and moments you chose to
+              remember.
             </p>
           </div>
 

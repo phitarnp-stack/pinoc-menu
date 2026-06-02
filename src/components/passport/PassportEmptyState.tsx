@@ -6,10 +6,10 @@ export function PassportEmptyState() {
       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
         My Cup
       </p>
-      <h2 className="mt-4 text-3xl font-semibold">Your journal is still open.</h2>
+      <h2 className="mt-4 text-3xl font-semibold">Your journey starts here.</h2>
       <p className="mt-4 max-w-xl text-sm leading-7 text-[#5f4635]">
-        Save a cup from any story page. Pinoc will keep the origin, flavor
-        notes, and quiet milestones on this device.
+        Save a cup from any story page. Pinoc will keep the story, origin,
+        flavor notes, and quiet moment on this device.
       </p>
       <div className="mt-7 flex flex-col gap-3 sm:flex-row">
         <Link

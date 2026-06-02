@@ -50,13 +50,26 @@ export function PassportDashboard() {
 
   return (
     <div className="grid gap-7">
-      <div className="grid gap-3 sm:grid-cols-3">
-        <SummaryCard label="Experiences" value={passport.entries.length} />
-        <SummaryCard label="Origins" value={origins.length} />
-        <SummaryCard label="Milestones" value={passport.badgeAwards.length} />
-      </div>
-
-      <PassportSyncNotice />
+      <section className="rounded-[1.25rem] border border-[#3d2618]/10 bg-[#fff8ed]/44 p-6 shadow-[0_14px_42px_rgba(84,55,34,0.08)] backdrop-blur sm:p-7">
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
+          Your Journey
+        </p>
+        <h2 className="mt-3 text-2xl font-semibold">
+          A gentle record of what you are discovering.
+        </h2>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <SummaryCard
+            label="Total experiences"
+            value={passport.entries.length}
+          />
+          <SummaryCard label="Origins met" value={origins.length} />
+          <SummaryCard label="Flavors noticed" value={flavors.length} />
+          <SummaryCard
+            label="Badges earned"
+            value={passport.badgeAwards.length}
+          />
+        </div>
+      </section>
 
       <div className="grid gap-5 lg:grid-cols-[1.08fr_0.92fr] lg:items-start">
         <RecentExperiences entries={passport.entries} />
@@ -67,6 +80,7 @@ export function PassportDashboard() {
       </div>
 
       <BadgeCollection awards={passport.badgeAwards} />
+      <PassportSyncNotice />
     </div>
   );
 }

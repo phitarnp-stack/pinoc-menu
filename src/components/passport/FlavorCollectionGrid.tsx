@@ -14,9 +14,11 @@ export function FlavorCollectionGrid({
   return (
     <section className="rounded-[1.25rem] border border-[#3d2618]/10 bg-[#fff8ed]/48 p-6 shadow-[0_14px_42px_rgba(84,55,34,0.08)] backdrop-blur">
       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#7d4d2f]">
-        Flavors Noticed
+        Flavors You&apos;re Starting To Notice
       </p>
-      <h2 className="mt-3 text-2xl font-semibold">Flavors you are noticing</h2>
+      <h2 className="mt-3 text-2xl font-semibold">
+        Flavors you&apos;re starting to notice
+      </h2>
 
       {flavors.length > 0 ? (
         <div className="mt-5 flex flex-wrap gap-2">
@@ -34,7 +36,7 @@ export function FlavorCollectionGrid({
         </div>
       ) : (
         <p className="mt-5 text-sm leading-7 text-[#5f4635]">
-          Your flavor collection will grow from notes, profiles, and discovery
+          Your flavor language will grow from notes, profiles, and discovery
           tags as you add cups.
         </p>
       )}
