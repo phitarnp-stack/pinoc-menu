@@ -1198,6 +1198,12 @@ export function ProductCrudPage({
                     aspectRatio: "4:5",
                     minimumWidth: "1080 px",
                     formats: "JPG / PNG / WEBP",
+                    usedIn: [
+                      "Home",
+                      "Menu List",
+                      "Quiet List",
+                      "Featured Menu",
+                    ],
                   }}
                   label="Product Image"
                   objectNameSeed={formState.name || "product"}

@@ -219,6 +219,7 @@ export function HeroContentForm({
                     aspectRatio: "3:4",
                     minimumWidth: "1440 px",
                     formats: "JPG / PNG / WEBP",
+                    usedIn: ["Home Hero", "Featured Product", "Featured Special"],
                   }}
                   label="Hero Image"
                   objectNameSeed="homepage-hero"

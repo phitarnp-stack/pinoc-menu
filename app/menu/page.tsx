@@ -7,6 +7,46 @@ import {
 
 export const dynamic = "force-dynamic";
 
+const categoryMoods: Record<
+  string,
+  {
+    accent: string;
+    icon: string;
+    mood: string;
+  }
+> = {
+  "classic-coffee": {
+    accent: "from-[#8b5d3b]/18 to-[#fff8ed]/50",
+    icon: "☕",
+    mood: "Daily ritual",
+  },
+  "filter-coffee": {
+    accent: "from-[#c98f5f]/18 to-[#fff8ed]/50",
+    icon: "◌",
+    mood: "Discovery",
+  },
+  matcha: {
+    accent: "from-[#7c8f61]/18 to-[#fff8ed]/50",
+    icon: "✦",
+    mood: "Calm",
+  },
+  "craft-cocoa": {
+    accent: "from-[#6f3f2b]/18 to-[#fff8ed]/50",
+    icon: "●",
+    mood: "Comfort",
+  },
+  "cold-brew-japan-traditional": {
+    accent: "from-[#516173]/18 to-[#fff8ed]/50",
+    icon: "◐",
+    mood: "Patience",
+  },
+  special: {
+    accent: "from-[#9a6b39]/18 to-[#fff8ed]/50",
+    icon: "◇",
+    mood: "Curiosity",
+  },
+};
+
 export default async function MenuPage() {
   const [menuCategories, menuItems] = await Promise.all([
     getMenuCategories(),
@@ -45,14 +85,27 @@ export default async function MenuPage() {
               const itemCount = menuItems.filter(
                 (item) => item.categoryId === category.id && item.isActive,
               ).length;
+              const mood = categoryMoods[category.slug] ?? {
+                accent: "from-[#8b5d3b]/14 to-[#fff8ed]/50",
+                icon: "•",
+                mood: "Explore",
+              };
 
               return (
                 <article
                   key={category.id}
-                  className="group flex min-h-64 flex-col justify-between rounded-lg border border-[#3d2618]/10 bg-[#fff8ed]/44 p-6 shadow-[0_14px_38px_rgba(84,55,34,0.08)] backdrop-blur transition hover:-translate-y-1 hover:border-[#3d2618]/20 hover:bg-[#fff8ed]/66 sm:p-7"
+                  className={`group flex min-h-64 flex-col justify-between rounded-lg border border-[#3d2618]/10 bg-gradient-to-br ${mood.accent} p-6 shadow-[0_14px_38px_rgba(84,55,34,0.08)] backdrop-blur transition hover:-translate-y-1 hover:border-[#3d2618]/20 hover:bg-[#fff8ed]/66 sm:p-7`}
                 >
                   <div>
-                    <div className="mb-6 h-px w-14 bg-[#7d4d2f]/45 transition group-hover:w-20" />
+                    <div className="mb-6 flex items-center justify-between gap-4">
+                      <div className="h-px w-14 bg-[#7d4d2f]/45 transition group-hover:w-20" />
+                      <span className="grid h-11 w-11 place-items-center rounded-full border border-[#3d2618]/10 bg-[#fff8ed]/62 text-lg text-[#7d4d2f]">
+                        {mood.icon}
+                      </span>
+                    </div>
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-[#7d4d2f]">
+                      {mood.mood}
+                    </p>
                     <h2 className="text-2xl font-semibold leading-tight text-[#241710]">
                       {category.name}
                     </h2>

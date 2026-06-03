@@ -91,7 +91,7 @@ export function ClassicMenuPage({
       ...group,
       items: groupItems,
     };
-  });
+  }).filter((group) => group.items.length > 0);
 
   return (
     <div className="grid gap-5">
@@ -106,7 +106,6 @@ export function ClassicMenuPage({
             title={group.title}
           />
         ))}
-
       </div>
     </div>
   );

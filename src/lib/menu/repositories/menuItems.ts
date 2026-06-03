@@ -39,6 +39,7 @@ export async function getMenuItemBySlug(
   const menuItems = await getMenuItems();
 
   return menuItems.find(
-    (menuItem) => menuItem.categoryId === categoryId && menuItem.slug === slug,
+    (menuItem) =>
+      menuItem.categoryId === categoryId && menuItem.slug === slug && menuItem.isActive,
   );
 }

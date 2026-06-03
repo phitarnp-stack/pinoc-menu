@@ -10,6 +10,8 @@ export type VisibilityStatus = "visible" | "hidden";
 
 export type MenuLabel = "new" | "seasonal" | "limited";
 
+export type MenuItemStatus = "active" | "inactive" | "archived";
+
 export type StoryStatus = "default" | "custom";
 
 export type ClassicGroup =
@@ -147,6 +149,7 @@ export interface MenuItem {
   customOverlayText?: string;
   overlayFields?: OverlayField[];
   isActive: boolean;
+  status: MenuItemStatus;
   specialCategory?: SpecialCategory;
   visibility?: VisibilityStatus;
   menuLabel?: MenuLabel;

@@ -10,6 +10,7 @@ import type {
   MenuCategory,
   MenuItem,
   MenuItemProduct,
+  MenuItemStatus,
   Product,
   ProductStatus,
   ProductType,
@@ -182,6 +183,10 @@ export const mapMenuItemRow = (row: DbRecord): MenuItem => ({
   customOverlayText: asOptionalString(row.custom_overlay_text),
   overlayFields: asOverlayFields(row.overlay_fields),
   isActive: asBoolean(row.is_active),
+  status: asString(
+    row.status,
+    asBoolean(row.is_active) ? "active" : "inactive",
+  ) as MenuItemStatus,
   specialCategory: asOptionalString(row.special_category) as
     | SpecialCategory
     | undefined,

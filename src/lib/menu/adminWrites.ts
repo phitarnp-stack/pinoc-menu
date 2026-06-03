@@ -10,6 +10,7 @@ import type {
   RecommendationFlavorPreference,
   RecommendationFeelingTag,
   MenuItemProduct,
+  ProductType,
 } from "@/src/types/menu";
 
 type WriteMode = "create" | "edit";
@@ -89,6 +90,7 @@ const menuItemRow = (item: MenuItem) => ({
   custom_overlay_text: nullable(item.customOverlayText),
   overlay_fields: item.overlayFields ?? ["name", "taste_note", "price"],
   is_active: item.isActive,
+  status: item.status ?? (item.isActive ? "active" : "inactive"),
   is_seasonal: Boolean(item.isSeasonal),
   available_from: nullable(item.availableFrom),
   available_until: nullable(item.availableUntil),
@@ -227,6 +229,7 @@ const buildMenuItemFromProduct = (
   heroContentMode: "image_with_menu_info",
   overlayFields: ["name", "taste_note", "price"],
   isActive: product.status === "active",
+  status: product.status === "active" ? "active" : "inactive",
   isSeasonal: Boolean(product.isSeasonal),
   availableFrom: product.availableFrom,
   availableUntil: product.availableUntil,
@@ -676,15 +679,64 @@ export async function saveMenuItemBeanLinks(
     return mockWriteResult;
   }
 
-  const deleteResult = await supabase
+  const existingLinks = await supabase
     .from("menu_item_products")
-    .delete()
+    .select("id, product_id")
     .eq("menu_item_id", menuItemId);
 
-  if (deleteResult.error) {
+  if (existingLinks.error) {
     throw new Error(
-      formatSupabaseError("Clearing available beans", deleteResult.error),
+      formatSupabaseError("Loading existing available beans", existingLinks.error),
     );
+  }
+
+  const existingProductIds =
+    existingLinks.data?.map((link) => link.product_id).filter(Boolean) ?? [];
+  const productIdsToCheck = Array.from(
+    new Set([...existingProductIds, ...beanLinks.map((link) => link.productId)]),
+  );
+
+  let coffeeBeanProductIds = new Set<string>();
+
+  if (productIdsToCheck.length > 0) {
+    const productsResult = await supabase
+      .from("products")
+      .select("id, product_type")
+      .in("id", productIdsToCheck);
+
+    if (productsResult.error) {
+      throw new Error(
+        formatSupabaseError("Checking available bean products", productsResult.error),
+      );
+    }
+
+    coffeeBeanProductIds = new Set(
+      (productsResult.data ?? [])
+        .filter(
+          (product) =>
+            (product.product_type as ProductType | undefined) === "coffee_bean",
+        )
+        .map((product) => product.id as string),
+    );
+  }
+
+  const coffeeBeanLinkIds =
+    existingLinks.data
+      ?.filter((link) => coffeeBeanProductIds.has(link.product_id))
+      .map((link) => link.id)
+      .filter(Boolean) ?? [];
+
+  if (coffeeBeanLinkIds.length > 0) {
+    const deleteResult = await supabase
+      .from("menu_item_products")
+      .delete()
+      .in("id", coffeeBeanLinkIds);
+
+    if (deleteResult.error) {
+      throw new Error(
+        formatSupabaseError("Clearing available beans", deleteResult.error),
+      );
+    }
   }
 
   if (beanLinks.length === 0) {
@@ -714,6 +766,7 @@ export async function saveMenuItemBeanLinks(
 export async function updateMenuItemStatus(
   item: MenuItem,
   isActive: boolean,
+  status: MenuItem["status"] = isActive ? "active" : "inactive",
 ): Promise<AdminWriteResult> {
   const supabase = createBrowserSupabaseClient();
 
@@ -723,7 +776,7 @@ export async function updateMenuItemStatus(
 
   const { error } = await supabase
     .from("menu_items")
-    .update({ is_active: isActive })
+    .update({ is_active: isActive, status })
     .eq("id", item.id);
 
   if (error) {

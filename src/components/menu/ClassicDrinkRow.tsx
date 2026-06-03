@@ -30,7 +30,7 @@ export function ClassicDrinkRow({ availableBeans, item }: ClassicDrinkRowProps) 
                 key={bean.id}
                 className="rounded-full border border-[#3d2618]/10 bg-[#fff8ed]/60 px-3 py-1 text-xs font-semibold text-[#5f4635]"
               >
-                {bean.name}
+                {bean.houseBlendLabel || bean.name}
               </span>
             ))}
           </div>

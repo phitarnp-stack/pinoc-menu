@@ -38,12 +38,21 @@ export const menuCategories: MenuCategory[] = [
     isActive: true,
   },
   {
+    id: "cold-brew-japan-traditional",
+    slug: "cold-brew-japan-traditional",
+    name: "Cold Brew [Japan Traditional]",
+    description:
+      "Slow, patient cold brew inspired by Japanese extraction rituals and quiet clarity.",
+    sortOrder: 5,
+    isActive: true,
+  },
+  {
     id: "special",
     slug: "special",
     name: "Special",
     description:
       "Seasonal signatures across coffee, non-coffee, and cold brew expressions.",
-    sortOrder: 5,
+    sortOrder: 6,
     isActive: true,
   },
 ];

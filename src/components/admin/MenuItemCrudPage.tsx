@@ -13,6 +13,7 @@ import type {
   HeroContentMode,
   MenuItem,
   MenuItemProduct,
+  MenuItemStatus,
   MenuLabel,
   OverlayField,
   Product,
@@ -42,7 +43,7 @@ type MenuItemCrudPageProps = {
   fixedCategoryId?: string;
 };
 
-type AdminMenuView = "active" | "archived";
+type AdminMenuView = MenuItemStatus;
 
 type MenuItemFormState = {
   name: string;
@@ -59,6 +60,7 @@ type MenuItemFormState = {
   customOverlayText: string;
   overlayFields: OverlayField[];
   isActive: "active" | "inactive";
+  status: MenuItemStatus;
   specialCategory: SpecialCategory;
   visibility: VisibilityStatus;
   menuLabel: "" | MenuLabel;
@@ -159,6 +161,28 @@ const classicGroupOptions: { label: string; value: ClassicGroup }[] = [
   { label: "Juice w/ Coffee", value: "juice_with_coffee" },
 ];
 
+const menuStatusOptions: {
+  description: string;
+  label: string;
+  value: MenuItemStatus;
+}[] = [
+  {
+    description: "Visible to customers and currently available.",
+    label: "Active",
+    value: "active",
+  },
+  {
+    description: "Hidden from customers, but ready to reactivate later.",
+    label: "Inactive",
+    value: "inactive",
+  },
+  {
+    description: "Moved out of daily management into the archive.",
+    label: "Archived",
+    value: "archived",
+  },
+];
+
 const heroContentModeOptions: {
   description: string;
   label: string;
@@ -208,6 +232,7 @@ const makeDefaultFormState = (
   customOverlayText: "",
   overlayFields: ["name", "taste_note", "price"],
   isActive: "active",
+  status: "active",
   specialCategory: "coffee",
   visibility: "visible",
   menuLabel: "",
@@ -249,6 +274,9 @@ const createId = (name: string) =>
 
 const formatPrice = (price: number) => `฿${price}`;
 
+const getMenuItemStatus = (item: MenuItem): MenuItemStatus =>
+  item.status ?? (item.isActive ? "active" : "inactive");
+
 export function MenuItemCrudPage({
   title,
   description,
@@ -274,15 +302,19 @@ export function MenuItemCrudPage({
   const [menuView, setMenuView] = useState<AdminMenuView>("active");
 
   const activeCount = useMemo(
-    () => items.filter((item) => item.isActive).length,
+    () => items.filter((item) => getMenuItemStatus(item) === "active").length,
     [items],
   );
-  const archivedCount = items.length - activeCount;
+  const inactiveCount = useMemo(
+    () => items.filter((item) => getMenuItemStatus(item) === "inactive").length,
+    [items],
+  );
+  const archivedCount = useMemo(
+    () => items.filter((item) => getMenuItemStatus(item) === "archived").length,
+    [items],
+  );
   const visibleItems = useMemo(
-    () =>
-      items.filter((item) =>
-        menuView === "active" ? item.isActive : !item.isActive,
-      ),
+    () => items.filter((item) => getMenuItemStatus(item) === menuView),
     [items, menuView],
   );
   const isEditing = editingId !== null;
@@ -348,7 +380,8 @@ export function MenuItemCrudPage({
       customOverlayTitle: formState.customOverlayTitle.trim() || undefined,
       customOverlayText: formState.customOverlayText.trim() || undefined,
       overlayFields: formState.overlayFields,
-      isActive: formState.isActive === "active",
+      isActive: formState.status === "active",
+      status: formState.status,
       specialCategory: isSpecialForm ? formState.specialCategory : undefined,
       visibility: isSpecialForm ? formState.visibility : undefined,
       menuLabel: isSpecialForm
@@ -395,8 +428,15 @@ export function MenuItemCrudPage({
           savedItem.id,
           selectedBeanLinks,
         );
+        const activeCoffeeBeanIds = new Set(
+          activeCoffeeBeans.map((bean) => bean.id),
+        );
         setMenuItemProducts((current) => [
-          ...current.filter((mapping) => mapping.menuItemId !== savedItem.id),
+          ...current.filter(
+            (mapping) =>
+              mapping.menuItemId !== savedItem.id ||
+              !activeCoffeeBeanIds.has(mapping.productId),
+          ),
           ...selectedBeanLinks.map((link) => ({
             id: `mip-${savedItem.id}-${link.productId}`,
             menuItemId: savedItem.id,
@@ -461,6 +501,7 @@ export function MenuItemCrudPage({
         ? item.overlayFields
         : ["name", "taste_note", "price"],
       isActive: item.isActive ? "active" : "inactive",
+      status: getMenuItemStatus(item),
       specialCategory: item.specialCategory ?? "coffee",
       visibility: item.visibility ?? (item.isActive ? "visible" : "hidden"),
       menuLabel: item.menuLabel ?? "",
@@ -485,14 +526,17 @@ export function MenuItemCrudPage({
     });
   };
 
-  const toggleStatus = async (itemId: string) => {
+  const updateItemStatus = async (
+    itemId: string,
+    nextStatus: MenuItemStatus,
+  ) => {
     const item = items.find((currentItem) => currentItem.id === itemId);
 
     if (!item) {
       return;
     }
 
-    const nextIsActive = !item.isActive;
+    const nextIsActive = nextStatus === "active";
     const nextVisibility = isSpecialForm
       ? nextIsActive
         ? "visible"
@@ -503,7 +547,7 @@ export function MenuItemCrudPage({
     setPendingId(itemId);
 
     try {
-      const result = await updateMenuItemStatus(item, nextIsActive);
+      const result = await updateMenuItemStatus(item, nextIsActive, nextStatus);
 
       setItems((current) =>
         current.map((currentItem) =>
@@ -511,6 +555,7 @@ export function MenuItemCrudPage({
             ? {
                 ...currentItem,
                 isActive: nextIsActive,
+                status: nextStatus,
                 visibility: nextVisibility,
               }
             : currentItem,
@@ -534,16 +579,29 @@ export function MenuItemCrudPage({
     }
   };
 
+  const toggleStatus = async (itemId: string) => {
+    const item = items.find((currentItem) => currentItem.id === itemId);
+
+    if (!item) {
+      return;
+    }
+
+    await updateItemStatus(
+      itemId,
+      getMenuItemStatus(item) === "active" ? "inactive" : "active",
+    );
+  };
+
   const archiveItem = async (item: MenuItem) => {
     const confirmed = window.confirm(
-      `Archive ${item.name}? It will be marked inactive and hidden from the customer menu.`,
+      `Archive ${item.name}? It will move out of the active/inactive lists and stay hidden from the customer menu.`,
     );
 
     if (!confirmed) {
       return;
     }
 
-    if (!item.isActive) {
+    if (getMenuItemStatus(item) === "archived") {
       setFeedback({
         tone: "warning",
         message: "This menu item is already archived.",
@@ -551,7 +609,7 @@ export function MenuItemCrudPage({
       return;
     }
 
-    await toggleStatus(item.id);
+    await updateItemStatus(item.id, "archived");
   };
 
   const permanentlyDeleteItem = async (item: MenuItem) => {
@@ -805,6 +863,52 @@ export function MenuItemCrudPage({
                       className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
                     />
                   </label>
+                </div>
+
+                <div className="grid gap-2">
+                  <p className="text-sm font-semibold text-[#5f4635]">
+                    Menu State
+                  </p>
+                  <div className="grid gap-2 sm:grid-cols-3">
+                    {menuStatusOptions.map((option) => {
+                      const isSelected = formState.status === option.value;
+
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() =>
+                            setFormState((current) => ({
+                              ...current,
+                              status: option.value,
+                              isActive:
+                                option.value === "active" ? "active" : "inactive",
+                              visibility:
+                                isSpecialForm && option.value !== "active"
+                                  ? "hidden"
+                                  : current.visibility,
+                            }))
+                          }
+                          className={
+                            isSelected
+                              ? "rounded-lg bg-[#2b1a12] px-4 py-3 text-left text-sm font-semibold text-[#fff8ed]"
+                              : "rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/50 px-4 py-3 text-left text-sm font-semibold text-[#5f4635]"
+                          }
+                        >
+                          <span>{option.label}</span>
+                          <span
+                            className={
+                              isSelected
+                                ? "mt-1 block text-xs font-medium leading-5 text-[#ead9c2]"
+                                : "mt-1 block text-xs font-medium leading-5 text-[#8a6a55]"
+                            }
+                          >
+                            {option.description}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <label className="grid gap-2 text-sm font-semibold text-[#5f4635]">
@@ -1384,6 +1488,12 @@ export function MenuItemCrudPage({
                     aspectRatio: "4:5",
                     minimumWidth: "1080 px",
                     formats: "JPG / PNG / WEBP",
+                    usedIn: [
+                      "Home",
+                      "Menu List",
+                      "Quiet List",
+                      "Featured Menu",
+                    ],
                   }}
                   label={isSpecialForm ? "Special Image" : "Menu Item Image"}
                   objectNameSeed={formState.name || "menu-item"}
@@ -1571,6 +1681,12 @@ export function MenuItemCrudPage({
                                 event.target.value === "visible"
                                   ? "active"
                                   : "inactive",
+                              status:
+                                event.target.value === "visible"
+                                  ? "active"
+                                  : current.status === "archived"
+                                    ? "archived"
+                                    : "inactive",
                             }))
                           }
                           className="min-h-12 rounded-lg border border-[#3d2618]/14 bg-[#f6efe6]/70 px-4 text-[#241710] outline-none transition focus:border-[#7d4d2f]"
@@ -1653,9 +1769,10 @@ export function MenuItemCrudPage({
             </form>
 
             <div className="grid gap-4">
-              <div className="grid grid-cols-2 rounded-full border border-[#3d2618]/12 bg-[#fff8ed]/58 p-1 shadow-[0_14px_34px_rgba(84,55,34,0.1)] backdrop-blur">
+              <div className="grid grid-cols-3 rounded-full border border-[#3d2618]/12 bg-[#fff8ed]/58 p-1 shadow-[0_14px_34px_rgba(84,55,34,0.1)] backdrop-blur">
                 {([
                   ["active", `Active Menu Items (${activeCount})`],
+                  ["inactive", `Inactive (${inactiveCount})`],
                   ["archived", `Archived Menu Items (${archivedCount})`],
                 ] as [AdminMenuView, string][]).map(([view, label]) => (
                   <button
@@ -1677,6 +1794,8 @@ export function MenuItemCrudPage({
                 <div className="rounded-lg border border-[#3d2618]/12 bg-[#fff8ed]/62 p-6 text-sm leading-7 text-[#5f4635] shadow-[0_14px_34px_rgba(84,55,34,0.1)] backdrop-blur">
                   {menuView === "active"
                     ? "No active menu items here yet."
+                    : menuView === "inactive"
+                      ? "No inactive menu items yet."
                     : "No archived menu items yet."}
                 </div>
               ) : null}
@@ -1685,6 +1804,7 @@ export function MenuItemCrudPage({
                 const category = menuCategories.find(
                   (menuCategory) => menuCategory.id === item.categoryId,
                 );
+                const itemStatus = getMenuItemStatus(item);
 
                 return (
                   <article
@@ -1713,12 +1833,14 @@ export function MenuItemCrudPage({
                           </h2>
                           <span
                             className={
-                              item.isActive
+                              itemStatus === "active"
                                 ? "rounded-full bg-[#2b1a12] px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-[#fff8ed]"
+                                : itemStatus === "archived"
+                                  ? "rounded-full bg-[#7d4d2f]/15 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-[#7d4d2f]"
                                 : "rounded-full bg-[#7d4d2f]/15 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-[#7d4d2f]"
                             }
                           >
-                            {item.isActive ? "active" : "archived"}
+                            {itemStatus}
                           </span>
                         </div>
                         <p className="mt-2 text-sm leading-6 text-[#5f4635]">
@@ -1754,17 +1876,17 @@ export function MenuItemCrudPage({
                       >
                         {pendingId === item.id
                           ? "Saving..."
-                          : item.isActive
+                          : itemStatus === "active"
                             ? "Deactivate"
                             : "Activate"}
                       </button>
                       <button
                         type="button"
                         onClick={() => archiveItem(item)}
-                        disabled={pendingId === item.id || !item.isActive}
+                        disabled={pendingId === item.id || itemStatus === "archived"}
                         className="min-h-11 rounded-full border border-[#3d2618]/14 px-5 text-sm font-semibold text-[#5f4635] transition hover:border-[#3d2618]/30 hover:bg-[#f6efe6]/70 disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        {item.isActive ? "Archive" : "Archived"}
+                        {itemStatus === "archived" ? "Archived" : "Archive"}
                       </button>
                       <button
                         type="button"

@@ -15,6 +15,7 @@ export const menuItems: MenuItem[] = [
     recommendedFor: "Guests choosing between several House Blend expressions.",
     imagePlaceholder: "Clear black coffee in a warm ceramic cup",
     isActive: true,
+    status: "active",
     classicGroup: "black_coffee",
     sortOrder: 1,
   },
@@ -31,6 +32,7 @@ export const menuItems: MenuItem[] = [
     recommendedFor: "A smooth everyday cup with gentle sweetness and texture.",
     imagePlaceholder: "Latte art with a cream-toned ceramic cup",
     isActive: true,
+    status: "active",
     classicGroup: "milk_coffee",
     sortOrder: 2,
   },
@@ -47,6 +49,7 @@ export const menuItems: MenuItem[] = [
     recommendedFor: "A richer milk coffee with a clear espresso presence.",
     imagePlaceholder: "Small cappuccino cup with dense microfoam",
     isActive: true,
+    status: "active",
     classicGroup: "milk_coffee",
     sortOrder: 3,
   },
@@ -63,6 +66,7 @@ export const menuItems: MenuItem[] = [
     recommendedFor: "Guests looking for a vibrant, aromatic filter coffee.",
     imagePlaceholder: "Light filter coffee with floral accents",
     isActive: true,
+    status: "active",
     isSeasonal: true,
     availableFrom: "2026-06-01",
     availableUntil: "2026-06-30",
@@ -81,6 +85,7 @@ export const menuItems: MenuItem[] = [
     recommendedFor: "A bright and graceful cup with delicate complexity.",
     imagePlaceholder: "Filter brew with red fruit and honey tones",
     isActive: true,
+    status: "active",
     isSeasonal: true,
     availableFrom: "2026-06-01",
     availableUntil: "2026-06-30",
@@ -99,6 +104,7 @@ export const menuItems: MenuItem[] = [
     recommendedFor: "A balanced local origin with quiet elegance.",
     imagePlaceholder: "Thai filter coffee with warm wood texture",
     isActive: true,
+    status: "active",
     isSeasonal: true,
     availableFrom: "2026-06-01",
     availableUntil: "2026-06-30",
@@ -117,6 +123,7 @@ export const menuItems: MenuItem[] = [
     recommendedFor: "A calm, focused matcha experience without milk.",
     imagePlaceholder: "Ceremonial matcha bowl and bamboo whisk",
     isActive: true,
+    status: "active",
     sortOrder: 1,
   },
   {
@@ -132,6 +139,7 @@ export const menuItems: MenuItem[] = [
     recommendedFor: "Guests who enjoy matcha with a smoother, milk-led profile.",
     imagePlaceholder: "Layered green matcha latte in glass",
     isActive: true,
+    status: "active",
     sortOrder: 2,
   },
   {
@@ -147,6 +155,7 @@ export const menuItems: MenuItem[] = [
     recommendedFor: "A rich cocoa cup with origin character and minimal sweetness.",
     imagePlaceholder: "Dark cocoa in a small ceramic cup",
     isActive: true,
+    status: "active",
     sortOrder: 1,
   },
   {
@@ -162,6 +171,7 @@ export const menuItems: MenuItem[] = [
     recommendedFor: "Guests looking for a comforting, premium non-coffee option.",
     imagePlaceholder: "Cocoa latte with a soft cream surface",
     isActive: true,
+    status: "active",
     sortOrder: 2,
   },
   {
@@ -177,6 +187,7 @@ export const menuItems: MenuItem[] = [
     recommendedFor: "Guests who want a bright coffee special served cold.",
     imagePlaceholder: "Iced espresso tonic with orange peel",
     isActive: true,
+    status: "active",
     sortOrder: 1,
   },
   {
@@ -192,6 +203,7 @@ export const menuItems: MenuItem[] = [
     recommendedFor: "Guests looking for a rich non-coffee special.",
     imagePlaceholder: "Layered matcha cocoa drink with cream cap",
     isActive: true,
+    status: "active",
     sortOrder: 2,
   },
   {
@@ -207,6 +219,7 @@ export const menuItems: MenuItem[] = [
     recommendedFor: "Cold brew drinkers who prefer a deeper specialty profile.",
     imagePlaceholder: "Dark cold brew over clear ice",
     isActive: true,
+    status: "active",
     sortOrder: 3,
   },
 ];

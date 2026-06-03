@@ -11,6 +11,7 @@ type ImageUploadFieldProps = {
     formats: string;
     minimumWidth: string;
     recommendedSize: string;
+    usedIn?: string[];
   };
   label: string;
   objectNameSeed: string;
@@ -124,6 +125,14 @@ export function ImageUploadField({
                 </span>
               </p>
               <p>Formats: {guidelines.formats}</p>
+              {guidelines.usedIn?.length ? (
+                <p>
+                  Used in:{" "}
+                  <span className="font-semibold text-[#5f4635]">
+                    {guidelines.usedIn.join(" / ")}
+                  </span>
+                </p>
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -162,7 +171,7 @@ export function ImageUploadField({
           <img
             alt={`${label} preview`}
             src={currentUrl}
-            className="aspect-[4/3] w-full object-cover"
+            className="aspect-[4/5] w-full object-cover"
           />
         </div>
       ) : null}
